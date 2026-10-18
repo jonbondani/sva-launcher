@@ -765,6 +765,7 @@ public final class MainActivity extends Activity {
         addTopIcon(systemShortcuts, "Partidos", R.drawable.ic_matches,
                 () -> startActivity(MatchesActivity.intent(this)));
         addTopIcon(systemShortcuts, "Network", R.drawable.ic_network, this::openNetworkSettings);
+        addTopIcon(systemShortcuts, "Reiniciar", R.drawable.ic_restart, this::confirmRestart);
         addTopIcon(systemShortcuts, "Android Settings", R.drawable.ic_android_settings, this::openAndroidSettings);
         addTopIcon(systemShortcuts, "Launcher Settings", R.drawable.ic_launcher_settings, this::showSettings);
         FrameLayout viewport = new FrameLayout(this);
@@ -796,10 +797,9 @@ public final class MainActivity extends Activity {
         timeCard.setPadding(dp(16), dp(2), dp(16), dp(2));
         timeCard.setBackground(headerSectionBackground());
         timeCard.setElevation(0);
-        timeCard.setFocusable(true);
-        timeCard.setClickable(true);
-        timeCard.setOnFocusChangeListener(LiquidTheme::animateFocus);
-        timeCard.setOnClickListener(v -> openDateSettings());
+        // Display only: on Fire TV the date settings shortcut lands in Amazon's launcher.
+        timeCard.setFocusable(false);
+        timeCard.setClickable(false);
         timeCard.addView(timeStack, new LinearLayout.LayoutParams(-2, -2));
 
         // Top-Center: Event
@@ -917,7 +917,7 @@ public final class MainActivity extends Activity {
         weatherStack.addView(nowPlayingSection);
 
         timeCard.setNextFocusRightId(weatherCard.getId());
-        weatherCard.setNextFocusLeftId(timeCard.getId());
+        weatherCard.setNextFocusLeftId(weatherCard.getId());
         weatherCard.setNextFocusRightId(homeCalendarCard.getId());
         homeCalendarCard.setNextFocusLeftId(weatherCard.getId());
 
@@ -2345,6 +2345,12 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             return;
         }
         boolean fahrenheit = preferences.getBoolean("weatherFahrenheit", false);
+        // Caches from older builds have no hourly data: refresh in the background for next time.
+        if (weatherForecast.hours.isEmpty()) maybeRefreshWeather(true);
+        if (!weatherForecast.days.isEmpty()) {
+            WeatherForecastDialog.show(this, weatherForecast, fahrenheit, preferences.getBoolean("weatherMph", false));
+            return;
+        }
         StringBuilder details = new StringBuilder();
         for (WeatherRepository.Day day : weatherForecast.days) {
             String weekday = day.date;
@@ -3258,6 +3264,39 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-2, dp(compactNavigation ? 36 : 42));
         lp.setMargins(dp(2), 0, dp(2), 0);
         container.addView(pill, lp);
+    }
+
+    /**
+     * Android only lets system apps reboot. Sva asks the system for its power menu through the
+     * Home-button accessibility service; without it, it opens the device settings page instead.
+     */
+    private void confirmRestart() {
+        AlertDialog dialog = new AlertDialog.Builder(new android.view.ContextThemeWrapper(this,
+                LiquidTheme.alertDialogTheme(this)))
+                .setTitle("¿Reiniciar el dispositivo?")
+                .setMessage(isLauncherOverrideEnabled()
+                        ? "Se abrirá el menú de apagado del sistema; elige «Reiniciar»."
+                        : "Se abrirán los ajustes del dispositivo; entra en «Mi Fire TV › Reiniciar».\n\n"
+                        + "Con el servicio del botón Inicio activado (Ajustes › Botón Inicio), Sva abre directamente el menú de reinicio.")
+                .setPositiveButton("Continuar", (d, which) -> {
+                    if (LauncherOverrideService.showPowerMenu()) return;
+                    openDeviceSettingsForRestart();
+                })
+                .setNegativeButton("Cancelar", null)
+                .create();
+        dialog.show();
+        styleDialog(dialog);
+    }
+
+    private void openDeviceSettingsForRestart() {
+        String[] actions = {android.provider.Settings.ACTION_DEVICE_INFO_SETTINGS, android.provider.Settings.ACTION_SETTINGS};
+        for (String action : actions) {
+            try {
+                startActivity(new Intent(action).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                return;
+            } catch (Exception ignored) { }
+        }
+        Tr.toast(this, "No se pudieron abrir los ajustes del dispositivo.", Toast.LENGTH_LONG).show();
     }
 
     private void openNetworkSettings() {
@@ -4286,7 +4325,16 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                 if (!isDpadDirection(keyCode)) return false;
                 int direction = focusDirection(keyCode);
                 // The input keeps horizontal arrows for cursor movement and multiline navigation.
-                if (focused instanceof EditText) return false;
+                // Up/down on a single-line field must still leave it: inside a ScrollView the
+                // default search never escapes the scroll, so "Save changes" below it was unreachable.
+                if (focused instanceof EditText) {
+                    boolean multiline = (((EditText) focused).getInputType() & InputType.TYPE_TEXT_FLAG_MULTI_LINE) != 0;
+                    if (multiline || direction == View.FOCUS_LEFT || direction == View.FOCUS_RIGHT) return false;
+                    View next = focused.focusSearch(direction);
+                    if (next != null && next != focused && next.isFocusable() && next.isEnabled() && next.requestFocus()) return true;
+                    if (direction == View.FOCUS_UP) { tabs[section].requestFocus(); return true; }
+                    return false;
+                }
                 if (rail != null && isWithinPage(focused, rail)) {
                     if (direction == View.FOCUS_UP && focused == tabs[NAV_ORDER[0]]) return true;
                     if (direction == View.FOCUS_RIGHT) {

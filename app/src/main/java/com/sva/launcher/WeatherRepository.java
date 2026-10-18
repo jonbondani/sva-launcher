@@ -33,7 +33,21 @@ final class WeatherRepository {
         }
     }
 
+    /** One hour of the next-24-hours strip. {@code time} is local "yyyy-MM-ddTHH:mm". */
+    static final class Hour {
+        final String time;
+        final int code, precipitation;
+        final double temperature;
+        final boolean day;
+        Hour(String time, int code, double temperature, int precipitation, boolean day) {
+            this.time = time; this.code = code; this.temperature = temperature;
+            this.precipitation = precipitation; this.day = day;
+        }
+    }
+
     static final class Forecast {
+        /** Hourly forecast for roughly the next 24 hours (empty for caches from older builds). */
+        final List<Hour> hours = new ArrayList<>();
         final String location;
         final long fetchedAt;
         final double temperature, apparentTemperature, windSpeed;
@@ -52,9 +66,13 @@ final class WeatherRepository {
             JSONArray daily = new JSONArray();
             for (Day item : days) daily.put(new JSONObject().put("date", item.date).put("code", item.code)
                     .put("low", item.low).put("high", item.high).put("precipitation", item.precipitation));
+            JSONArray hourly = new JSONArray();
+            for (Hour item : hours) hourly.put(new JSONObject().put("time", item.time).put("code", item.code)
+                    .put("temperature", item.temperature).put("precipitation", item.precipitation).put("day", item.day));
             return new JSONObject().put("location", location).put("fetchedAt", fetchedAt)
                     .put("temperature", temperature).put("apparentTemperature", apparentTemperature)
-                    .put("humidity", humidity).put("windSpeed", windSpeed).put("code", code).put("day", day).put("days", daily);
+                    .put("humidity", humidity).put("windSpeed", windSpeed).put("code", code).put("day", day)
+                    .put("days", daily).put("hours", hourly);
         }
 
         static Forecast fromJson(JSONObject value) throws Exception {
@@ -70,6 +88,12 @@ final class WeatherRepository {
                     value.getDouble("temperature"), value.getDouble("apparentTemperature"),
                     value.getDouble("windSpeed"), value.getInt("code"), value.optBoolean("day", true), days);
             forecast.humidity = value.optInt("humidity", -1);
+            JSONArray hourly = value.optJSONArray("hours");
+            if (hourly != null) for (int i = 0; i < hourly.length(); i++) {
+                JSONObject item = hourly.getJSONObject(i);
+                forecast.hours.add(new Hour(item.getString("time"), item.getInt("code"), item.getDouble("temperature"),
+                        item.optInt("precipitation", 0), item.optBoolean("day", true)));
+            }
             return forecast;
         }
     }
@@ -102,7 +126,8 @@ final class WeatherRepository {
                 "https://api.open-meteo.com/v1/forecast?latitude=%.5f&longitude=%.5f"
                         + "&current=temperature_2m,apparent_temperature,weather_code,is_day,wind_speed_10m,relative_humidity_2m"
                         + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max"
-                        + "&temperature_unit=celsius&wind_speed_unit=kmh&timezone=auto&forecast_days=4",
+                        + "&hourly=temperature_2m,weather_code,precipitation_probability,is_day"
+                        + "&temperature_unit=celsius&wind_speed_unit=kmh&timezone=auto&forecast_days=7",
                 location.latitude, location.longitude);
         return parseForecast(new JSONObject(download(url)), location.label, now);
     }
@@ -112,16 +137,34 @@ final class WeatherRepository {
         JSONArray dates = daily.getJSONArray("time"), codes = daily.getJSONArray("weather_code");
         JSONArray highs = daily.getJSONArray("temperature_2m_max"), lows = daily.getJSONArray("temperature_2m_min");
         JSONArray rain = daily.optJSONArray("precipitation_probability_max");
-        int count = Math.min(4, Math.min(Math.min(dates.length(), codes.length()), Math.min(highs.length(), lows.length())));
+        int count = Math.min(7, Math.min(Math.min(dates.length(), codes.length()), Math.min(highs.length(), lows.length())));
         if (count < 2) throw new IllegalArgumentException("Forecast did not include upcoming days.");
+        // Today first, then the following days (the week view shows all of them).
         ArrayList<Day> days = new ArrayList<>();
-        for (int i = 1; i < count; i++) days.add(new Day(dates.getString(i), codes.getInt(i),
+        for (int i = 0; i < count; i++) days.add(new Day(dates.getString(i), codes.getInt(i),
                 lows.getDouble(i), highs.getDouble(i), rain == null ? 0 : rain.optInt(i, 0)));
         Forecast forecast = new Forecast(label, now, current.getDouble("temperature_2m"),
                 current.optDouble("apparent_temperature", current.getDouble("temperature_2m")),
                 current.optDouble("wind_speed_10m", 0), current.getInt("weather_code"),
                 current.optInt("is_day", 1) == 1, days);
         forecast.humidity = current.optInt("relative_humidity_2m", -1);
+        JSONObject hourly = root.optJSONObject("hourly");
+        if (hourly != null) {
+            JSONArray times = hourly.optJSONArray("time"), temps = hourly.optJSONArray("temperature_2m");
+            JSONArray hourCodes = hourly.optJSONArray("weather_code"), hourRain = hourly.optJSONArray("precipitation_probability");
+            JSONArray isDay = hourly.optJSONArray("is_day");
+            // "current.time" is local time like 2026-10-18T19:15; keep the 24 hours from this hour on.
+            String nowHour = current.optString("time", "");
+            if (nowHour.length() >= 13) nowHour = nowHour.substring(0, 13);
+            if (times != null && temps != null && hourCodes != null) {
+                for (int i = 0; i < times.length() && forecast.hours.size() < 24; i++) {
+                    String time = times.getString(i);
+                    if (!nowHour.isEmpty() && time.length() >= 13 && time.substring(0, 13).compareTo(nowHour) < 0) continue;
+                    forecast.hours.add(new Hour(time, hourCodes.optInt(i, 0), temps.optDouble(i, 0),
+                            hourRain == null ? 0 : hourRain.optInt(i, 0), isDay == null || isDay.optInt(i, 1) == 1));
+                }
+            }
+        }
         return forecast;
     }
 

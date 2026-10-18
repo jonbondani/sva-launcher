@@ -17,6 +17,24 @@ public final class LauncherOverrideService extends AccessibilityService {
             "com.amazon.tv.launcher"
     };
     private long lastReopenAt;
+    /** The running service, so Sva can ask the system for its power menu (restart / power off). */
+    private static volatile LauncherOverrideService running;
+
+    @Override protected void onServiceConnected() {
+        super.onServiceConnected();
+        running = this;
+    }
+
+    @Override public void onDestroy() {
+        if (running == this) running = null;
+        super.onDestroy();
+    }
+
+    /** Opens the system power menu; false when the accessibility service is not enabled. */
+    static boolean showPowerMenu() {
+        LauncherOverrideService service = running;
+        return service != null && service.performGlobalAction(GLOBAL_ACTION_POWER_DIALOG);
+    }
 
     @Override public void onAccessibilityEvent(AccessibilityEvent event) {
         if (event == null || event.getEventType() != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return;
