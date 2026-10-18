@@ -187,6 +187,10 @@ public final class MainActivity extends Activity {
     private TextView weatherTemperature, weatherCondition, weatherDetails, weatherLocation, weatherMetrics;
     private TextView weatherSymbol, homeCalendarEyebrow, homeCalendarTitle, homeCalendarSubtitle;
     private LinearLayout homeCalendarCard;
+    /** The football match shown in the top event card instead of the calendar, if any. */
+    private MatchRepository.Match homeMatch;
+    private Runnable matchTick;
+    private boolean matchRefreshRunning;
     private View clockDivider;
     private LinearLayout nowPlayingSection, nowPlayingCard;
     private Button musicToggle;
@@ -491,6 +495,7 @@ public final class MainActivity extends Activity {
         scheduleLiveRefreshCheck();
         maybeRefreshPublicCalendar(false);
         scheduleCalendarRefresh();
+        scheduleMatchTick();
         scheduleGooglePhotosRefresh();
         maybeRefreshWeather(false);
         scheduleWeatherRefresh();
@@ -526,6 +531,7 @@ public final class MainActivity extends Activity {
         if (googlePhotosRefreshTick != null) handler.removeCallbacks(googlePhotosRefreshTick);
         if (weatherRefreshTick != null) handler.removeCallbacks(weatherRefreshTick);
         if (mediaTick != null) handler.removeCallbacks(mediaTick);
+        if (matchTick != null) handler.removeCallbacks(matchTick);
         cancelWeatherLocation();
         backgroundImageGeneration++;
         super.onPause();
@@ -754,6 +760,8 @@ public final class MainActivity extends Activity {
         systemShortcuts.setGravity(Gravity.CENTER_VERTICAL);
         systemShortcuts.setPadding(dp(3), dp(3), dp(3), dp(3));
         navbar.addView(systemShortcuts, new LinearLayout.LayoutParams(-2, dp(52)));
+        addTopIcon(systemShortcuts, "Partidos", R.drawable.ic_matches,
+                () -> startActivity(MatchesActivity.intent(this)));
         addTopIcon(systemShortcuts, "Network", R.drawable.ic_network, this::openNetworkSettings);
         addTopIcon(systemShortcuts, "Android Settings", R.drawable.ic_android_settings, this::openAndroidSettings);
         addTopIcon(systemShortcuts, "Launcher Settings", R.drawable.ic_launcher_settings, this::showSettings);
@@ -829,7 +837,13 @@ public final class MainActivity extends Activity {
         homeCalendarCard.setFocusable(true);
         homeCalendarCard.setClickable(true);
         homeCalendarCard.setOnFocusChangeListener(LiquidTheme::animateFocus);
-        homeCalendarCard.setOnClickListener(v -> selectTab(TAB_EVENTS, false));
+        homeCalendarCard.setOnClickListener(v -> {
+            if (homeMatch == null) { selectTab(TAB_EVENTS, false); return; }
+            Intent matches = MatchesActivity.intent(this);
+            // A live match opens straight in its app; an upcoming one opens the fixtures list.
+            if (homeMatch.isLive(System.currentTimeMillis())) matches.putExtra(MatchesActivity.EXTRA_OPEN_UID, homeMatch.uid);
+            startActivity(matches);
+        });
         updateHomeCalendarWidget();
 
         // Top-Right: Weather
@@ -2511,8 +2525,46 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         return events;
     }
 
+    /** Refreshes fixtures when stale and re-evaluates the live state of the home card every minute. */
+    private void scheduleMatchTick() {
+        if (matchTick == null) matchTick = new Runnable() {
+            @Override public void run() {
+                if (!screenActive) return;
+                updateHomeCalendarWidget();
+                if (!matchRefreshRunning && MatchRepository.isStale(MainActivity.this)) {
+                    matchRefreshRunning = true;
+                    final android.content.Context app = getApplicationContext();
+                    new Thread(() -> {
+                        MatchRepository.refresh(app);
+                        handler.post(() -> {
+                            matchRefreshRunning = false;
+                            updateHomeCalendarWidget();
+                        });
+                    }, "sva-matches-home").start();
+                }
+                handler.postDelayed(this, 60_000L);
+            }
+        };
+        handler.removeCallbacks(matchTick);
+        handler.post(matchTick);
+    }
+
     private void updateHomeCalendarWidget() {
         if (homeCalendarTitle == null || homeCalendarSubtitle == null) return;
+        long matchNow = System.currentTimeMillis();
+        // A live match, or one starting within a day and a half, takes over the event card.
+        homeMatch = MatchRepository.forHome(this, matchNow, 36L * 60L * 60L * 1000L);
+        if (homeMatch != null) {
+            boolean live = homeMatch.isLive(matchNow);
+            homeCalendarEyebrow.setText(live ? "EN DIRECTO · " + homeMatch.competition.toUpperCase(Locale.ROOT)
+                    : "PRÓXIMO PARTIDO");
+            homeCalendarTitle.setText(homeMatch.title);
+            homeCalendarSubtitle.setText(live ? "Pulsa para verlo"
+                    : MatchesActivity.dayLabel(homeMatch.startMs, matchNow) + " · "
+                    + (homeMatch.timeTbc ? "hora por confirmar" : MatchesActivity.timeLabel(homeMatch.startMs))
+                    + " · " + homeMatch.competition);
+            return;
+        }
         LocalDate today = LocalDate.now();
         PublicCalendarRepository.Event todayEvent = null;
         PublicCalendarRepository.Event nextEvent = null;

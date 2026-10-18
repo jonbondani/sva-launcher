@@ -1,0 +1,54 @@
+name: Fire TV APK
+# Builds a debug APK of the Fire TV branch and publishes it as the "firetv-latest" pre-release,
+# so the Downloader app on a Fire TV can install it from a fixed URL:
+#   https://github.com/<owner>/sva-launcher/releases/download/firetv-latest/sva-firetv.apk
+on:
+  push:
+    branches: [firetv]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: firetv-apk
+  cancel-in-progress: true
+jobs:
+  apk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
+      - name: Install pinned Android toolchain
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;28.2.13676358'
+      - name: Use a stable debug key when one is configured
+        # Optional secret: base64 of a debug keystore (alias androiddebugkey, password android).
+        # Without it every build gets a new key and updating requires uninstalling Sva first.
+        env:
+          FIRETV_DEBUG_KEYSTORE_BASE64: ${{ secrets.FIRETV_DEBUG_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$FIRETV_DEBUG_KEYSTORE_BASE64" ]; then
+            mkdir -p ~/.android
+            printf '%s' "$FIRETV_DEBUG_KEYSTORE_BASE64" | base64 -d > ~/.android/debug.keystore
+            echo "Stable debug key installed."
+          else
+            echo "::notice::No FIRETV_DEBUG_KEYSTORE_BASE64 secret; using a one-off debug key."
+          fi
+      - name: Build debug APK
+        run: ./gradlew --no-daemon assembleDebug
+      - name: Publish firetv-latest pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk sva-firetv.apk
+          gh release delete firetv-latest --yes --cleanup-tag || true
+          gh release create firetv-latest sva-firetv.apk \
+            --prerelease --target "$GITHUB_SHA" \
+            --title "Sva para Fire TV ($(date -u +%Y-%m-%d) · ${GITHUB_SHA::7})" \
+            --notes "APK de pruebas para Fire TV generado automáticamente desde la rama firetv."

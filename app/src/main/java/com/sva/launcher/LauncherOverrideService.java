@@ -11,7 +11,10 @@ public final class LauncherOverrideService extends AccessibilityService {
             "com.google.android.tvlauncher",
             "com.google.android.apps.tv.launcherx",
             "com.google.android.leanbacklauncher",
-            "com.google.android.leanbacklauncher.recommendations"
+            "com.google.android.leanbacklauncher.recommendations",
+            // Fire OS (Fire TV Stick, Cube and Fire TV Edition televisions). Fire OS
+            // ignores third-party HOME activities, so this override is the only route.
+            "com.amazon.tv.launcher"
     };
     private long lastReopenAt;
 

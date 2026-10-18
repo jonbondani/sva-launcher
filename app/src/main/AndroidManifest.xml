@@ -27,6 +27,12 @@
             android:name=".TvFilePickerActivity"
             android:exported="false"
             android:screenOrientation="landscape" />
+        <!-- Exported without an intent filter so teams can be added over ADB (am start -n ...). -->
+        <activity
+            android:name=".MatchesActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:screenOrientation="landscape" />
         <activity
             android:name=".ControllerSettingsActivity"
             android:exported="false"
