@@ -48,6 +48,7 @@ final class MatchRepository {
     private static final String KEY_COMPETITION_APPS = "competitionApps";
     private static final String KEY_SEEDED = "seeded";
     private static final String KEY_FEEDS_FILLED = "presetFeedsFilled";
+    private static final String KEY_PRESETS_V2 = "presetsMarbella";
     private static final long HOUR_MS = 60L * 60L * 1000L;
     private static final long STALE_MS = 3L * HOUR_MS;
     private static final long DEFAULT_LENGTH_MS = 2L * HOUR_MS;
@@ -72,6 +73,7 @@ final class MatchRepository {
             {"Real Madrid", "8633"},
             {"Sevilla", "8302"},
             {"Málaga", "9864"},
+            {"Marbella", "161781"},
     };
 
     static String fotmobFeed(String teamId) {
@@ -141,6 +143,20 @@ final class MatchRepository {
                 if (!team.name.isEmpty()) result.add(team);
             }
         } catch (Exception ignored) { }
+        // Teams added to the presets after a first install (Marbella) are added once.
+        if (!preferences.getBoolean(KEY_PRESETS_V2, false)) {
+            boolean added = false;
+            for (String[] preset : PRESET_TEAMS) {
+                boolean present = false;
+                for (Team team : result) present |= sameName(team.name, preset[0]);
+                if (!present && "Marbella".equals(preset[0])) {
+                    result.add(new Team(preset[0], fotmobFeed(preset[1]), ""));
+                    added = true;
+                }
+            }
+            preferences.edit().putBoolean(KEY_PRESETS_V2, true).apply();
+            if (added) { saveTeams(context, result); invalidate(context); }
+        }
         // Earlier builds seeded these teams without a feed: fill them in once.
         if (!preferences.getBoolean(KEY_FEEDS_FILLED, false)) {
             boolean changed = false;

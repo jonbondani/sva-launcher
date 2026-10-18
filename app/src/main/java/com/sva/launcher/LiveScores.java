@@ -136,6 +136,53 @@ final class LiveScores {
         return mine;
     }
 
+    /**
+     * Today's games of the followed teams for the Home widget: ESPN scores where ESPN covers the
+     * competition, plus calendar fixtures it does not cover (Primera Federación, for example),
+     * shown with their kick-off time and an "En juego" state but no score.
+     */
+    static List<Game> todayForHome(Context context, long nowMs) {
+        ArrayList<Game> games = new ArrayList<>();
+        java.util.Calendar today = java.util.Calendar.getInstance();
+        today.setTimeInMillis(nowMs);
+        int day = today.get(java.util.Calendar.DAY_OF_YEAR), year = today.get(java.util.Calendar.YEAR);
+        for (Game game : forTeams(context, false)) if (sameDay(game.startMs, day, year)) games.add(game);
+        for (MatchRepository.Match match : MatchRepository.upcoming(context, nowMs)) {
+            if (match.timeTbc || !sameDay(match.startMs, day, year)) continue;
+            boolean covered = false;
+            for (Game game : games) {
+                if (Math.abs(game.startMs - match.startMs) > 3L * 3_600_000L) continue;
+                for (String team : match.teams.split(" · ")) covered |= game.involves(team);
+            }
+            if (covered) continue;
+            String[] sides = splitTitle(match.title);
+            String state = match.isLive(nowMs) ? "in" : match.startMs > nowMs ? "pre" : "post";
+            games.add(new Game(match.uid, match.competition, state, "", "", match.startMs,
+                    sides[0], "", "", sides[1], "", ""));
+        }
+        Collections.sort(games, (a, b) -> {
+            int ra = a.live() ? 0 : a.upcoming() ? 1 : 2, rb = b.live() ? 0 : b.upcoming() ? 1 : 2;
+            return ra != rb ? ra - rb : Long.compare(a.startMs, b.startMs);
+        });
+        return games;
+    }
+
+    private static boolean sameDay(long ms, int dayOfYear, int year) {
+        java.util.Calendar c = java.util.Calendar.getInstance();
+        c.setTimeInMillis(ms);
+        return c.get(java.util.Calendar.DAY_OF_YEAR) == dayOfYear && c.get(java.util.Calendar.YEAR) == year;
+    }
+
+    /** "Málaga CF - Racing", "Juventus vs Real Madrid", "Sevilla v Betis" → the two sides. */
+    static String[] splitTitle(String title) {
+        String clean = title.replaceAll("\\s*\\(.*\\)\\s*$", "").trim();
+        for (String separator : new String[]{" - ", " – ", " vs. ", " vs ", " v "}) {
+            int at = clean.indexOf(separator);
+            if (at > 0) return new String[]{clean.substring(0, at).trim(), clean.substring(at + separator.length()).trim()};
+        }
+        return new String[]{clean, ""};
+    }
+
     /** The followed team's game being played right now, if any. */
     static Game liveForTeams(Context context) {
         for (Game game : forTeams(context, false)) if (game.live()) return game;

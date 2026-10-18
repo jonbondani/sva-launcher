@@ -193,6 +193,8 @@ public final class MainActivity extends Activity {
     private MatchRepository.Match homeMatch;
     /** A followed team's game in play (ESPN live score), shown before calendar fixtures. */
     private LiveScores.Game homeLiveGame;
+    private LinearLayout homeLiveStrip;
+    private String homeLiveSignature = "";
     private boolean liveScoresRunning;
     private Runnable matchTick;
     private boolean matchRefreshRunning;
@@ -253,6 +255,7 @@ public final class MainActivity extends Activity {
         BackNavigation.install(this, this::handleBack);
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         preferences = getSharedPreferences("launcher", MODE_PRIVATE);
+        applyHouseDefaults();
         guideCollapsed = preferences.getBoolean("guideCollapsed", false);
         if (state != null) {
             focusedPackage = state.getString("focusedPackage");
@@ -501,6 +504,7 @@ public final class MainActivity extends Activity {
         maybeRefreshPublicCalendar(false);
         scheduleCalendarRefresh();
         scheduleMatchTick();
+        maybeAutoUpdate();
         scheduleGooglePhotosRefresh();
         maybeRefreshWeather(false);
         scheduleWeatherRefresh();
@@ -787,6 +791,14 @@ public final class MainActivity extends Activity {
         int appBlockDp = 34 + APP_TILE_HEIGHT + 24 + 32 + 6;
         root.addView(heroContent, new LinearLayout.LayoutParams(-1,
                 dp(Math.max(180, heroHeightDp() - dockHeight - appBlockDp))));
+        // Today's games of the followed teams, Google-sports style, above the app row.
+        homeLiveStrip = new LinearLayout(this);
+        homeLiveStrip.setOrientation(LinearLayout.HORIZONTAL);
+        homeLiveStrip.setClipChildren(false);
+        homeLiveStrip.setVisibility(View.GONE);
+        FrameLayout.LayoutParams stripParams = new FrameLayout.LayoutParams(-2, -2, Gravity.BOTTOM | Gravity.START);
+        stripParams.setMargins(dp(40), 0, dp(20), dp(6));
+        heroContent.addView(homeLiveStrip, stripParams);
         renderWeather();
 
         int topCardHeight = dp(compactNavigation ? 78 : 82);
@@ -2553,9 +2565,12 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             @Override public void run() {
                 if (!screenActive) return;
                 updateHomeCalendarWidget();
-                // Live scores only matter around a followed team's game: refresh while one is today.
+                updateHomeLiveStrip();
+                // Scores are polled while a followed team plays today (every 45 s during a game).
+                long tickNow = System.currentTimeMillis();
                 if (!liveScoresRunning && LiveScores.isStale(MainActivity.this)
-                        && MatchRepository.forHome(MainActivity.this, System.currentTimeMillis(), 4L * 60L * 60L * 1000L) != null) {
+                        && (MatchRepository.forHome(MainActivity.this, tickNow, 14L * 60L * 60L * 1000L) != null
+                        || !LiveScores.todayForHome(MainActivity.this, tickNow).isEmpty())) {
                     liveScoresRunning = true;
                     final android.content.Context liveApp = getApplicationContext();
                     new Thread(() -> {
@@ -2563,6 +2578,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                         handler.post(() -> {
                             liveScoresRunning = false;
                             updateHomeCalendarWidget();
+                            updateHomeLiveStrip();
                         });
                     }, "sva-live-home").start();
                 }
@@ -2577,11 +2593,116 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                         });
                     }, "sva-matches-home").start();
                 }
-                handler.postDelayed(this, 60_000L);
+                handler.postDelayed(this, 30_000L);
             }
         };
         handler.removeCallbacks(matchTick);
         handler.post(matchTick);
+    }
+
+    private boolean autoUpdateRunning;
+    private static final long UPDATE_CHECK_MS = 6L * 60L * 60L * 1000L;
+
+    /**
+     * Like other apps: at most every 6 hours, check the firetv-latest release in the background,
+     * download a newer build silently and then offer to install it (Android asks to confirm).
+     */
+    private void maybeAutoUpdate() {
+        if (autoUpdateRunning || settingsScreen != null) return;
+        long now = System.currentTimeMillis();
+        int installed = Updater.installedCode(this);
+        int ready = preferences.getInt("updateReadyCode", 0);
+        java.io.File apk = Updater.pendingApk(this);
+        if (ready > installed && apk.isFile()) {
+            if (now - preferences.getLong("updatePromptedAt", 0) > UPDATE_CHECK_MS) offerUpdate(preferences.getString("updateReadyName", ""));
+            return;
+        }
+        if (ready > 0 && ready <= installed) {
+            // Already installed: drop the leftover download.
+            apk.delete();
+            preferences.edit().remove("updateReadyCode").remove("updateReadyName").apply();
+        }
+        if (now - preferences.getLong("updateCheckedAt", 0) < UPDATE_CHECK_MS) return;
+        autoUpdateRunning = true;
+        final android.content.Context app = getApplicationContext();
+        ioWorker.execute(() -> {
+            String readyName = null;
+            try {
+                Updater.Release latest = Updater.latest();
+                preferences.edit().putLong("updateCheckedAt", System.currentTimeMillis()).apply();
+                if (latest.versionCode > Updater.installedCode(app)) {
+                    Updater.download(app, message -> { });
+                    preferences.edit().putInt("updateReadyCode", latest.versionCode)
+                            .putString("updateReadyName", latest.versionName).apply();
+                    readyName = latest.versionName;
+                }
+            } catch (Exception ignored) { }
+            final String name = readyName;
+            handler.post(() -> {
+                autoUpdateRunning = false;
+                if (name != null && screenActive && settingsScreen == null) offerUpdate(name);
+            });
+        });
+    }
+
+    private void offerUpdate(String versionName) {
+        preferences.edit().putLong("updatePromptedAt", System.currentTimeMillis()).apply();
+        AlertDialog dialog = new AlertDialog.Builder(new android.view.ContextThemeWrapper(this,
+                LiquidTheme.alertDialogTheme(this)))
+                .setTitle("Actualización de Sva lista")
+                .setMessage("La versión " + versionName + " ya está descargada. Tus ajustes se conservan.\n\n"
+                        + "Si no la instalas ahora, te lo recordaremos más tarde; también está en Ajustes › Versión y actualizaciones.")
+                .setPositiveButton("Instalar ahora", (d, which) -> installDownloadedUpdate())
+                .setNegativeButton("Más tarde", null)
+                .create();
+        dialog.show();
+        styleDialog(dialog);
+    }
+
+    private void installDownloadedUpdate() {
+        if (!Updater.canInstall(this)) {
+            Tr.toast(this, "Permite que Sva instale apps y vuelve a pulsar «Instalar ahora».", Toast.LENGTH_LONG).show();
+            preferences.edit().remove("updatePromptedAt").apply();
+            Updater.openInstallPermission(this);
+            return;
+        }
+        final java.io.File apk = Updater.pendingApk(this);
+        ioWorker.execute(() -> {
+            try {
+                Updater.installFile(MainActivity.this, apk, message -> { });
+            } catch (Exception error) {
+                handler.post(() -> Tr.toast(this, "No se pudo instalar: " + error.getMessage(), Toast.LENGTH_LONG).show());
+            }
+        });
+    }
+
+    /** Rebuilds the Home score cards when their content changed, keeping focus on the same card. */
+    private void updateHomeLiveStrip() {
+        if (homeLiveStrip == null) return;
+        long now = System.currentTimeMillis();
+        List<LiveScores.Game> games = LiveScores.todayForHome(this, now);
+        StringBuilder signature = new StringBuilder();
+        for (LiveScores.Game game : games) signature.append(game.id).append(game.state).append(game.homeScore)
+                .append(game.awayScore).append(game.status()).append('|');
+        if (signature.toString().equals(homeLiveSignature)) return;
+        homeLiveSignature = signature.toString();
+        View focused = homeLiveStrip.findFocus();
+        int focusIndex = focused == null ? -1 : homeLiveStrip.indexOfChild(focused);
+        homeLiveStrip.removeAllViews();
+        homeLiveStrip.setVisibility(games.isEmpty() ? View.GONE : View.VISIBLE);
+        for (int i = 0; i < Math.min(3, games.size()); i++) {
+            LiveScores.Game game = games.get(i);
+            String team = "";
+            for (MatchRepository.Team followed : MatchRepository.teams(this)) if (game.involves(followed.name)) team = followed.name;
+            final String involved = team;
+            View card = LiveScores.card(this, game, v -> startActivity(MatchesActivity.intent(this)
+                    .putExtra(MatchesActivity.EXTRA_OPEN_COMPETITION, game.competition)
+                    .putExtra(MatchesActivity.EXTRA_OPEN_TEAM, involved)));
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(dp(292), -2);
+            params.rightMargin = dp(14);
+            homeLiveStrip.addView(card, params);
+        }
+        if (focusIndex >= 0 && focusIndex < homeLiveStrip.getChildCount()) homeLiveStrip.getChildAt(focusIndex).requestFocus();
     }
 
     private void updateHomeCalendarWidget() {
@@ -3349,6 +3470,25 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
     private void openAndroidSettings() {
         try { startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS)); }
         catch (Exception ignored) { }
+    }
+
+    /**
+     * First-run defaults for this household, applied once and never over a value the viewer set:
+     * 24-hour clock and the weather for Marbella, Spain.
+     */
+    private void applyHouseDefaults() {
+        SharedPreferences.Editor editor = preferences.edit();
+        if (!preferences.contains("24h")) editor.putBoolean("24h", true);
+        if (!preferences.getBoolean("houseWeatherDefault", false)) {
+            if (!preferences.contains("weatherLatitude")) {
+                editor.putString("weatherLocationMode", "city")
+                        .putString("weatherLocationLabel", "Marbella, Andalucía, España")
+                        .putLong("weatherLatitude", Double.doubleToRawLongBits(36.5101))
+                        .putLong("weatherLongitude", Double.doubleToRawLongBits(-4.8825));
+            }
+            editor.putBoolean("houseWeatherDefault", true);
+        }
+        editor.apply();
     }
 
     /** Fire TV devices (Stick, Cube, Fire TV Edition TVs) run Amazon's launcher. */

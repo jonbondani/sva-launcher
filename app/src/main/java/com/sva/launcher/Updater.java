@@ -87,6 +87,26 @@ final class Updater {
 
     /** Blocking: downloads the APK and hands it to the system installer (which asks to confirm). */
     static void install(Context context, Progress progress) throws Exception {
+        installFile(context, download(context, progress), progress);
+    }
+
+    /** Where a background download of the next version is kept until it is installed. */
+    static java.io.File pendingApk(Context context) {
+        return new java.io.File(context.getApplicationContext().getCacheDir(), "sva-update.apk");
+    }
+
+    /** Blocking: downloads the release APK into the cache (used by the silent background check). */
+    static java.io.File download(Context context, Progress progress) throws Exception {
+        java.io.File target = pendingApk(context), partial = new java.io.File(target.getPath() + ".part");
+        try (OutputStream out = new java.io.FileOutputStream(partial)) {
+            downloadTo(RELEASE + "sva-firetv.apk", out, progress);
+        }
+        if (!partial.renameTo(target)) throw new IllegalStateException("No se pudo guardar la descarga.");
+        return target;
+    }
+
+    /** Hands an already downloaded APK to the system installer. */
+    static void installFile(Context context, java.io.File apk, Progress progress) throws Exception {
         Context app = context.getApplicationContext();
         PackageInstaller installer = app.getPackageManager().getPackageInstaller();
         PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
@@ -94,8 +114,11 @@ final class Updater {
         params.setAppPackageName(app.getPackageName());
         int sessionId = installer.createSession(params);
         try (PackageInstaller.Session session = installer.openSession(sessionId)) {
-            try (OutputStream out = session.openWrite("sva-firetv.apk", 0, -1)) {
-                downloadTo(RELEASE + "sva-firetv.apk", out, progress);
+            try (OutputStream out = session.openWrite("sva-firetv.apk", 0, apk.length());
+                 InputStream in = new java.io.FileInputStream(apk)) {
+                byte[] buffer = new byte[64 * 1024];
+                int count;
+                while ((count = in.read(buffer)) != -1) out.write(buffer, 0, count);
                 session.fsync(out);
             }
             int flags = PendingIntent.FLAG_UPDATE_CURRENT;

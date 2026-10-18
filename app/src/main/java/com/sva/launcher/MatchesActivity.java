@@ -231,7 +231,13 @@ public final class MatchesActivity extends Activity {
         int focusIndex = focused != null && focused.getParent() instanceof View && focused.getParent().getParent() == liveBox
                 ? liveBox.indexOfChild((View) focused.getParent()) : -1;
         liveBox.removeAllViews();
-        List<LiveScores.Game> games = LiveScores.forTeams(this, true);
+        // Followed teams today (with calendar-only games such as Marbella), then other live games.
+        List<LiveScores.Game> games = new ArrayList<>(LiveScores.todayForHome(this, System.currentTimeMillis()));
+        for (LiveScores.Game other : LiveScores.forTeams(this, true)) {
+            boolean listed = false;
+            for (LiveScores.Game game : games) listed |= game.id.equals(other.id);
+            if (!listed && other.live()) games.add(other);
+        }
         if (games.isEmpty()) {
             if (liveLoading) SettingsUi.hint(liveBox, "Buscando resultados de hoy…");
             return;

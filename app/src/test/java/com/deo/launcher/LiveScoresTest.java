@@ -42,6 +42,15 @@ public final class LiveScoresTest {
         assertEquals("Málaga CF 1 - 0 Real Madrid Castilla", game.scoreLine());
     }
 
+    @Test public void splitsFixtureTitles() {
+        String[] sides = LiveScores.splitTitle("Marbella FC - Cádiz CF Mirandilla");
+        assertEquals("Marbella FC", sides[0]);
+        assertEquals("Cádiz CF Mirandilla", sides[1]);
+        sides = LiveScores.splitTitle("Juventus vs Real Madrid (Champions League)");
+        assertEquals("Juventus", sides[0]);
+        assertEquals("Real Madrid", sides[1]);
+    }
+
     @Test public void halfTimeIsShownInSpanish() {
         LiveScores.Game game = new LiveScores.Game("1", "LaLiga", "in", "45'", "Halftime", 0,
                 "Sevilla", "0", "", "Betis", "0", "");
