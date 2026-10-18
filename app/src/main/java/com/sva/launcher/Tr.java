@@ -97,9 +97,12 @@ final class Tr {
         String value = text.toString();
         String direct = exact.get(value);
         if (direct != null) return direct;
+        // Known fragments first ("Next · " + programme), then compound texts part by part.
+        String fragment = fragment(value);
+        if (!fragment.equals(value)) return fragment;
         if (value.contains("\n")) return joinTranslated(value, "\n");
         if (value.contains(" · ")) return joinTranslated(value, " · ");
-        return fragment(value);
+        return value;
     }
 
     static String s(Context context, String text) {

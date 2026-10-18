@@ -1,0 +1,541 @@
+New moon	Luna nueva
+Full moon	Luna llena
+ON NOW  ·  	AHORA  ·  
+Select to watch	Selecciona para ver
+Next · 	Siguiente · 
+Up	Arriba
+Down	Abajo
+Left	Izquierda
+Right	Derecha
+Pause	Pausa
+Game controllers	Mandos de juego
+Configure buttons for your connected gamepads	Configura los botones de tus mandos conectados
+Connected controllers	Mandos conectados
+Left-stick and directional-pad movement work automatically. Select a controller to remap its buttons.	El joystick izquierdo y la cruceta funcionan automáticamente. Selecciona un mando para reasignar sus botones.
+No controller connected	No hay ningún mando conectado
+Connect a gamepad by Bluetooth or USB, then choose Refresh.	Conecta un mando por Bluetooth o USB y elige Actualizar mandos.
+Refresh controllers	Actualizar mandos
+Map controller	Asignar mando
+Button mapping	Asignación de botones
+Press a button on the selected controller. Press Back to cancel without saving.	Pulsa un botón del mando seleccionado. Pulsa Atrás para cancelar sin guardar.
+Button 	Botón 
+ of 	 de 
+Controller mapping saved.	Asignación del mando guardada.
+Could not save mapping.	No se pudo guardar la asignación.
+Play	Jugar
+Rename	Renombrar
+Artwork	Carátula
+Remove	Quitar
+Game title	Título del juego
+Save	Guardar
+Could not save title.	No se pudo guardar el título.
+Cancel	Cancelar
+Could not save artwork.	No se pudo guardar la carátula.
+Remove 	¿Quitar 
+Sva's imported copy, artwork, and battery save will be deleted. Your original file will not be changed.	Se eliminarán la copia importada en Sva, la carátula y la partida guardada. Tu archivo original no se modificará.
+Could not remove game.	No se pudo quitar el juego.
+Games	Juegos
+Add files	Añadir archivos
+Add folder	Añadir carpeta
+Your local NES library · user-provided .nes files only	Tu biblioteca local de NES · solo archivos .nes propios
+No games yet. Add your own .nes files to get started.	Aún no hay juegos. Añade tus propios archivos .nes para empezar.
+Importing games…	Importando juegos…
+This game could not be started.	No se pudo iniciar este juego.
+Resume	Reanudar
+Restart	Reiniciar
+Exit to Sva	Salir a Sva
+ added · 	 añadidos · 
+ duplicate	 duplicado
+ skipped	 omitidos
+NES game	Juego de NES
+Enter a Google Photos shared album link.	Introduce el enlace de un álbum compartido de Google Photos.
+Google Photos returned HTTP 	Google Photos devolvió el error HTTP 
+The link did not open a Google Photos album.	El enlace no abre un álbum de Google Photos.
+The Google Photos album page is too large to read.	La página del álbum de Google Photos es demasiado grande para leerla.
+Starting soon · 	Empieza pronto · 
+ starts at 	 empieza a las 
+Watch	Ver
+Dismiss	Descartar
+ClearKey playback requires a DASH stream.	La reproducción con ClearKey requiere un stream DASH.
+ClearKey needs inline keys or a license URL.	ClearKey necesita claves en línea o una URL de licencia.
+Backup contains too many channels.	La copia de seguridad contiene demasiados canales.
+Backup contains an invalid channel entry.	La copia de seguridad contiene un canal no válido.
+Backup contains a channel without a name or stream URL.	La copia de seguridad contiene un canal sin nombre o sin URL de stream.
+Add an M3U playlist URL in Settings.	Añade una URL de lista M3U en Ajustes.
+No channels found in the playlist.	No se han encontrado canales en la lista.
+Playlist was empty. Keeping saved channels.	La lista estaba vacía. Se mantienen los canales guardados.
+Playlist URL changed during refresh. Refresh channels again.	La URL de la lista cambió durante la actualización. Vuelve a actualizar los canales.
+Channels updated.	Canales actualizados.
+Could not load playlist: 	No se pudo cargar la lista: 
+Showing saved channels. Channel refresh failed: 	Mostrando canales guardados. Error al actualizar canales: 
+Add and save a programme guide URL in Settings.	Añade y guarda una URL de guía de programación en Ajustes.
+Refresh channels first to load the programme guide.	Actualiza primero los canales para cargar la guía de programación.
+Programme guide URL changed during refresh. Refresh the guide again.	La URL de la guía cambió durante la actualización. Vuelve a actualizar la guía.
+Programme guide updated.	Guía de programación actualizada.
+Showing saved channels. Guide refresh failed: 	Mostrando canales guardados. Error al actualizar la guía: 
+Playlist is larger than 24 MB.	La lista supera los 24 MB.
+Playlist ended a channel entry before its stream URL.	La lista terminó una entrada de canal antes de su URL de stream.
+Channel	Canal
+Playlist ended before the final channel stream URL.	La lista terminó antes de la URL de stream del último canal.
+Source exceeds the 	La fuente supera el límite de 
+ MB size limit.	 MB.
+JSON guide is larger than 16 MB.	La guía JSON supera los 16 MB.
+Guide contains no valid programmes matching playlist tvg-id values.	La guía no contiene programas válidos que coincidan con los tvg-id de la lista.
+Guide has no current or upcoming programmes.	La guía no tiene programas actuales ni próximos.
+JSON guide contains no channels.	La guía JSON no contiene canales.
+JSON guide contains no channel entries.	La guía JSON no contiene entradas de canal.
+JSON guide contains no valid programmes matching playlist channel IDs or names.	La guía JSON no contiene programas válidos que coincidan con los ID o nombres de canal de la lista.
+JSON guide has no current or upcoming programmes.	La guía JSON no tiene programas actuales ni próximos.
+This backup file is not supported.	Este archivo de copia de seguridad no es compatible.
+The backup file is missing launcher, IPTV, or channel data.	Al archivo de copia de seguridad le faltan datos del launcher, IPTV o canales.
+Unsupported set in preferences.	Conjunto no compatible en las preferencias.
+Unsupported preference value: 	Valor de preferencia no compatible: 
+The backup contains an invalid preference.	La copia de seguridad contiene una preferencia no válida.
+The backup contains an incompatible preference type.	La copia de seguridad contiene un tipo de preferencia incompatible.
+The backup contains an invalid number.	La copia de seguridad contiene un número no válido.
+The backup contains an unknown preference type.	La copia de seguridad contiene un tipo de preferencia desconocido.
+Could not save restored settings.	No se pudieron guardar los ajustes restaurados.
+Home	Inicio
+Live TV	TV en directo
+Events	Eventos
+Saved	Guardados
+That reminder channel is no longer available.	El canal de ese recordatorio ya no está disponible.
+Creating launcher backup…	Creando copia de seguridad…
+Could not write to that file.	No se pudo escribir en ese archivo.
+Could not create the backup.	No se pudo crear la copia de seguridad.
+Backup saved.	Copia de seguridad guardada.
+Backup failed: 	Error en la copia de seguridad: 
+Restoring launcher backup…	Restaurando copia de seguridad…
+Could not read that file.	No se pudo leer ese archivo.
+Backup file is larger than 64 MB.	El archivo de copia de seguridad supera los 64 MB.
+Could not restore that backup.	No se pudo restaurar esa copia de seguridad.
+Restore failed: 	Error al restaurar: 
+Backup restored.	Copia de seguridad restaurada.
+Weather unavailable	Tiempo no disponible
+Add weather	Añadir el tiempo
+Local conditions	Condiciones locales
+Network	Red
+Android Settings	Ajustes de Android
+Launcher Settings	Ajustes del launcher
+UP NEXT	A CONTINUACIÓN
+No events today	No hay eventos hoy
+Open your calendar	Abrir tu calendario
+NOW PLAYING	REPRODUCIENDO
+Pause playback	Pausar reproducción
+Import games	Importar juegos
+No games yet. Import your own .nes files to get started.	Aún no hay juegos. Importa tus propios archivos .nes para empezar.
+Add a playlist in Settings to browse live TV.	Añade una lista en Ajustes para ver TV en directo.
+Add an M3U and optional XMLTV URL in Settings to get started.	Añade una URL M3U y, opcionalmente, una XMLTV en Ajustes para empezar.
+Add shortcut	Añadir acceso directo
+No saved YouTube shortcuts yet. Add a video or playlist in Settings.	Aún no hay accesos directos de YouTube. Añade un vídeo o una lista en Ajustes.
+TV guide	Guía de TV
+Expand	Expandir
+Collapse	Contraer
+Add a playlist and programme guide in Settings.	Añade una lista y una guía de programación en Ajustes.
+Back to Home	Volver a Inicio
+Calendar	Calendario
+Previous month	Mes anterior
+Today	Hoy
+Next month	Mes siguiente
+No events planned	No hay eventos previstos
+Lunar illumination  ·  	Iluminación lunar  ·  
+All day	Todo el día
+Playing on your TV	Reproduciendo en tu TV
+Resume playback	Reanudar reproducción
+Open Android Settings and allow Sva Now Playing notification access.	Abre los Ajustes de Android y permite el acceso a notificaciones de Sva Now Playing.
+Weather not set	Tiempo sin configurar
+Refresh in Settings	Actualizar en Ajustes
+Configure in Settings	Configurar en Ajustes
+Feels like 	Sensación de 
+. Wind 	. Viento 
+Forecast unavailable	Previsión no disponible
+Close	Cerrar
+Refreshing weather…	Actualizando el tiempo…
+Could not refresh weather.	No se pudo actualizar el tiempo.
+Weather refreshed.	Tiempo actualizado.
+Refresh failed · 	Error al actualizar · 
+Location is unavailable on this TV.	La ubicación no está disponible en esta TV.
+Turn on Android location services first.	Activa primero los servicios de ubicación de Android.
+Finding this TV’s location…	Buscando la ubicación de esta TV…
+Location timed out. Try city search instead.	Se agotó el tiempo de ubicación. Prueba a buscar una ciudad.
+Location permission was not granted.	No se concedió el permiso de ubicación.
+Could not determine this TV’s location.	No se pudo determinar la ubicación de esta TV.
+Current location	Ubicación actual
+Location denied. Search for a city instead.	Ubicación denegada. Busca una ciudad.
+Calendar event	Evento del calendario
+Add a calendar in Settings	Añade un calendario en Ajustes
+Your calendar is clear	No tienes eventos
+Could not refresh this calendar.	No se pudo actualizar este calendario.
+Calendar refreshed · 	Calendario actualizado · 
+ events cached.	 eventos en caché.
+Calendar refresh failed · 	Error al actualizar el calendario · 
+Calendar refresh failed: 	Error al actualizar el calendario: 
+Loading apps…	Cargando apps…
+No apps selected	No hay apps seleccionadas
+Artwork: 	Imagen: 
+Play video: 	Reproducir vídeo: 
+Open playlist: 	Abrir lista: 
+No app can open this YouTube link.	Ninguna app puede abrir este enlace de YouTube.
+Could not open this YouTube link.	No se pudo abrir este enlace de YouTube.
+Uncategorized	Sin categoría
+All channels are hidden. Restore channels in Settings.	Todos los canales están ocultos. Restáuralos en Ajustes.
+TV guide  ·  	Guía de TV  ·  
+Expand TV guide	Expandir guía de TV
+Collapse TV guide	Contraer guía de TV
+\n\nReminders appear five minutes before the show while Sva is open.	\n\nLos recordatorios aparecen cinco minutos antes del programa mientras Sva está abierto.
+Remove reminder	Quitar recordatorio
+Remind me	Recordármelo
+This programme has already started.	Este programa ya ha empezado.
+Watch channel	Ver canal
+Could not read that folder. Keeping the saved slideshow.	No se pudo leer esa carpeta. Se mantiene la presentación guardada.
+No images were found in that folder.	No se encontraron imágenes en esa carpeta.
+Background slideshow updated · 	Presentación de fondo actualizada · 
+ photos	 fotos
+No photos were found. Check that link sharing is on.	No se encontraron fotos. Comprueba que el enlace para compartir está activado.
+Could not load that Google Photos album.	No se pudo cargar ese álbum de Google Photos.
+No public photos were found in that album.	No se encontraron fotos públicas en ese álbum.
+Google Photos slideshow updated · 	Presentación de Google Photos actualizada · 
+Could not open playback. Please try again.	No se pudo abrir la reproducción. Inténtalo de nuevo.
+Refreshing channels…	Actualizando canales…
+Refreshing programme guide…	Actualizando guía de programación…
+Updating today's programme guide…	Actualizando la guía de programación de hoy…
+Channels	Canales
+Apps	Apps
+Appearance	Apariencia
+Clock	Reloj
+Playback & DRM	Reproducción y DRM
+Home button	Botón Inicio
+Backup & restore	Copia de seguridad
+Schedules	Actualizaciones
+Weather	Tiempo
+Navigation	Navegación
+Content	Contenido
+Home & Display	Inicio y pantalla
+System	Sistema
+Playlist and programme guide	Lista y guía de programación
+Choose which channels appear in Live TV	Elige qué canales aparecen en TV en directo
+Choose and order your home shortcuts	Elige y ordena tus accesos de Inicio
+Photo backdrop and wallpaper	Fondo de fotos y fondo de pantalla
+Time and date on Home	Hora y fecha en Inicio
+Default Widevine license settings	Ajustes de licencia Widevine predeterminados
+Open Sva when the TV Home button opens its built-in launcher	Abrir Sva cuando el botón Inicio abra el launcher de la TV
+Save or restore launcher settings and channels	Guarda o restaura los ajustes y canales
+Save videos and playlists in Saved	Guarda vídeos y listas en Guardados
+Show events from a public Google Calendar	Muestra eventos de un Google Calendar público
+Choose when content updates automatically	Elige cuándo se actualiza el contenido
+Import and manage your local NES library	Importa y gestiona tu biblioteca local de NES
+Current conditions and a three-day forecast	Condiciones actuales y previsión a tres días
+Choose which categories appear and their order	Elige qué categorías aparecen y su orden
+Settings	Ajustes
+Discard unsaved edits?	¿Descartar los cambios sin guardar?
+Playlist, DRM, or calendar changes have not been saved.	Los cambios de lista, DRM o calendario no se han guardado.
+Discard	Descartar
+Keep editing	Seguir editando
+Library	Biblioteca
+Sva supports user-provided .nes files only. Games are copied into private app storage; original files are never changed.	Sva solo admite archivos .nes propios. Los juegos se copian al almacenamiento privado de la app; los archivos originales nunca se modifican.
+Open game library and import	Abrir biblioteca de juegos e importar
+Controllers	Mandos
+Configure game controllers	Configurar mandos de juego
+Nestopia UE is embedded in Sva. On a TV remote, use the arrow buttons to move, OK for A, and hold OK for Start. Gamepads are assigned to players one and two automatically. During play, Back opens Resume, Restart, and Exit.	Nestopia UE está integrado en Sva. Con el mando de la TV, usa las flechas para moverte, OK para A y mantén OK para Start. Los mandos de juego se asignan automáticamente a los jugadores uno y dos. Durante la partida, Atrás abre Reanudar, Reiniciar y Salir.
+Nestopia UE · GPL-2.0-or-later · Sva combined application GPLv3. Source: github.com/libretro/nestopia	Nestopia UE · GPL-2.0-or-later · Aplicación combinada Sva GPLv3. Código fuente: github.com/libretro/nestopia
+Visible categories	Categorías visibles
+Choose which categories appear in the navigation bar. Your games and calendar data stay saved.	Elige qué categorías aparecen en la barra de navegación. Tus juegos y datos del calendario se conservan.
+Show Live TV in navigation	Mostrar TV en directo en la navegación
+Show Games in navigation	Mostrar Juegos en la navegación
+Show Events in navigation	Mostrar Eventos en la navegación
+Item order	Orden de elementos
+Home stays first. Select a category to change its position. Hidden categories keep their place.	Inicio siempre va primero. Selecciona una categoría para cambiar su posición. Las categorías ocultas conservan su lugar.
+Reset item order	Restablecer orden
+First after Home	Primero tras Inicio
+Second after Home	Segundo tras Inicio
+Third after Home	Tercero tras Inicio
+Last	Último
+ · Hidden	 · Oculto
+Location	Ubicación
+Choose a city or use this TV's location to show weather on Home.	Elige una ciudad o usa la ubicación de esta TV para mostrar el tiempo en Inicio.
+Weather location · 	Ubicación del tiempo · 
+Search city or postal code	Buscar ciudad o código postal
+Pune, India	Madrid, España
+Search	Buscar
+Enter at least two characters.	Introduce al menos dos caracteres.
+Searching locations…	Buscando ubicaciones…
+Location search failed.	Error al buscar la ubicación.
+Search failed · 	Error en la búsqueda · 
+No matching places found.	No se encontraron lugares.
+Choose a location.	Elige una ubicación.
+Use device location	Usar ubicación del dispositivo
+Remove weather	Quitar el tiempo
+Units	Unidades
+Temperature	Temperatura
+Wind speed	Velocidad del viento
+Refresh now	Actualizar ahora
+Choose a location first.	Elige primero una ubicación.
+Weather by Open-Meteo · Locations by GeoNames · Device location requested only on setup or manual refresh.	Tiempo de Open-Meteo · Ubicaciones de GeoNames · La ubicación del dispositivo solo se solicita al configurar o actualizar manualmente.
+Override status	Estado de la sustitución
+✓ Sva launcher override is enabled on this TV.	✓ La sustitución del launcher por Sva está activada en esta TV.
+✕ Sva launcher override is currently disabled.	✕ La sustitución del launcher por Sva está desactivada.
+Some TVs keep their built-in launcher as Home even when another launcher is selected. Enable Sva Launcher in Android Accessibility settings to reopen Sva whenever the TV opens its built-in launcher.	Algunas TV mantienen su launcher integrado como Inicio aunque se elija otro. Activa Sva Launcher en los ajustes de Accesibilidad de Android para reabrir Sva cada vez que la TV abra su launcher integrado.
+Settings shortcuts	Accesos a ajustes
+Open Accessibility settings	Abrir ajustes de Accesibilidad
+Could not open Accessibility settings.	No se pudieron abrir los ajustes de Accesibilidad.
+Try setting Sva as the Home app	Intentar poner Sva como app de inicio
+Could not open Home settings.	No se pudieron abrir los ajustes de inicio.
+Create backup	Crear copia de seguridad
+Create a JSON backup of launcher settings, app and channel choices, IPTV and DRM details, and saved channels.	Crea una copia de seguridad JSON con los ajustes del launcher, apps y canales elegidos, datos de IPTV y DRM, y canales guardados.
+Create backup file	Crear archivo de copia
+Restore from backup	Restaurar copia de seguridad
+Restoring replaces the current launcher settings and saved channel cache. Keep backup files private.	Al restaurar se sustituyen los ajustes actuales y la caché de canales guardada. Mantén privados los archivos de copia.
+Refresh intervals	Intervalos de actualización
+Schedules run while Sva is open. Overdue content is checked when Home resumes; manual refresh buttons continue to work when automatic refresh is disabled.	Las actualizaciones se ejecutan mientras Sva está abierto. El contenido pendiente se comprueba al volver a Inicio; los botones de actualización manual siguen funcionando aunque la automática esté desactivada.
+Photo slideshow	Presentación de fotos
+IPTV playlist	Lista IPTV
+Programme guide	Guía de programación
+Public calendar	Calendario público
+Google Photos album	Álbum de Google Photos
+Defaults	Valores predeterminados
+Paused keeps the current photo visible. Every launch refreshes Google Photos or weather once when Sva starts.	En pausa se mantiene la foto actual. Cada inicio actualiza Google Photos o el tiempo una vez al abrir Sva.
+Restore schedule defaults	Restablecer valores predeterminados
+Paste a public YouTube video or playlist link to add a card to Saved. Add an optional title; the full artwork thumbnail stays visible on the card.	Pega el enlace de un vídeo o lista pública de YouTube para añadir una tarjeta a Guardados. Añade un título opcional; la miniatura completa se ve en la tarjeta.
+Video or playlist link	Enlace de vídeo o lista
+Card title · optional	Título de la tarjeta · opcional
+Use the YouTube title	Usar el título de YouTube
+Artwork video link · optional	Vídeo para la imagen · opcional
+Use for playlist artwork	Para la imagen de la lista
+Add to Saved	Añadir a Guardados
+Enter a valid YouTube video or playlist link.	Introduce un enlace válido de vídeo o lista de YouTube.
+That link is already in Saved.	Ese enlace ya está en Guardados.
+Artwork must be a YouTube video link.	La imagen debe ser un enlace a un vídeo de YouTube.
+Added to Saved.	Añadido a Guardados.
+Saved shortcuts	Accesos guardados
+No YouTube cards saved yet.	Aún no hay tarjetas de YouTube guardadas.
+  ·  Add art	  ·  Añadir imagen
+ from Saved	 de Guardados
+Title	Título
+Edit title for 	Editar título de 
+Art	Imagen
+Edit artwork for 	Editar imagen de 
+Removed from Saved.	Quitado de Guardados.
+YouTube video link	Enlace de vídeo de YouTube
+Card artwork	Imagen de la tarjeta
+Paste a YouTube video link to use its thumbnail. Leave empty to retry automatic artwork.	Pega el enlace de un vídeo de YouTube para usar su miniatura. Déjalo vacío para reintentar la imagen automática.
+Enter a YouTube video link	Introduce un enlace de vídeo de YouTube
+Card title	Título de la tarjeta
+Clear the title to use the title provided by YouTube when available.	Borra el título para usar el de YouTube cuando esté disponible.
+Calendar feed	Fuente del calendario
+Add a public Google Calendar iCal address (Google Calendar → Settings → Integrate calendar → Public address in iCal format). Events appear in the Events tab.	Añade una dirección iCal pública de Google Calendar (Google Calendar → Configuración → Integrar el calendario → Dirección pública en formato iCal). Los eventos aparecen en la pestaña Eventos.
+Public calendar iCal URL	URL iCal del calendario público
+Actions	Acciones
+Save calendar and refresh	Guardar calendario y actualizar
+Calendar removed.	Calendario quitado.
+Use a public Google Calendar iCal URL from Integrate calendar.	Usa una URL iCal pública de Google Calendar desde Integrar el calendario.
+Refreshing public calendar…	Actualizando calendario público…
+Refresh saved calendar now	Actualizar calendario guardado
+Save the calendar URL before refreshing.	Guarda la URL del calendario antes de actualizar.
+Add a public calendar URL first.	Añade primero la URL de un calendario público.
+The on-device schedule is checked when Sva opens. Change its automatic refresh cadence under Schedules. Events appear while active.	El calendario guardado se comprueba al abrir Sva. Cambia su frecuencia de actualización en Actualizaciones. Los eventos aparecen mientras están activos.
+Not refreshed yet	Aún no actualizado
+Updated 	Actualizado el 
+Public calendar cache · 	Caché del calendario público · 
+ events · 	 eventos · 
+Save changes	Guardar cambios
+Discard edits	Descartar cambios
+Refresh channels	Actualizar canales
+Playlist & Guide URLs	URL de lista y guía
+M3U playlist	Lista M3U
+Programme guide · XML, XML.GZ or JSON	Guía de programación · XML, XML.GZ o JSON
+XMLTV matches by tvg-id. JSON guides match channel IDs or a unique channel name. EPGSchedule times use India Standard Time.	XMLTV asocia por tvg-id. Las guías JSON asocian por ID de canal o un nombre de canal único. Los horarios de EPGSchedule usan la hora estándar de la India.
+Cache & Guide status	Estado de caché y guía
+Refresh programme guide now	Actualizar guía de programación
+Save the programme guide URL before refreshing it.	Guarda la URL de la guía de programación antes de actualizarla.
+Playlist and programme-guide refresh cadences are configured independently under Schedules. You can also refresh them manually here.	La frecuencia de actualización de la lista y la guía se configura por separado en Actualizaciones. También puedes actualizarlas manualmente aquí.
+Settings saved. Automatic refresh uses the cadences under Schedules.	Ajustes guardados. La actualización automática usa las frecuencias de Actualizaciones.
+No changes to save.	No hay cambios que guardar.
+Save the playlist URL before refreshing channels.	Guarda la URL de la lista antes de actualizar los canales.
+Widevine DRM	DRM Widevine
+Widevine license URL	URL de licencia Widevine
+Optional default license endpoint	Servidor de licencias predeterminado opcional
+License request headers	Cabeceras de la solicitud de licencia
+One per line · Name: Value	Una por línea · Nombre: Valor
+Channel-specific KODIPROP settings in the playlist take priority over these defaults.	Los ajustes KODIPROP de cada canal en la lista tienen prioridad sobre estos valores predeterminados.
+Playback settings saved	Ajustes de reproducción guardados
+Clock display	Visualización del reloj
+Changes appear on the Home clock immediately.	Los cambios se aplican al reloj de Inicio al momento.
+Theme	Tema
+Follow your TV’s theme, or choose a light or dark appearance.	Sigue el tema de tu TV o elige una apariencia clara u oscura.
+System default	Predeterminado del sistema
+Light	Claro
+Dark	Oscuro
+Now Playing	Reproduciendo ahora
+Appears on Home only while media is playing. Allow notification access to show playback from other apps.	Aparece en Inicio solo mientras se reproduce contenido. Permite el acceso a notificaciones para mostrar lo que suena en otras apps.
+Manage Now Playing access	Gestionar acceso de Reproduciendo ahora
+Screensaver	Salvapantallas
+Sva Memories · screensaver settings	Sva Memories · ajustes del salvapantallas
+Slideshow	Presentación
+A photo folder or Google Photos album plays as a slideshow. It takes priority over a single wallpaper.	Una carpeta de fotos o un álbum de Google Photos se muestra como presentación. Tiene prioridad sobre un fondo único.
+Photo folder · 	Carpeta de fotos · 
+ images	 imágenes
+No photo folder selected	No hay carpeta de fotos seleccionada
+Choose photo folder	Elegir carpeta de fotos
+Clear photo folder	Quitar carpeta de fotos
+No Google Photos album selected	No hay álbum de Google Photos seleccionado
+Google Photos album · 	Álbum de Google Photos · 
+Google Photos public album link	Enlace de álbum público de Google Photos
+Paste a link shared with anyone	Pega un enlace compartido con cualquiera
+Use Google Photos album	Usar álbum de Google Photos
+Paste a Google Photos shared album link first.	Pega primero el enlace de un álbum compartido de Google Photos.
+Loading public album…	Cargando álbum público…
+Clear Google Photos album	Quitar álbum de Google Photos
+Single wallpaper	Fondo único
+Single wallpaper is set	Fondo único configurado
+No single wallpaper — using the default landscape	Sin fondo único: se usa el paisaje predeterminado
+Choose single wallpaper	Elegir fondo único
+Clear single wallpaper	Quitar fondo único
+On-device channel cache · 	Caché de canales en el dispositivo · 
+ channel	 canal
+ channels	 canales
+Last refreshed 	Última actualización: 
+Programme guide · daily refresh · 	Guía de programación · actualización diaria · 
+Find a channel	Buscar un canal
+Search by channel name	Buscar por nombre de canal
+Choose up to five apps for Home. Use arrows to change their order.	Elige hasta cinco apps para Inicio. Usa las flechas para cambiar su orden.
+ channels · 	 canales · 
+ shown	 visibles
+Shown	Visible
+Hidden	Oculto
+Loading 	Cargando 
+Invalid channel playback configuration.	Configuración de reproducción del canal no válida.
+Missing channel stream URL.	Falta la URL de stream del canal.
+Playing · Up/Down to change channel	Reproduciendo · Arriba/Abajo para cambiar de canal
+Stream ended · Back to return	Emisión finalizada · Atrás para volver
+ playback failed. Check the channel license settings and TV support.	: error de reproducción. Comprueba los ajustes de licencia del canal y la compatibilidad de la TV.
+Could not play this channel. The stream or codec may not be supported by the TV.	No se pudo reproducir este canal. Puede que la TV no admita el stream o el códec.
+Could not start ClearKey playback. Check the DASH format, keys or license URL.	No se pudo iniciar la reproducción ClearKey. Comprueba el formato DASH, las claves o la URL de licencia.
+Could not start Widevine playback. Check the channel DRM settings.	No se pudo iniciar la reproducción Widevine. Comprueba los ajustes DRM del canal.
+Could not start this stream. Check the stream URL and playlist options.	No se pudo iniciar esta emisión. Comprueba la URL del stream y las opciones de la lista.
+ min left	 min restantes
+Watch 	Ver 
+No upcoming schedule	Sin programación próxima
+No upcoming schedule for 	Sin programación próxima para 
+ON NOW	AHORA
+  ·  REMINDER SET	  ·  RECORDATORIO
+ on 	 en 
+Calendar feed returned HTTP 	La fuente del calendario devolvió el error HTTP 
+Calendar feed is larger than 6 MB.	La fuente del calendario supera los 6 MB.
+This link did not return a public iCalendar feed.	Este enlace no devolvió un calendario iCalendar público.
+Paused	En pausa
+Manual only	Solo manual
+Every launch	Cada inicio
+ seconds	 segundos
+ minute	 minuto
+ minutes	 minutos
+ hour	 hora
+ hours	 horas
+ day	 día
+ days	 días
+No photos found. Check that the album is publicly shared.	No se encontraron fotos. Comprueba que el álbum se comparte públicamente.
+Cinema	Cine
+Darkroom	Cuarto oscuro
+Editorial	Editorial
+Floating Prints	Copias flotantes
+Monolith	Monolito
+Prism	Prisma
+Silhouette	Silueta
+Travel Journal	Diario de viaje
+Photo Weave	Tejido de fotos
+Slow camera movement, soft black edge shading and a quiet cinematic fade.	Movimiento de cámara lento, bordes oscurecidos suaves y un fundido cinematográfico sereno.
+An amber-lit contact sheet, warm photographs and a passing trace of light.	Una hoja de contactos con luz ámbar, fotografías cálidas y un fugaz rastro de luz.
+An oversized photograph, ivory margins and beautifully set personal captions.	Una fotografía a gran tamaño, márgenes marfil y pies de foto personales cuidadosamente compuestos.
+Album photographs drift as layered paper prints against colors drawn from your images.	Las fotos del álbum flotan como copias en papel superpuestas sobre colores extraídos de tus imágenes.
+A sculptural floating photograph, deep image-inspired color and quiet movement.	Una fotografía flotante escultural, colores intensos inspirados en la imagen y movimiento sereno.
+Translucent planes, emerald light ribbons and a luminous photographic centrepiece.	Planos translúcidos, cintas de luz esmeralda y una fotografía luminosa en el centro.
+Monochrome photography revealed through broad, moving vertical panels.	Fotografía en blanco y negro revelada a través de amplios paneles verticales en movimiento.
+Warm textured paper, photographic keepsakes and delicate route lines.	Papel cálido con textura, recuerdos fotográficos y delicadas líneas de ruta.
+Different album photographs woven into a slowly changing asymmetric grid.	Distintas fotos del álbum entretejidas en una cuadrícula asimétrica que cambia lentamente.
+Sva Memories · Personalize your idle screen	Sva Memories · Personaliza tu pantalla en reposo
+Photo source	Origen de las fotos
+Leave empty to follow the Home album. Use an album shared with anyone who has the link.	Déjalo vacío para usar el álbum de Inicio. Usa un álbum compartido con cualquiera que tenga el enlace.
+Use Home album	Usar álbum de Inicio
+Screensaver now follows the Home album.	El salvapantallas usa ahora el álbum de Inicio.
+Check album	Comprobar álbum
+Atmosphere	Ambiente
+Change photo	Cambiar foto
+Overlays	Superposiciones
+Weather and events use your Home location and calendar.	El tiempo y los eventos usan tu ubicación y calendario de Inicio.
+Activation	Activación
+Off	Desactivado
+Start while Sva is idle	Iniciar con Sva inactivo
+Runs while Sva is open. Playback and settings stay uninterrupted.	Funciona mientras Sva está abierto. No interrumpe la reproducción ni los ajustes.
+Choose in Android TV settings	Elegir en ajustes de Android TV
+Choose Sva Memories in Android TV settings for a system-wide screensaver. Previously downloaded photos work offline.	Elige Sva Memories en los ajustes de Android TV para usarlo como salvapantallas del sistema. Las fotos ya descargadas funcionan sin conexión.
+Preview	Vista previa
+Save screensaver changes?	¿Guardar cambios del salvapantallas?
+Your album and caption have unsaved changes.	Tu álbum y pie de foto tienen cambios sin guardar.
+This TV restricts system screensaver settings. Use Start while Sva is idle above, or open the TV's Screensaver / Ambient mode settings.	Esta TV restringe los ajustes del salvapantallas del sistema. Usa Iniciar con Sva inactivo (arriba) o abre los ajustes de Salvapantallas / Modo ambiente de la TV.
+Enter a Google Photos shared album link, or leave empty to use Home.	Introduce el enlace de un álbum compartido de Google Photos o déjalo vacío para usar el de Inicio.
+Saved.	Guardado.
+Add an album on Home or paste a separate album above.	Añade un álbum en Inicio o pega otro álbum arriba.
+Checking shared album…	Comprobando álbum compartido…
+Album ready · 	Álbum listo · 
+Could not read album. Check the link, sharing settings and connection.	No se pudo leer el álbum. Comprueba el enlace, los ajustes de uso compartido y la conexión.
+Photo source · 	Origen de las fotos · 
+Home album	Álbum de Inicio
+Separate album	Álbum independiente
+ · no link configured yet	 · aún sin enlace configurado
+Add a personal caption	Añade un pie de foto personal
+Add a Google Photos album in Screensaver settings	Añade un álbum de Google Photos en los ajustes del salvapantallas
+Loading your photographs…	Cargando tus fotografías…
+Album unavailable · showing landscape wallpaper	Álbum no disponible · mostrando fondo de paisaje
+Photos unavailable · showing landscape wallpaper	Fotos no disponibles · mostrando fondo de paisaje
+Set up weather in Launcher Settings	Configura el tiempo en Ajustes del launcher
+No upcoming events	No hay próximos eventos
+Your calendar	Tu calendario
+Now · 	Ahora · 
+Up next · 	A continuación · 
+ · All day	 · Todo el día
+On	Activado
+Back	Atrás
+Invalid ClearKey configuration. Supply valid 128-bit KID/key pairs or a JWK key set.	Configuración ClearKey no válida. Indica pares KID/clave de 128 bits válidos o un conjunto de claves JWK.
+Storage	Almacenamiento
+Backup filename	Nombre del archivo de copia
+Other locations	Otras ubicaciones
+Add NES games	Añadir juegos de NES
+Add games from folder	Añadir juegos de una carpeta
+Choose image	Elegir imagen
+Restore backup	Restaurar copia
+Save backup	Guardar copia
+Storage settings are unavailable.	Los ajustes de almacenamiento no están disponibles.
+Storage access needed	Se necesita acceso al almacenamiento
+Allow Sva to browse local files, or choose Other locations for a provider.	Permite que Sva explore los archivos locales o elige Otras ubicaciones para usar un proveedor.
+Allow storage access	Permitir acceso al almacenamiento
+Storage locations	Ubicaciones de almacenamiento
+Choose internal storage or a connected USB drive.	Elige el almacenamiento interno o una unidad USB conectada.
+Internal storage	Almacenamiento interno
+No local storage found	No se encontró almacenamiento local
+ selected · press OK on files, then Add selected	 seleccionados · pulsa OK en los archivos y luego Añadir selección
+Open a folder, then choose Use this folder	Abre una carpeta y elige Usar esta carpeta
+Enter a filename and save in this folder	Escribe un nombre de archivo y guarda en esta carpeta
+Select a file with OK	Selecciona un archivo con OK
+This folder cannot be read	No se puede leer esta carpeta
+No matching files here	No hay archivos compatibles aquí
+Add selected (	Añadir selección (
+Use this folder	Usar esta carpeta
+Save here	Guardar aquí
+Select a file	Seleccionar archivo
+Enter a filename without slashes	Escribe un nombre de archivo sin barras
+Replace 	¿Reemplazar 
+Replace	Reemplazar
+Could not create a file here.	No se pudo crear un archivo aquí.
+No other file provider is available.	No hay otro proveedor de archivos disponible.
+Forecast did not include upcoming days.	La previsión no incluye los próximos días.
+Partly cloudy	Parcialmente nublado
+Overcast	Cubierto
+Fog	Niebla
+Drizzle	Llovizna
+Rain	Lluvia
+Snow	Nieve
+Thunderstorm	Tormenta
+Mixed weather	Tiempo variable
+Weather service returned 	El servicio del tiempo devolvió 
+Weather response was too large.	La respuesta del servicio del tiempo era demasiado grande.
+YouTube video	Vídeo de YouTube
+YouTube playlist	Lista de YouTube

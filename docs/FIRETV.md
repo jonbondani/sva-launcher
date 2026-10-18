@@ -15,7 +15,7 @@ Esta rama adapta Sva Launcher a Fire OS y añade **Partidos**: los próximos enc
 
 - **Juegos Android en la pestaña Juegos.** Además de la biblioteca NES, aparecen los juegos Android instalados, como los ports nativos de proyectos de decompilación. Los que se declaran juego salen solos; los demás se añaden con la tarjeta «+ Añadir juego Android». Mantén pulsada una tarjeta para quitarla.
 
-- **Español.** En **Ajustes › Appearance › Idioma / Language** puedes elegir Español, English o el idioma del sistema. Con el Fire TV en español, Sva sale en español directamente.
+- **Español.** En **Ajustes › Apariencia (Appearance) › Idioma / Language** puedes elegir Español, English o el idioma del sistema. Con el Fire TV en español, Sva sale en español directamente.
 - **Apps iniciales.** Hasta que elijas tus apps, el inicio muestra Movistar Plus+, Disney+, DAZN y Prime Video, en ese orden y solo las que estén instaladas.
 - **Icono y banner nuevos**, pensados para la fila de apps de Fire TV.
 - **Botón Home en Fire TV.** Fire OS oculta Sva en Accesibilidad e ignora «elegir app de inicio». La sección *Home button* explica cómo activarlo por ADB.
