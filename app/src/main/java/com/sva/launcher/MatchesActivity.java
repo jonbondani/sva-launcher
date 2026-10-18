@@ -33,6 +33,9 @@ import java.util.Map;
  */
 public final class MatchesActivity extends Activity {
     static final String EXTRA_OPEN_UID = "open_uid";
+    /** Opens the app for a competition directly (live score card on Home). */
+    static final String EXTRA_OPEN_COMPETITION = "open_competition";
+    static final String EXTRA_OPEN_TEAM = "open_team";
     static final String EXTRA_ADD_TEAM = "add_team";
     static final String EXTRA_REMOVE_TEAM = "remove_team";
     private static final int MATCHES = 0, TEAMS = 1, APPS = 2;
@@ -52,6 +55,16 @@ public final class MatchesActivity extends Activity {
     private ProgressBar spinner;
     private int screen = MATCHES;
     private boolean refreshing;
+    private LinearLayout liveBox;
+    private boolean liveLoading;
+    private final android.os.Handler ticker = new android.os.Handler(android.os.Looper.getMainLooper());
+    /** Re-reads ESPN while this screen is open: every 45 s with a game in play, else every 10 min. */
+    private final Runnable liveTick = new Runnable() {
+        @Override public void run() {
+            refreshLive();
+            ticker.postDelayed(this, 30_000L);
+        }
+    };
 
     static Intent intent(Context context) { return new Intent(context, MatchesActivity.class); }
 
@@ -81,6 +94,17 @@ public final class MatchesActivity extends Activity {
         handleIntent(getIntent());
         render();
         if (MatchRepository.isStale(this)) refresh(false);
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        ticker.removeCallbacks(liveTick);
+        ticker.post(liveTick);
+    }
+
+    @Override protected void onPause() {
+        ticker.removeCallbacks(liveTick);
+        super.onPause();
     }
 
     @Override protected void onNewIntent(Intent intent) {
@@ -127,6 +151,13 @@ public final class MatchesActivity extends Activity {
             toast("Equipo eliminado: " + remove.trim());
             intent.removeExtra(EXTRA_REMOVE_TEAM);
         }
+        String competition = intent.getStringExtra(EXTRA_OPEN_COMPETITION);
+        if (competition != null) {
+            String team = intent.getStringExtra(EXTRA_OPEN_TEAM);
+            intent.removeExtra(EXTRA_OPEN_COMPETITION);
+            intent.removeExtra(EXTRA_OPEN_TEAM);
+            openCompetition(competition, team == null ? "" : team);
+        }
         String uid = intent.getStringExtra(EXTRA_OPEN_UID);
         if (uid != null) {
             intent.removeExtra(EXTRA_OPEN_UID);
@@ -165,6 +196,11 @@ public final class MatchesActivity extends Activity {
             SettingsUi.add(content, SettingsUi.action(this, "Añadir un equipo", this::addTeam));
             return;
         }
+        // Today's games with live scores (ESPN), Google-card style, above the fixture list.
+        liveBox = new LinearLayout(this);
+        liveBox.setOrientation(LinearLayout.VERTICAL);
+        content.addView(liveBox, new LinearLayout.LayoutParams(-1, -2));
+        renderLive();
         if (refreshing && matches.isEmpty()) {
             SettingsUi.hint(content, "Buscando partidos de tus equipos…");
             return;
@@ -187,6 +223,63 @@ public final class MatchesActivity extends Activity {
         long refreshed = MatchRepository.refreshedAt(this);
         if (refreshed > 0) SettingsUi.hint(content, "Última actualización: " + dayLabel(refreshed, now).toLowerCase(SPANISH)
                 + " a las " + timeLabel(refreshed) + ".");
+    }
+
+    private void renderLive() {
+        if (liveBox == null) return;
+        View focused = getCurrentFocus();
+        int focusIndex = focused != null && focused.getParent() instanceof View && focused.getParent().getParent() == liveBox
+                ? liveBox.indexOfChild((View) focused.getParent()) : -1;
+        liveBox.removeAllViews();
+        List<LiveScores.Game> games = LiveScores.forTeams(this, true);
+        if (games.isEmpty()) {
+            if (liveLoading) SettingsUi.hint(liveBox, "Buscando resultados de hoy…");
+            return;
+        }
+        SettingsUi.heading(liveBox, "Hoy y en directo");
+        LinearLayout row = null;
+        for (int i = 0; i < games.size(); i++) {
+            LiveScores.Game game = games.get(i);
+            if (i % 3 == 0) {
+                row = new LinearLayout(this);
+                LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(-1, -2);
+                rowParams.bottomMargin = SettingsUi.dp(this, 12);
+                liveBox.addView(row, rowParams);
+            }
+            String team = "";
+            for (MatchRepository.Team followed : MatchRepository.teams(this)) if (game.involves(followed.name)) team = followed.name;
+            final String involved = team;
+            View card = LiveScores.card(this, game, v -> openCompetition(game.competition, involved));
+            LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(0, -2, 1);
+            cardParams.rightMargin = SettingsUi.dp(this, 12);
+            row.addView(card, cardParams);
+        }
+        // Pad the last row so cards keep the same width.
+        if (row != null) for (int i = row.getChildCount(); i < 3; i++) row.addView(new View(this), new LinearLayout.LayoutParams(0, 1, 1));
+        if (focusIndex >= 0 && focusIndex < liveBox.getChildCount()) {
+            View again = liveBox.getChildAt(focusIndex);
+            if (again instanceof LinearLayout && ((LinearLayout) again).getChildCount() > 0) ((LinearLayout) again).getChildAt(0).requestFocus();
+        }
+    }
+
+    private void refreshLive() {
+        if (liveLoading || !LiveScores.isStale(this)) return;
+        liveLoading = true;
+        final Context app = getApplicationContext();
+        new Thread(() -> {
+            LiveScores.refresh(app);
+            runOnUiThread(() -> {
+                liveLoading = false;
+                if (!isFinishing() && !isDestroyed() && screen == MATCHES) renderLive();
+            });
+        }, "sva-live-scores").start();
+    }
+
+    /** Opens the app chosen for a competition (asking once), as fixture rows do. */
+    private void openCompetition(String competition, String team) {
+        MatchRepository.Match stub = new MatchRepository.Match("live-" + competition, competition, team.isEmpty() ? competition : team,
+                competition, "", System.currentTimeMillis(), System.currentTimeMillis() + 7_200_000L, false);
+        watch(stub);
     }
 
     private View matchRow(MatchRepository.Match match, long now) {

@@ -191,6 +191,9 @@ public final class MainActivity extends Activity {
     private LinearLayout homeCalendarCard;
     /** The football match shown in the top event card instead of the calendar, if any. */
     private MatchRepository.Match homeMatch;
+    /** A followed team's game in play (ESPN live score), shown before calendar fixtures. */
+    private LiveScores.Game homeLiveGame;
+    private boolean liveScoresRunning;
     private Runnable matchTick;
     private boolean matchRefreshRunning;
     private View clockDivider;
@@ -843,6 +846,14 @@ public final class MainActivity extends Activity {
         homeCalendarCard.setClickable(true);
         homeCalendarCard.setOnFocusChangeListener(LiquidTheme::animateFocus);
         homeCalendarCard.setOnClickListener(v -> {
+            if (homeLiveGame != null) {
+                String team = "";
+                for (MatchRepository.Team followed : MatchRepository.teams(this)) if (homeLiveGame.involves(followed.name)) team = followed.name;
+                startActivity(MatchesActivity.intent(this)
+                        .putExtra(MatchesActivity.EXTRA_OPEN_COMPETITION, homeLiveGame.competition)
+                        .putExtra(MatchesActivity.EXTRA_OPEN_TEAM, team));
+                return;
+            }
             if (homeMatch == null) { selectTab(TAB_EVENTS, false); return; }
             Intent matches = MatchesActivity.intent(this);
             // A live match opens straight in its app; an upcoming one opens the fixtures list.
@@ -2542,6 +2553,19 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             @Override public void run() {
                 if (!screenActive) return;
                 updateHomeCalendarWidget();
+                // Live scores only matter around a followed team's game: refresh while one is today.
+                if (!liveScoresRunning && LiveScores.isStale(MainActivity.this)
+                        && MatchRepository.forHome(MainActivity.this, System.currentTimeMillis(), 4L * 60L * 60L * 1000L) != null) {
+                    liveScoresRunning = true;
+                    final android.content.Context liveApp = getApplicationContext();
+                    new Thread(() -> {
+                        LiveScores.refresh(liveApp);
+                        handler.post(() -> {
+                            liveScoresRunning = false;
+                            updateHomeCalendarWidget();
+                        });
+                    }, "sva-live-home").start();
+                }
                 if (!matchRefreshRunning && MatchRepository.isStale(MainActivity.this)) {
                     matchRefreshRunning = true;
                     final android.content.Context app = getApplicationContext();
@@ -2563,6 +2587,15 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
     private void updateHomeCalendarWidget() {
         if (homeCalendarTitle == null || homeCalendarSubtitle == null) return;
         long matchNow = System.currentTimeMillis();
+        homeLiveGame = LiveScores.liveForTeams(this);
+        if (homeLiveGame != null) {
+            homeMatch = null;
+            homeCalendarEyebrow.setText("EN DIRECTO · " + homeLiveGame.status().toUpperCase(Locale.ROOT)
+                    + " · " + homeLiveGame.competition.toUpperCase(Locale.ROOT));
+            homeCalendarTitle.setText(homeLiveGame.scoreLine());
+            homeCalendarSubtitle.setText("Pulsa para verlo");
+            return;
+        }
         // A live match, or one starting within a day and a half, takes over the event card.
         homeMatch = MatchRepository.forHome(this, matchNow, 36L * 60L * 60L * 1000L);
         if (homeMatch != null) {
