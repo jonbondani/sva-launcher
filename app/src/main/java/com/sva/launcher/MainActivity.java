@@ -4820,8 +4820,15 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                     : "Descargar e instalar " + availableUpdate.versionName, null);
             check.setOnClickListener(v -> {
                 if (updateBusy) return;
+                // Installing needs "install unknown apps" for Sva; send the viewer there first.
+                if (availableUpdate != null && !Updater.canInstall(MainActivity.this)) {
+                    setUpdateStatus("Permite que Sva instale apps (pantalla que se abre) y vuelve a pulsar el botón.");
+                    Updater.openInstallPermission(MainActivity.this);
+                    return;
+                }
                 updateBusy = true;
-                check.setEnabled(false);
+                // Not disabled: disabling the focused button sends focus to the settings rail.
+                check.setAlpha(0.6f);
                 final Updater.Release pending = availableUpdate;
                 setUpdateStatus(pending == null ? "Buscando…" : "Descargando…");
                 ioWorker.execute(() -> {
@@ -4847,7 +4854,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                         updateBusy = false;
                         availableUpdate = next;
                         if (settingsScreen != this || section != ABOUT) return;
-                        check.setEnabled(true);
+                        check.setAlpha(1f);
                         check.setText(availableUpdate == null ? "Buscar actualización"
                                 : "Descargar e instalar " + availableUpdate.versionName);
                         setUpdateStatus(shown);

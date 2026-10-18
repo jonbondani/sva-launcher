@@ -60,6 +60,24 @@ final class Updater {
         }
     }
 
+    /** Android 8+: Sva needs the per-app "install unknown apps" permission to update itself. */
+    static boolean canInstall(Context context) {
+        return context.getPackageManager().canRequestPackageInstalls();
+    }
+
+    static void openInstallPermission(Context context) {
+        Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                android.net.Uri.parse("package:" + context.getPackageName())).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        try {
+            context.startActivity(intent);
+        } catch (Exception notOnThisDevice) {
+            // Fire OS: Settings › My Fire TV › Developer options › Install unknown apps.
+            try {
+                context.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            } catch (Exception ignored) { }
+        }
+    }
+
     /** Blocking: reads version.json from the release. */
     static Release latest() throws Exception {
         String body = new String(download(RELEASE + "version.json", 64 * 1024, null), StandardCharsets.UTF_8);

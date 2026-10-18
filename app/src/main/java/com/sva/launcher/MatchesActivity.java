@@ -451,7 +451,7 @@ public final class MatchesActivity extends Activity {
     /** Visible progress while feeds download: spinner, disabled button and its label. */
     private void setBusy(boolean busy) {
         spinner.setVisibility(busy ? View.VISIBLE : View.GONE);
-        refreshButton.setEnabled(!busy);
+        // Not disabled while busy: disabling the focused button would throw focus elsewhere.
         refreshButton.setText(busy ? "Actualizando…" : "Actualizar");
         refreshButton.setAlpha(busy ? 0.6f : 1f);
     }
