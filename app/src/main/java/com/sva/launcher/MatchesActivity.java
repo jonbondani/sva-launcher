@@ -48,7 +48,8 @@ public final class MatchesActivity extends Activity {
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         LinearLayout page = SettingsUi.page(this, "Partidos",
                 "Tus equipos en un solo sitio. Pulsa un partido para abrir la app donde lo ves; mantén pulsado para cambiarla.",
-                this::onBackPressed);
+                this::handleBack);
+        BackNavigation.install(this, this::handleBack);
         LinearLayout tabs = new LinearLayout(this);
         tabs.setGravity(Gravity.CENTER_VERTICAL);
         addTab(tabs, "Próximos", () -> show(MATCHES));
@@ -70,9 +71,13 @@ public final class MatchesActivity extends Activity {
         render();
     }
 
-    @Override public void onBackPressed() {
+    // Kept for Android <33 (Fire OS 7/8); modern system Back uses BackNavigation.
+    @android.annotation.SuppressLint("GestureBackNavigation")
+    @Override public void onBackPressed() { handleBack(); }
+
+    private void handleBack() {
         if (screen != MATCHES) { show(MATCHES); return; }
-        super.onBackPressed();
+        finish();
     }
 
     private void addTab(LinearLayout tabs, String label, Runnable click) {
