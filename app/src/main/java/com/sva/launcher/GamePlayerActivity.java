@@ -58,7 +58,7 @@ public final class GamePlayerActivity extends Activity implements InputManager.I
                 if (!started) {
                     File rom = repository.romFile(game), save = repository.saveFile(game);
                     started = session.start(rom.getAbsolutePath(), save.getAbsolutePath(), getFilesDir().getAbsolutePath());
-                    if (!started) { Toast.makeText(GamePlayerActivity.this, "This game could not be started.", Toast.LENGTH_LONG).show(); finish(); return; }
+                    if (!started) { Tr.toast(GamePlayerActivity.this, "This game could not be started.", Toast.LENGTH_LONG).show(); finish(); return; }
                 }
                 session.surface(holder.getSurface());
                 session.pause(false);

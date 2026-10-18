@@ -371,7 +371,7 @@ public final class MainActivity extends Activity {
             matches++;
         }
         if (matches == 1) playChannel(fallback);
-        else Toast.makeText(this, "That reminder channel is no longer available.", Toast.LENGTH_LONG).show();
+        else Tr.toast(this, "That reminder channel is no longer available.", Toast.LENGTH_LONG).show();
     }
 
     private void openGameLibrary() {
@@ -407,7 +407,7 @@ public final class MainActivity extends Activity {
     }
 
     private void exportBackup(Uri destination) {
-        Toast.makeText(this, "Creating launcher backup…", Toast.LENGTH_SHORT).show();
+        Tr.toast(this, "Creating launcher backup…", Toast.LENGTH_SHORT).show();
         Thread worker = new Thread(() -> {
             String error = null;
             try {
@@ -422,7 +422,7 @@ public final class MainActivity extends Activity {
                 error = e.getMessage() == null ? "Could not create the backup." : e.getMessage();
             }
             String result = error;
-            handler.post(() -> Toast.makeText(this,
+            handler.post(() -> Tr.toast(this,
                     result == null ? "Backup saved." : "Backup failed: " + result,
                     result == null ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG).show());
         }, "launcher-backup-export");
@@ -431,7 +431,7 @@ public final class MainActivity extends Activity {
     }
 
     private void importBackup(Uri source) {
-        Toast.makeText(this, "Restoring launcher backup…", Toast.LENGTH_SHORT).show();
+        Tr.toast(this, "Restoring launcher backup…", Toast.LENGTH_SHORT).show();
         Thread worker = new Thread(() -> {
             String error = null;
             try (java.io.InputStream input = getContentResolver().openInputStream(source)) {
@@ -454,10 +454,10 @@ public final class MainActivity extends Activity {
             String result = error;
             handler.post(() -> {
                 if (result != null) {
-                    Toast.makeText(this, "Restore failed: " + result, Toast.LENGTH_LONG).show();
+                    Tr.toast(this, "Restore failed: " + result, Toast.LENGTH_LONG).show();
                     return;
                 }
-                Toast.makeText(this, "Backup restored.", Toast.LENGTH_SHORT).show();
+                Tr.toast(this, "Backup restored.", Toast.LENGTH_SHORT).show();
                 recreate();
             });
         }, "launcher-backup-import");
@@ -2268,7 +2268,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         try {
             startActivity(new Intent(android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
         } catch (android.content.ActivityNotFoundException missing) {
-            Toast.makeText(this, "Open Android Settings and allow Sva Now Playing notification access.",
+            Tr.toast(this, "Open Android Settings and allow Sva Now Playing notification access.",
                     Toast.LENGTH_LONG).show();
         }
     }
@@ -2700,7 +2700,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                     settingsScreen.onCalendarRefreshResult("Calendar refresh failed · " + resultError);
                 }
                 if (manual && resultError != null) {
-                    Toast.makeText(this, "Calendar refresh failed: " + resultError, Toast.LENGTH_LONG).show();
+                    Tr.toast(this, "Calendar refresh failed: " + resultError, Toast.LENGTH_LONG).show();
                 }
                 scheduleCalendarRefresh();
             });
@@ -2731,7 +2731,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             List<AppEntry> loaded = installedApps();
             List<String> selected = selectedPackages(loaded);
             if (selected.isEmpty() && !preferences.getBoolean("customApps", false)) {
-                for (AppEntry entry : loaded) selected.add(entry.packageName);
+                selected.addAll(defaultApps(loaded));
+                if (selected.isEmpty()) for (AppEntry entry : loaded) selected.add(entry.packageName);
             }
             Set<String> selectedSet = new HashSet<>(selected);
             PackageManager packageManager = getPackageManager();
@@ -2989,9 +2990,9 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         try {
             Intent browser = new Intent(Intent.ACTION_VIEW, target);
             if (browser.resolveActivity(getPackageManager()) != null) startActivity(browser);
-            else Toast.makeText(this, "No app can open this YouTube link.", Toast.LENGTH_LONG).show();
+            else Tr.toast(this, "No app can open this YouTube link.", Toast.LENGTH_LONG).show();
         } catch (Exception e) {
-            Toast.makeText(this, "Could not open this YouTube link.", Toast.LENGTH_LONG).show();
+            Tr.toast(this, "Could not open this YouTube link.", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -3238,6 +3239,17 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         catch (Exception ignored) { }
     }
 
+    /** Fire TV devices (Stick, Cube, Fire TV Edition TVs) run Amazon's launcher. */
+    private boolean isFireOs() {
+        if ("Amazon".equalsIgnoreCase(android.os.Build.MANUFACTURER)) return true;
+        try {
+            getPackageManager().getPackageInfo("com.amazon.tv.launcher", 0);
+            return true;
+        } catch (PackageManager.NameNotFoundException ignored) {
+            return false;
+        }
+    }
+
     private boolean isLauncherOverrideEnabled() {
         AccessibilityManager manager = (AccessibilityManager) getSystemService(ACCESSIBILITY_SERVICE);
         if (manager == null) return false;
@@ -3370,6 +3382,25 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         return entries;
     }
 
+    /**
+     * Until the viewer picks apps, Home starts with these streaming services, in this order, when
+     * installed. Matched by label so it works with the Fire TV, Android TV and phone builds alike.
+     */
+    private static final String[] DEFAULT_APP_LABELS = {"movistar", "disney", "dazn", "prime video"};
+
+    private List<String> defaultApps(List<AppEntry> available) {
+        ArrayList<String> result = new ArrayList<>();
+        for (String wanted : DEFAULT_APP_LABELS) {
+            for (AppEntry entry : available) {
+                if (MatchRepository.fold(entry.label).contains(wanted) && !result.contains(entry.packageName)) {
+                    result.add(entry.packageName);
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
     private List<String> selectedPackages(List<AppEntry> available) {
         String raw = preferences.getString("selectedApps", "");
         ArrayList<String> selected = new ArrayList<>();
@@ -3492,7 +3523,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                 .setPositiveButton(saved ? "Remove reminder" : "Remind me", (ignored, which) -> {
                     if (saved) reminders.remove(reminder);
                     else if (!reminders.add(reminder)) {
-                        Toast.makeText(this, "This programme has already started.", Toast.LENGTH_SHORT).show();
+                        Tr.toast(this, "This programme has already started.", Toast.LENGTH_SHORT).show();
                     }
                     guideAdapter.refreshTimes();
                 })
@@ -3586,7 +3617,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             handler.post(() -> {
                 if (generation != backgroundFolderGeneration || isFinishing()) return;
                 if (!scan.success) {
-                    if (userSelected) Toast.makeText(this,
+                    if (userSelected) Tr.toast(this,
                             "Could not read that folder. Keeping the saved slideshow.", Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -3594,9 +3625,9 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                 if (!sameBackgroundPhotos(scan.photos)) setBackgroundPhotos(scan.photos);
                 if (settingsScreen != null) settingsScreen.refreshAppearance();
                 if (userSelected && scan.photos.isEmpty()) {
-                    Toast.makeText(this, "No images were found in that folder.", Toast.LENGTH_LONG).show();
+                    Tr.toast(this, "No images were found in that folder.", Toast.LENGTH_LONG).show();
                 } else if (userSelected) {
-                    Toast.makeText(this, "Background slideshow updated · " + scan.photos.size() + " photos", Toast.LENGTH_SHORT).show();
+                    Tr.toast(this, "Background slideshow updated · " + scan.photos.size() + " photos", Toast.LENGTH_SHORT).show();
                 }
             });
         });
@@ -3622,7 +3653,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             handler.post(() -> {
                 if (generation != backgroundFolderGeneration || isFinishing()) return;
                 if (error != null || result.isEmpty()) {
-                    if (userSelected) Toast.makeText(this, error == null ? "No public photos were found in that album." : error, Toast.LENGTH_LONG).show();
+                    if (userSelected) Tr.toast(this, error == null ? "No public photos were found in that album." : error, Toast.LENGTH_LONG).show();
                     return;
                 }
                 cacheBackgroundAlbum(shareUrl, result);
@@ -3630,7 +3661,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                         .putLong("googlePhotosUpdatedAt", System.currentTimeMillis()).apply();
                 if (!sameBackgroundPhotos(result)) setBackgroundPhotos(result);
                 if (settingsScreen != null) settingsScreen.refreshAppearance();
-                if (userSelected) Toast.makeText(this, "Google Photos slideshow updated · " + result.size() + " photos", Toast.LENGTH_SHORT).show();
+                if (userSelected) Tr.toast(this, "Google Photos slideshow updated · " + result.size() + " photos", Toast.LENGTH_SHORT).show();
                 scheduleGooglePhotosRefresh();
             });
         });
@@ -3939,7 +3970,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         play.putExtra("zapChannels", zapList.toString());
         play.putExtra("zapIndex", selectedIndex);
         try { startActivity(PlaybackSession.createIntent(this, play)); }
-        catch (Exception ignored) { Toast.makeText(this, "Could not open playback. Please try again.", Toast.LENGTH_LONG).show(); }
+        catch (Exception ignored) { Tr.toast(this, "Could not open playback. Please try again.", Toast.LENGTH_LONG).show(); }
     }
 
     private void refreshChannels() {
@@ -4004,6 +4035,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
     private SettingsScreen settingsScreen;
 
     private void styleDialog(AlertDialog dialog) {
+        Tr.attach(dialog);
         Window window = dialog.getWindow();
         if (window != null) {
             window.setBackgroundDrawable(roundedShape(LiquidTheme.surface(this), LiquidTheme.border(this), 1, 26));
@@ -4188,6 +4220,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             body.addView(detail, new LinearLayout.LayoutParams(0, -1, 1));
 
             dialog.setContentView(shell);
+            Tr.attach(dialog);
             dialog.setCancelable(false);
             dialog.setOnKeyListener((ignored, keyCode, event) -> {
                 View focused = dialog.getCurrentFocus();
@@ -4197,8 +4230,10 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                             android.view.inputmethod.InputMethodManager keyboard =
                                     (android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
                             if (keyboard != null) keyboard.hideSoftInputFromWindow(focused.getWindowToken(), 0);
-                            focused.clearFocus();
-                            tabs[section].requestFocus();
+                            // Stay in the form (next control) so the value can still be saved or searched;
+                            // a second Back from there leaves the section as before.
+                            View next = focused.focusSearch(View.FOCUS_DOWN);
+                            if (next == null || !next.requestFocus()) tabs[section].requestFocus();
                         } else requestClose();
                     }
                     return true;
@@ -4606,13 +4641,28 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             addFormHint(form, enabled
                     ? "✓ Sva launcher override is enabled on this TV."
                     : "✕ Sva launcher override is currently disabled.");
+            if (isFireOs() && enabled) {
+                addFormHint(form, "Listo: al pulsar Home en el mando se abrirá Sva. Para desactivarlo:  ./firetv-optimizer.sh sva-inicio off");
+                return;
+            }
+            if (isFireOs()) {
+                // Fire OS hides third-party accessibility services and ignores HOME_SETTINGS, so the
+                // shortcuts below do nothing there; the service has to be enabled once over ADB.
+                addFormHint(form, "Fire TV oculta este ajuste: Accesibilidad no muestra Sva y no deja elegir otra app de inicio. "
+                        + "Actívalo una vez desde un ordenador de tu red con ADB (Depuración ADB activada en Opciones para desarrolladores):");
+                addFormHint(form, "adb connect <IP-del-Fire-TV>\nadb shell settings put secure enabled_accessibility_services "
+                        + "com.sva.launcher/com.sva.launcher.LauncherOverrideService\nadb shell settings put secure accessibility_enabled 1");
+                addFormHint(form, "Con el script firetv-optimizer basta con:  ./firetv-optimizer.sh sva-inicio\n"
+                        + "El inicio de Amazon sigue instalado; Sva solo se reabre encima al pulsar Home.");
+                return;
+            }
             addFormHint(form, "Some TVs keep their built-in launcher as Home even when another launcher is selected. Enable Sva Launcher in Android Accessibility settings to reopen Sva whenever the TV opens its built-in launcher.");
             addFormSectionHeader(form, "Settings shortcuts");
             addFormButton(form, "Open Accessibility settings", v -> {
                 try {
                     startActivity(new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS));
                 } catch (Exception e) {
-                    Toast.makeText(MainActivity.this, "Could not open Accessibility settings.", Toast.LENGTH_LONG).show();
+                    Tr.toast(MainActivity.this, "Could not open Accessibility settings.", Toast.LENGTH_LONG).show();
                 }
             });
             addFormButton(form, "Try setting Sva as the Home app", v -> {
@@ -4620,7 +4670,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                     startActivity(new Intent("android.settings.HOME_SETTINGS"));
                 } catch (Exception e) {
                     try { startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS)); }
-                    catch (Exception ignored) { Toast.makeText(MainActivity.this, "Could not open Home settings.", Toast.LENGTH_LONG).show(); }
+                    catch (Exception ignored) { Tr.toast(MainActivity.this, "Could not open Home settings.", Toast.LENGTH_LONG).show(); }
                 }
             });
         }
@@ -5030,7 +5080,10 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                     android.view.inputmethod.InputMethodManager keyboard =
                             (android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
                     if (keyboard != null) keyboard.hideSoftInputFromWindow(field.getWindowToken(), 0);
-                    field.clearFocus();
+                    // clearFocus() would hand focus to the first focusable view (the left menu);
+                    // move on to the control below instead (for example the "Search" button).
+                    View next = field.focusSearch(View.FOCUS_DOWN);
+                    if (next == null || !next.requestFocus()) field.requestFocus();
                     return true;
                 });
             }
@@ -5187,7 +5240,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                 iptv.saveDrmSettings(draftLicense, draftHeaders);
                 draftLicense = iptv.drmLicenseUrl(); draftHeaders = iptv.drmHeaderText();
                 renderSection();
-                Toast.makeText(MainActivity.this, "Playback settings saved", Toast.LENGTH_SHORT).show();
+                Tr.toast(MainActivity.this, "Playback settings saved", Toast.LENGTH_SHORT).show();
             }, v -> {
                 draftLicense = iptv.drmLicenseUrl(); draftHeaders = iptv.drmHeaderText(); renderSection();
             }, null);
@@ -5215,6 +5268,16 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             addChoice(form, "Appearance", new String[]{"System default", "Light", "Dark"},
                     LiquidTheme.LIGHT.equals(mode) ? 1 : LiquidTheme.DARK.equals(mode) ? 2 : 0,
                     index -> changeLiquidGlassMode(modes[index]));
+            String language = Tr.language(MainActivity.this);
+            String[] languages = {Tr.SYSTEM, Tr.SPANISH, Tr.ENGLISH};
+            addChoice(form, "Idioma / Language", new String[]{"Idioma del sistema", "Español", "English"},
+                    Tr.SPANISH.equals(language) ? 1 : Tr.ENGLISH.equals(language) ? 2 : 0, index -> {
+                        if (languages[index].equals(Tr.language(MainActivity.this))) return;
+                        Tr.setLanguage(MainActivity.this, languages[index]);
+                        // Texts already on screen keep their language; rebuild everything.
+                        dialog.dismiss();
+                        MainActivity.this.recreate();
+                    });
 
             // — Now Playing ————————————————————————————————————————————————————
             addFormSectionHeader(form, "Now Playing");
@@ -5250,10 +5313,10 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             addFormButton(form, "Use Google Photos album", v -> {
                 String link = albumField.getText().toString().trim();
                 if (link.isEmpty()) {
-                    Toast.makeText(MainActivity.this, "Paste a Google Photos shared album link first.", Toast.LENGTH_SHORT).show();
+                    Tr.toast(MainActivity.this, "Paste a Google Photos shared album link first.", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                Toast.makeText(MainActivity.this, "Loading public album…", Toast.LENGTH_SHORT).show();
+                Tr.toast(MainActivity.this, "Loading public album…", Toast.LENGTH_SHORT).show();
                 loadBackgroundAlbum(link, true);
             });
             if (!albumUrl.isEmpty()) addFormButton(form, "Clear Google Photos album", v -> {
@@ -5459,7 +5522,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                 if (!initialized) {
                     selectedOrder.addAll(selectedPackages(apps));
                     if (selectedOrder.isEmpty() && !preferences.getBoolean("customApps", false)) {
-                        for (AppEntry entry : apps) selectedOrder.add(entry.packageName);
+                        selectedOrder.addAll(defaultApps(apps));
+                        if (selectedOrder.isEmpty()) for (AppEntry entry : apps) selectedOrder.add(entry.packageName);
                     }
                     initialized = true;
                 }

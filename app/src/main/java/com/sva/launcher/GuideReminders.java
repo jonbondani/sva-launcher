@@ -151,6 +151,7 @@ final class GuideReminders {
                 .create();
         alert.setOnDismissListener(dialog -> { alert = null; schedule(); });
         alert.show();
+        Tr.attach(alert);
     }
 
     private static IptvRepository.Channel findChannel(List<IptvRepository.Channel> channels, Reminder reminder) {

@@ -312,7 +312,7 @@ public final class MatchesActivity extends Activity {
         return new AlertDialog.Builder(this, LiquidTheme.alertDialogTheme(this));
     }
 
-    private void toast(String message) { Toast.makeText(this, message, Toast.LENGTH_LONG).show(); }
+    private void toast(String message) { Tr.toast(this, message, Toast.LENGTH_LONG).show(); }
 
     private static String hostOf(String url) {
         try {

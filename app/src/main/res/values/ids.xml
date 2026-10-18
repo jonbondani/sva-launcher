@@ -1,0 +1,4 @@
+<resources>
+    <!-- View tag used by Tr to mark windows whose texts are already being translated. -->
+    <item name="tr_attached" type="id" />
+</resources>

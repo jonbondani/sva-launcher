@@ -114,10 +114,10 @@ public final class GameDetailActivity extends Activity {
 
     private void rename() {
         EditText input = new EditText(this); input.setText(game.title); input.setSelectAllOnFocus(true);
-        new AlertDialog.Builder(this).setTitle("Game title").setView(input).setPositiveButton("Save", (d, w) -> {
+        Tr.attach(new AlertDialog.Builder(this).setTitle("Game title").setView(input).setPositiveButton("Save", (d, w) -> {
             String value = input.getText().toString().trim(); if (value.isEmpty()) return;
-            try { repository.updateTitle(id, value); render(); } catch (Exception e) { Toast.makeText(this, "Could not save title.", Toast.LENGTH_LONG).show(); }
-        }).setNegativeButton("Cancel", null).show();
+            try { repository.updateTitle(id, value); render(); } catch (Exception e) { Tr.toast(this, "Could not save title.", Toast.LENGTH_LONG).show(); }
+        }).setNegativeButton("Cancel", null).show());
     }
 
     private void pickArtwork() {
@@ -128,13 +128,13 @@ public final class GameDetailActivity extends Activity {
         super.onActivityResult(request, result, data);
         if (request != PICK_ART || result != RESULT_OK || data == null || data.getData() == null) return;
         try { repository.updateArtwork(id, data.getData()); render(); }
-        catch (Exception e) { Toast.makeText(this, "Could not save artwork.", Toast.LENGTH_LONG).show(); }
+        catch (Exception e) { Tr.toast(this, "Could not save artwork.", Toast.LENGTH_LONG).show(); }
     }
 
     private void remove() {
-        new AlertDialog.Builder(this).setTitle("Remove " + game.title + "?")
+        Tr.attach(new AlertDialog.Builder(this).setTitle("Remove " + game.title + "?")
                 .setMessage("Sva's imported copy, artwork, and battery save will be deleted. Your original file will not be changed.")
-                .setPositiveButton("Remove", (d, w) -> { try { repository.remove(id); finish(); } catch (Exception e) { Toast.makeText(this, "Could not remove game.", Toast.LENGTH_LONG).show(); } })
-                .setNegativeButton("Cancel", null).show();
+                .setPositiveButton("Remove", (d, w) -> { try { repository.remove(id); finish(); } catch (Exception e) { Tr.toast(this, "Could not remove game.", Toast.LENGTH_LONG).show(); } })
+                .setNegativeButton("Cancel", null).show());
     }
 }

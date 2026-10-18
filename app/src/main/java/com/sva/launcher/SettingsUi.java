@@ -116,7 +116,9 @@ final class SettingsUi {
         });
         return row;
     }
-    static View choice(Context c, String title, String[] options, int selected, IntConsumer save) {
+    static View choice(Context c, String title, String[] rawOptions, int selected, IntConsumer save) {
+        // Translate up front so the shown value and the list stay comparable in either language.
+        String[] options = Tr.all(c, rawOptions);
         LinearLayout row = row(c); TextView label = text(c, title, 16, false);
         row.addView(label, new LinearLayout.LayoutParams(0, -2, 1));
         TextView value = text(c, options[selected], 14, true);
@@ -131,7 +133,7 @@ final class SettingsUi {
                         value.setText(options[which]); row.setContentDescription(title + ", " + options[which]);
                         save.accept(which); d.dismiss(); row.requestFocus();
                     }).setNegativeButton("Cancel", null).create();
-            dialog.setOnDismissListener(d -> row.requestFocus()); dialog.show();
+            dialog.setOnDismissListener(d -> row.requestFocus()); dialog.show(); Tr.attach(dialog);
             dialog.getListView().setSelection(current);
         });
         return row;

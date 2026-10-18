@@ -100,11 +100,11 @@ public final class ScreensaverSettingsActivity extends Activity {
         boolean dirty = !album.getText().toString().trim().equals(prefs.getString(ScreensaverPreferences.ALBUM, ""))
                 || !caption.getText().toString().trim().equals(prefs.getString(ScreensaverPreferences.CAPTION, ""));
         if (!dirty) { finish(); return; }
-        new android.app.AlertDialog.Builder(this, LiquidTheme.alertDialogTheme(this))
+        Tr.attach(new android.app.AlertDialog.Builder(this, LiquidTheme.alertDialogTheme(this))
                 .setTitle("Save screensaver changes?")
                 .setMessage("Your album and caption have unsaved changes.")
                 .setPositiveButton("Save", (d, w) -> { if (save()) finish(); })
-                .setNegativeButton("Discard", (d, w) -> finish()).setNeutralButton("Keep editing", null).show();
+                .setNegativeButton("Discard", (d, w) -> finish()).setNeutralButton("Keep editing", null).show());
     }
 
     @Override protected void onSaveInstanceState(Bundle state) {

@@ -15,7 +15,10 @@ public final class SvaApplication extends Application implements Application.Act
 
     GuideReminders guideReminders() { return guideReminders; }
 
-    @Override public void onActivityResumed(Activity activity) { guideReminders.onResumed(activity); }
+    @Override public void onActivityResumed(Activity activity) {
+        Tr.attach(activity);
+        guideReminders.onResumed(activity);
+    }
     @Override public void onActivityPaused(Activity activity) { guideReminders.onPaused(activity); }
     @Override public void onActivityCreated(Activity activity, Bundle state) { }
     @Override public void onActivityStarted(Activity activity) { }

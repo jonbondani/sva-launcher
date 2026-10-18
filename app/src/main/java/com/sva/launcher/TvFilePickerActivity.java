@@ -172,7 +172,7 @@ public final class TvFilePickerActivity extends Activity {
                         Uri.parse("package:" + getPackageName())), STORAGE_SETTINGS);
             } catch (Exception e) {
                 try { startActivityForResult(new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION), STORAGE_SETTINGS); }
-                catch (Exception ignored) { Toast.makeText(this, "Storage settings are unavailable.", Toast.LENGTH_LONG).show(); }
+                catch (Exception ignored) { Tr.toast(this, "Storage settings are unavailable.", Toast.LENGTH_LONG).show(); }
             }
         } else {
             requestPermissions(isSaveMode()
@@ -304,15 +304,15 @@ public final class TvFilePickerActivity extends Activity {
             if (!name.toLowerCase(Locale.ROOT).endsWith(".json")) name += ".json";
             File target = new File(directory, name);
             if (target.exists()) {
-                new AlertDialog.Builder(this, LiquidTheme.alertDialogTheme(this))
+                Tr.attach(new AlertDialog.Builder(this, LiquidTheme.alertDialogTheme(this))
                         .setTitle("Replace " + name + "?")
                         .setPositiveButton("Replace", (dialog, which) -> finishWithFiles(Arrays.asList(target)))
-                        .setNegativeButton("Cancel", null).show();
+                        .setNegativeButton("Cancel", null).show());
             } else {
                 try {
                     if (!target.createNewFile()) throw new IOException("Could not create file");
                     finishWithFiles(Arrays.asList(target));
-                } catch (IOException e) { Toast.makeText(this, "Could not create a file here.", Toast.LENGTH_LONG).show(); }
+                } catch (IOException e) { Tr.toast(this, "Could not create a file here.", Toast.LENGTH_LONG).show(); }
             }
         }
     }
@@ -347,7 +347,7 @@ public final class TvFilePickerActivity extends Activity {
         picker.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         try { startActivityForResult(picker, EXTERNAL_PICK); }
-        catch (Exception e) { Toast.makeText(this, "No other file provider is available.", Toast.LENGTH_LONG).show(); }
+        catch (Exception e) { Tr.toast(this, "No other file provider is available.", Toast.LENGTH_LONG).show(); }
     }
 
     @Override protected void onActivityResult(int request, int result, Intent data) {

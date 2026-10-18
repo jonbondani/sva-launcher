@@ -196,10 +196,10 @@ public final class GameLibraryActivity extends Activity {
         final List<Uri> files = request == PICK_FILES ? GameRepository.urisFromResult(data) : null;
         final Uri tree = request == PICK_FOLDER ? data.getData() : null;
         if (files != null && files.isEmpty() || request == PICK_FOLDER && tree == null) return;
-        Toast.makeText(this, "Importing games…", Toast.LENGTH_SHORT).show();
+        Tr.toast(this, "Importing games…", Toast.LENGTH_SHORT).show();
         new Thread(() -> {
             GameRepository.ImportResult imported = files != null ? repository.importUris(files) : repository.importTree(tree);
-            runOnUiThread(() -> { Toast.makeText(this, imported.message(), Toast.LENGTH_LONG).show(); render(); });
+            runOnUiThread(() -> { Tr.toast(this, imported.message(), Toast.LENGTH_LONG).show(); render(); });
         }, "nes-import").start();
     }
 }

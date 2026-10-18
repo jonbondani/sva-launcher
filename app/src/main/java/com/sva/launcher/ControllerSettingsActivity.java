@@ -81,8 +81,8 @@ public final class ControllerSettingsActivity extends Activity {
         mapping.keys[step++] = event.getKeyCode();
         if (step < mapping.keys.length) updatePrompt();
         else {
-            try { mapping.save(this, mappingDevice); Toast.makeText(this, "Controller mapping saved.", Toast.LENGTH_SHORT).show(); }
-            catch (Exception e) { Toast.makeText(this, "Could not save mapping.", Toast.LENGTH_LONG).show(); }
+            try { mapping.save(this, mappingDevice); Tr.toast(this, "Controller mapping saved.", Toast.LENGTH_SHORT).show(); }
+            catch (Exception e) { Tr.toast(this, "Could not save mapping.", Toast.LENGTH_LONG).show(); }
             mappingDevice = null; renderList();
         }
         return true;
