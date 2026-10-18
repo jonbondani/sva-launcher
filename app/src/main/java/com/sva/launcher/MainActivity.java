@@ -3324,6 +3324,28 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             gameGrid.addView(card, params);
             if (gameGrid.getChildCount() <= columns) linkTopControl(TAB_GAMES, card);
         }
+        // Installed Android games (native ports) follow the NES library, then an "add" card.
+        List<String[]> androidGames = AndroidGames.games(this);
+        if (!androidGames.isEmpty()) gamesEmpty.setVisibility(View.GONE);
+        ArrayList<LinearLayout> extraCards = new ArrayList<>();
+        for (String[] app : androidGames) {
+            final String label = app[0], appPackage = app[1];
+            LinearLayout card = AndroidGames.card(this, label, appPackage, v -> AndroidGames.launch(this, appPackage));
+            card.setOnLongClickListener(v -> {
+                AndroidGames.confirmHide(this, label, appPackage, this::renderGames);
+                return true;
+            });
+            extraCards.add(card);
+        }
+        extraCards.add(AndroidGames.addCard(this, this::renderGames));
+        for (LinearLayout card : extraCards) {
+            GridLayout.LayoutParams params = new GridLayout.LayoutParams();
+            params.width = cardWidth;
+            params.height = dp(224);
+            params.setMargins(0, 0, dp(12), dp(12));
+            gameGrid.addView(card, params);
+            if (gameGrid.getChildCount() <= columns) linkTopControl(TAB_GAMES, card);
+        }
     }
 
     private static final class AppEntry {
