@@ -778,8 +778,11 @@ public final class MainActivity extends Activity {
         tabShell.removeView(navigation);
         tabShell.addView(navigation, new LinearLayout.LayoutParams(-1, dp(dockHeight)));
         FrameLayout heroContent = new FrameLayout(this);
+        // Leave exactly the height of the app row block (spacer + row + bottom padding) above
+        // the dock, so taller banner tiles are not hidden behind it.
+        int appBlockDp = 34 + APP_TILE_HEIGHT + 24 + 32 + 6;
         root.addView(heroContent, new LinearLayout.LayoutParams(-1,
-                dp(Math.max(180, heroHeightDp() - dockHeight - 128))));
+                dp(Math.max(180, heroHeightDp() - dockHeight - appBlockDp))));
         renderWeather();
 
         int topCardHeight = dp(compactNavigation ? 78 : 82);
@@ -922,15 +925,15 @@ public final class MainActivity extends Activity {
         header.setGravity(Gravity.CENTER_VERTICAL);
         header.setPadding(dp(14), dp(4), dp(10), dp(4));
         header.setBackgroundColor(Color.TRANSPARENT);
-        header.addView(timeCard, new LinearLayout.LayoutParams(0, -1, 28));
+        header.addView(timeCard, new LinearLayout.LayoutParams(0, -1, 22));
         View timeRule = new View(this);
         timeRule.setBackgroundColor(light ? LiquidTheme.border(this) : 0x55CDD0D4);
         header.addView(timeRule, new LinearLayout.LayoutParams(dp(1), dp(48)));
-        header.addView(weatherCard, new LinearLayout.LayoutParams(0, -1, 40));
+        header.addView(weatherCard, new LinearLayout.LayoutParams(0, -1, 38));
         View eventRule = new View(this);
         eventRule.setBackgroundColor(light ? LiquidTheme.border(this) : 0x55CDD0D4);
         header.addView(eventRule, new LinearLayout.LayoutParams(dp(1), dp(48)));
-        header.addView(homeCalendarCard, new LinearLayout.LayoutParams(0, -1, 32));
+        header.addView(homeCalendarCard, new LinearLayout.LayoutParams(0, -1, 40));
         FrameLayout topBar = new FrameLayout(this);
         topBar.setPadding(dp(20), dp(16), dp(20), 0);
         topBar.addView(header, new FrameLayout.LayoutParams(-1, topCardHeight));
@@ -3211,39 +3214,50 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         } catch (Exception ignored) { return "youtube-" + Integer.toHexString(url.hashCode()); }
     }
 
+    /**
+     * Icon-only shortcuts in the dock that open into a labelled pill when focused (like the
+     * text tabs), so it is clear what each one does without growing past the dock.
+     */
     private void addTopIcon(LinearLayout container, String title, int iconResource, Runnable action) {
-        ImageView icon = new ImageView(this);
-        icon.setImageResource(iconResource);
-        icon.setColorFilter(LiquidTheme.isLight(this) ? 0xFF24403D : 0xD4FFFFFF);
-        icon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        icon.setPadding(dp(compactNavigation ? 8 : 10), dp(compactNavigation ? 8 : 10),
-                dp(compactNavigation ? 8 : 10), dp(compactNavigation ? 8 : 10));
-        icon.setContentDescription(title);
-        icon.setTooltipText(title);
         boolean light = LiquidTheme.isLight(this);
-        // A solid accent disc with a white glyph: the translucent fill plus elevation shadow
-        // used before rendered as a dark blob that hid the icon on light themes.
-        int focusFill = LiquidTheme.accent(this);
         int idleTint = light ? 0xFF24403D : 0xD4FFFFFF;
         int focusTint = light ? Color.WHITE : 0xFF071417;
+        String shownTitle = Tr.s(this, title);
+        LinearLayout pill = new LinearLayout(this);
+        pill.setOrientation(LinearLayout.HORIZONTAL);
+        pill.setGravity(Gravity.CENTER_VERTICAL);
+        int side = dp(compactNavigation ? 7 : 9);
+        pill.setPadding(side, 0, side, 0);
+        pill.setContentDescription(shownTitle);
+        pill.setFocusable(true);
+        pill.setClickable(true);
         StateListDrawable states = new StateListDrawable();
-        states.addState(new int[]{android.R.attr.state_focused}, roundedShape(focusFill, focusFill, 1, 22));
-        states.addState(new int[]{android.R.attr.state_pressed}, roundedShape(focusFill, focusFill, 1, 22));
+        int accent = LiquidTheme.accent(this);
+        states.addState(new int[]{android.R.attr.state_focused}, roundedShape(accent, accent, 1, 22));
+        states.addState(new int[]{android.R.attr.state_pressed}, roundedShape(accent, accent, 1, 22));
         states.addState(new int[]{}, new android.graphics.drawable.ColorDrawable(Color.TRANSPARENT));
-        icon.setBackground(states);
-        icon.setFocusable(true);
-        icon.setClickable(true);
-        icon.setOnFocusChangeListener((view, focused) -> {
+        pill.setBackground(states);
+        ImageView icon = new ImageView(this);
+        icon.setImageResource(iconResource);
+        icon.setColorFilter(idleTint);
+        icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        icon.setFocusable(false);
+        int glyph = dp(compactNavigation ? 20 : 22);
+        pill.addView(icon, new LinearLayout.LayoutParams(glyph, glyph));
+        TextView name = label(shownTitle, 14, focusTint, false);
+        name.setSingleLine(true);
+        name.setVisibility(View.GONE);
+        LinearLayout.LayoutParams nameParams = new LinearLayout.LayoutParams(-2, -2);
+        nameParams.leftMargin = dp(7);
+        pill.addView(name, nameParams);
+        pill.setOnFocusChangeListener((view, focused) -> {
             icon.setColorFilter(focused ? focusTint : idleTint);
-            view.animate().cancel();
-            view.animate().scaleX(focused ? 1.18f : 1f).scaleY(focused ? 1.18f : 1f)
-                    .setDuration(android.animation.ValueAnimator.areAnimatorsEnabled() ? 150 : 0).start();
+            name.setVisibility(focused ? View.VISIBLE : View.GONE);
         });
-        icon.setOnClickListener(v -> action.run());
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                dp(compactNavigation ? 34 : 40), dp(compactNavigation ? 34 : 40));
+        pill.setOnClickListener(v -> action.run());
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-2, dp(compactNavigation ? 36 : 42));
         lp.setMargins(dp(2), 0, dp(2), 0);
-        container.addView(icon, lp);
+        container.addView(pill, lp);
     }
 
     private void openNetworkSettings() {
