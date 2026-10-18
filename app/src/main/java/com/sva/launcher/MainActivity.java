@@ -634,6 +634,14 @@ public final class MainActivity extends Activity {
         LinearLayout tabShell = new LinearLayout(this);
         tabShell.setOrientation(LinearLayout.VERTICAL);
         scene.addView(tabShell, new FrameLayout.LayoutParams(-1, -1));
+        // Explanation panel for the focused dock shortcut, drawn above the page, never focusable.
+        shortcutPreview = new FrameLayout(this);
+        shortcutPreview.setVisibility(View.GONE);
+        shortcutPreview.setFocusable(false);
+        shortcutPreview.setClickable(false);
+        FrameLayout.LayoutParams previewParams = new FrameLayout.LayoutParams(-1, -1);
+        previewParams.bottomMargin = dp(120);
+        scene.addView(shortcutPreview, previewParams);
         LinearLayout navigation = new LinearLayout(this);
         navigation.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
         int screenWidthDp = Math.round(getResources().getDisplayMetrics().widthPixels
@@ -3375,49 +3383,130 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
     }
 
     /**
-     * Icon-only shortcuts in the dock that open into a labelled pill when focused (like the
-     * text tabs), so it is clear what each one does without growing past the dock.
+     * Icon-only shortcuts in the dock. They keep their size when focused (a growing pill pushed
+     * the last one off the dock); instead the active tab is dimmed and a panel over the page
+     * explains what the focused shortcut is and does.
      */
     private void addTopIcon(LinearLayout container, String title, int iconResource, Runnable action) {
         boolean light = LiquidTheme.isLight(this);
         int idleTint = light ? 0xFF24403D : 0xD4FFFFFF;
         int focusTint = light ? Color.WHITE : 0xFF071417;
-        String shownTitle = Tr.s(this, title);
-        LinearLayout pill = new LinearLayout(this);
-        pill.setOrientation(LinearLayout.HORIZONTAL);
-        pill.setGravity(Gravity.CENTER_VERTICAL);
-        int side = dp(compactNavigation ? 7 : 9);
-        pill.setPadding(side, 0, side, 0);
-        pill.setContentDescription(shownTitle);
-        pill.setFocusable(true);
-        pill.setClickable(true);
+        ImageView icon = new ImageView(this);
+        icon.setImageResource(iconResource);
+        icon.setColorFilter(idleTint);
+        icon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        int pad = dp(compactNavigation ? 8 : 10);
+        icon.setPadding(pad, pad, pad, pad);
+        icon.setContentDescription(Tr.s(this, title));
         StateListDrawable states = new StateListDrawable();
         int accent = LiquidTheme.accent(this);
         states.addState(new int[]{android.R.attr.state_focused}, roundedShape(accent, accent, 1, 22));
         states.addState(new int[]{android.R.attr.state_pressed}, roundedShape(accent, accent, 1, 22));
         states.addState(new int[]{}, new android.graphics.drawable.ColorDrawable(Color.TRANSPARENT));
-        pill.setBackground(states);
-        ImageView icon = new ImageView(this);
-        icon.setImageResource(iconResource);
-        icon.setColorFilter(idleTint);
-        icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        icon.setFocusable(false);
-        int glyph = dp(compactNavigation ? 20 : 22);
-        pill.addView(icon, new LinearLayout.LayoutParams(glyph, glyph));
-        TextView name = label(shownTitle, 14, focusTint, false);
-        name.setSingleLine(true);
-        name.setVisibility(View.GONE);
-        LinearLayout.LayoutParams nameParams = new LinearLayout.LayoutParams(-2, -2);
-        nameParams.leftMargin = dp(7);
-        pill.addView(name, nameParams);
-        pill.setOnFocusChangeListener((view, focused) -> {
+        icon.setBackground(states);
+        icon.setFocusable(true);
+        icon.setClickable(true);
+        icon.setOnFocusChangeListener((view, focused) -> {
             icon.setColorFilter(focused ? focusTint : idleTint);
-            name.setVisibility(focused ? View.VISIBLE : View.GONE);
+            if (focused) showShortcutPreview(title, iconResource);
+            else handler.post(() -> {
+                if (systemShortcuts == null || systemShortcuts.findFocus() == null) hideShortcutPreview();
+            });
         });
-        pill.setOnClickListener(v -> action.run());
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-2, dp(compactNavigation ? 36 : 42));
+        icon.setOnClickListener(v -> action.run());
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                dp(compactNavigation ? 36 : 42), dp(compactNavigation ? 36 : 42));
         lp.setMargins(dp(2), 0, dp(2), 0);
-        container.addView(pill, lp);
+        container.addView(icon, lp);
+    }
+
+    private FrameLayout shortcutPreview;
+
+    /** Title, description and background colours for each dock shortcut. */
+    private static String[] shortcutInfo(String title) {
+        switch (title) {
+            case "Partidos": return new String[]{"Partidos",
+                    "Resultados en directo, horarios y calendario de tus equipos. Pulsa un partido para abrir la app donde se ve.",
+                    "FF0B6B37", "FF22A55B"};
+            case "Network": return new String[]{"Red",
+                    "Wi‑Fi y conexión del Fire TV: cambia de red o comprueba la señal.", "FF1E40AF", "FF0EA5E9"};
+            case "Reiniciar": return new String[]{"Reiniciar",
+                    "Reinicia el dispositivo cuando algo va lento o se queda colgado.", "FF9F1239", "FFF97316"};
+            case "Android Settings": return new String[]{"Ajustes de Fire TV",
+                    "Ajustes del sistema: pantalla, sonido, mandos, apps instaladas y cuenta.", "FF1F2937", "FF64748B"};
+            case "Launcher Settings": return new String[]{"Ajustes de Sva",
+                    "Personaliza el inicio: apps, tiempo, idioma, canales, partidos y actualizaciones.", "FF5B21B6", "FFDB2777"};
+            default: return new String[]{title, "", "FF1F2937", "FF475569"};
+        }
+    }
+
+    private void showShortcutPreview(String title, int iconResource) {
+        if (shortcutPreview == null) return;
+        String[] info = shortcutInfo(title);
+        shortcutPreview.removeAllViews();
+        LinearLayout card = new LinearLayout(this);
+        card.setGravity(Gravity.CENTER_VERTICAL);
+        card.setPadding(dp(28), dp(22), dp(32), dp(22));
+        GradientDrawable background = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
+                new int[]{(int) Long.parseLong(info[2], 16), (int) Long.parseLong(info[3], 16)});
+        background.setCornerRadius(dp(26));
+        card.setBackground(background);
+        card.setElevation(dp(10));
+        ImageView glyph = new ImageView(this);
+        glyph.setImageResource(iconResource);
+        glyph.setColorFilter(Color.WHITE);
+        GradientDrawable halo = new GradientDrawable();
+        halo.setShape(GradientDrawable.OVAL);
+        halo.setColor(0x33FFFFFF);
+        glyph.setBackground(halo);
+        glyph.setPadding(dp(16), dp(16), dp(16), dp(16));
+        card.addView(glyph, new LinearLayout.LayoutParams(dp(84), dp(84)));
+        LinearLayout copy = new LinearLayout(this);
+        copy.setOrientation(LinearLayout.VERTICAL);
+        copy.setPadding(dp(22), 0, 0, 0);
+        TextView heading = new TextView(this);
+        heading.setText(info[0]);
+        heading.setTextColor(Color.WHITE);
+        heading.setTextSize(28);
+        heading.setTypeface(Typeface.create(LiquidTheme.font(this), Typeface.BOLD));
+        copy.addView(heading);
+        TextView body = new TextView(this);
+        body.setText(info[1]);
+        body.setTextColor(0xE6FFFFFF);
+        body.setTextSize(17);
+        body.setTypeface(LiquidTheme.font(this));
+        body.setLineSpacing(dp(3), 1f);
+        body.setPadding(0, dp(6), 0, 0);
+        copy.addView(body);
+        TextView hint = new TextView(this);
+        hint.setText("Pulsa OK para abrir");
+        hint.setTextColor(0xB3FFFFFF);
+        hint.setTextSize(13);
+        hint.setPadding(0, dp(10), 0, 0);
+        copy.addView(hint);
+        card.addView(copy, new LinearLayout.LayoutParams(dp(460), -2));
+        shortcutPreview.addView(card, new FrameLayout.LayoutParams(-2, -2, Gravity.CENTER));
+        shortcutPreview.setVisibility(View.VISIBLE);
+        shortcutPreview.setAlpha(0f);
+        shortcutPreview.animate().alpha(1f).setDuration(160).start();
+        dimActiveTab(true);
+    }
+
+    private void hideShortcutPreview() {
+        if (shortcutPreview != null) shortcutPreview.setVisibility(View.GONE);
+        dimActiveTab(false);
+    }
+
+    /** While a dock shortcut has focus, the current tab stops looking selected. */
+    private void dimActiveTab(boolean dim) {
+        Button active = tabButtons[activeTab];
+        if (active == null || active.getBackground() == null) return;
+        boolean light = LiquidTheme.isLight(this);
+        active.getBackground().mutate().setAlpha(dim ? 0 : 255);
+        int color = dim ? (light ? 0xFF24403D : 0xD4FFFFFF) : (light ? Color.WHITE : 0xFF071417);
+        active.setTextColor(color);
+        if (navigationGlyphs[activeTab] != null) navigationGlyphs[activeTab].setGlyphColor(color);
+        active.invalidate();
     }
 
     /**
