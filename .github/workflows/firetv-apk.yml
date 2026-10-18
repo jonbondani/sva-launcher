@@ -34,9 +34,11 @@ jobs:
           FIRETV_DEBUG_KEYSTORE_BASE64: ${{ secrets.FIRETV_DEBUG_KEYSTORE_BASE64 }}
         run: |
           if [ -n "$FIRETV_DEBUG_KEYSTORE_BASE64" ]; then
-            mkdir -p ~/.android
-            printf '%s' "$FIRETV_DEBUG_KEYSTORE_BASE64" | base64 -d > ~/.android/debug.keystore
-            echo "Stable debug key installed."
+            key="$RUNNER_TEMP/firetv-debug.keystore"
+            printf '%s' "$FIRETV_DEBUG_KEYSTORE_BASE64" | tr -d ' \r\n' | base64 -d > "$key"
+            echo "FIRETV_DEBUG_KEYSTORE=$key" >> "$GITHUB_ENV"
+            echo "Stable debug key installed ($(wc -c < "$key") bytes)."
+            keytool -list -keystore "$key" -storepass android | grep -i fingerprint || true
           else
             echo "::notice::No FIRETV_DEBUG_KEYSTORE_BASE64 secret; using a one-off debug key."
           fi

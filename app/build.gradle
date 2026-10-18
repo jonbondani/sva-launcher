@@ -47,6 +47,19 @@ android {
             path "src/main/jni/Android.mk"
         }
     }
+    // Fire TV builds: sign debug APKs with a stable key so in-app updates install over the
+    // previous version. The workflow writes the key and points FIRETV_DEBUG_KEYSTORE at it.
+    def firetvKeystore = System.getenv("FIRETV_DEBUG_KEYSTORE")?.trim()
+    if (firetvKeystore && file(firetvKeystore).exists()) {
+        signingConfigs {
+            debug {
+                storeFile file(firetvKeystore)
+                storePassword "android"
+                keyAlias "androiddebugkey"
+                keyPassword "android"
+            }
+        }
+    }
     // A source checkout builds unsigned releases without access to a maintainer's key.
     def signingEnvironment = ["SVA_KEYSTORE_PATH", "SVA_STORE_PASSWORD", "SVA_KEY_ALIAS", "SVA_KEY_PASSWORD"]
     def hasReleaseSigning = signingEnvironment.every { System.getenv(it)?.trim() }
