@@ -150,6 +150,8 @@ public final class MainActivity extends Activity {
     private SharedPreferences preferences;
     private LinearLayout root, homeContent, liveContent, gamesContent, eventsContent, savedContent;
     private LinearLayout appRow, youtubeRow, youtubeSection;
+    /** Packages whose Home tile shows a TV banner (the rest show their icon). */
+    private final Set<String> appBanners = new HashSet<>();
     private GridLayout gameGrid, calendarMonthGrid;
     private TextView calendarHeaderDate, calendarHeaderEvents;
     private Button previousMonthButton, nextMonthButton;
@@ -959,7 +961,7 @@ public final class MainActivity extends Activity {
         appRow.setClipChildren(false);
         appRow.setClipToPadding(false);
         appScroll.addView(appRow);
-        homeContent.addView(appScroll, new LinearLayout.LayoutParams(-1, dp(88)));
+        homeContent.addView(appScroll, new LinearLayout.LayoutParams(-1, dp(APP_TILE_HEIGHT + 24)));
 
         LinearLayout gamesHeading = new LinearLayout(this);
         gamesHeading.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
@@ -2737,14 +2739,22 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             Set<String> selectedSet = new HashSet<>(selected);
             PackageManager packageManager = getPackageManager();
             ArrayList<AppEntry> withIcons = new ArrayList<>(loaded.size());
+            HashSet<String> banners = new HashSet<>();
             for (AppEntry entry : loaded) {
                 Drawable icon = null;
                 if (selectedSet.contains(entry.packageName)) {
-                    try { icon = packageManager.getApplicationIcon(entry.info); } catch (Exception ignored) { }
+                    // TV apps ship a 16:9 banner; fall back to the launcher icon.
+                    try { icon = packageManager.getApplicationBanner(entry.info); } catch (Exception ignored) { }
+                    if (icon != null) banners.add(entry.packageName);
+                    else try { icon = packageManager.getApplicationIcon(entry.info); } catch (Exception ignored) { }
                 }
                 withIcons.add(new AppEntry(entry.info, entry.packageName, entry.label, icon));
             }
-            handler.post(() -> showApps(withIcons));
+            handler.post(() -> {
+                appBanners.clear();
+                appBanners.addAll(banners);
+                showApps(withIcons);
+            });
         });
     }
 
@@ -2756,10 +2766,10 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         if (previous != null && previous.getTag() instanceof String) focusedPackage = (String) previous.getTag();
         appRow.removeAllViews();
         boolean light = LiquidTheme.isLight(this);
-        int tileWidth = compactNavigation ? 148 : 167;
         List<String> selected = selectedPackages(all);
         if (selected.isEmpty() && !preferences.getBoolean("customApps", false)) {
-            for (AppEntry entry : all) selected.add(entry.packageName);
+            selected.addAll(defaultApps(all));
+            if (selected.isEmpty()) for (AppEntry entry : all) selected.add(entry.packageName);
         }
         int displayed = 0;
         for (String packageName : selected) {
@@ -2796,28 +2806,36 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             tile.setFocusableInTouchMode(false);
             tile.setElevation(dp(2));
             tile.setOnFocusChangeListener(LiquidTheme::animateFocus);
-            tile.setPadding(dp(10), dp(4), dp(8), dp(4));
             tile.setTag(packageName);
+            tile.setContentDescription(entry.label);
+            // Image-only tiles: the app's TV banner fills the card; otherwise its icon, centred.
             ImageView icon = new ImageView(this);
             icon.setImageDrawable(entry.icon);
-            icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            tile.addView(icon, new LinearLayout.LayoutParams(dp(36), dp(36)));
-            int nameColor;
-            if (isBranded) {
-                nameColor = whiteCard ? 0xFF101820 : Color.WHITE;
+            boolean banner = appBanners.contains(entry.packageName) && entry.icon != null;
+            if (banner) {
+                tile.setPadding(dp(3), dp(3), dp(3), dp(3));
+                icon.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                icon.setClipToOutline(true);
+                icon.setOutlineProvider(new android.view.ViewOutlineProvider() {
+                    @Override public void getOutline(View view, android.graphics.Outline outline) {
+                        outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), dp(13));
+                    }
+                });
+                tile.addView(icon, new LinearLayout.LayoutParams(-1, -1));
+            } else if (entry.icon != null) {
+                tile.setPadding(dp(8), dp(8), dp(8), dp(8));
+                icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                tile.addView(icon, new LinearLayout.LayoutParams(dp(56), dp(56)));
             } else {
-                nameColor = light ? LiquidTheme.text(this) : Color.WHITE;
+                // No artwork at all: keep the name so the tile is still identifiable.
+                TextView name = label(entry.label, 13, isBranded && !whiteCard ? Color.WHITE
+                        : (light ? LiquidTheme.text(this) : Color.WHITE), true);
+                name.setGravity(Gravity.CENTER);
+                name.setMaxLines(2);
+                tile.addView(name, new LinearLayout.LayoutParams(-1, -1));
             }
-            TextView name = label(entry.label, compactNavigation ? 12 : 13, nameColor, true);
-            name.setTextColor(nameColor);
-            name.setGravity(Gravity.CENTER_VERTICAL);
-            name.setMaxLines(1);
-            name.setEllipsize(android.text.TextUtils.TruncateAt.END);
-            LinearLayout.LayoutParams appNameParams = new LinearLayout.LayoutParams(0, -1, 1);
-            appNameParams.leftMargin = dp(8);
-            tile.addView(name, appNameParams);
             tile.setOnClickListener(v -> launchApp(entry.packageName));
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(tileWidth), dp(64));
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(APP_TILE_WIDTH), dp(APP_TILE_HEIGHT));
             lp.setMargins(0, 0, dp(8), 0);
             appRow.addView(tile, lp);
             if (displayed == 0) tabEntryFocus[TAB_HOME] = tile;
@@ -3203,16 +3221,24 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         icon.setContentDescription(title);
         icon.setTooltipText(title);
         boolean light = LiquidTheme.isLight(this);
-        int focusFill = light ? 0x22087D91 : 0x24FFFFFF;
-        int focusStroke = light ? LiquidTheme.accent(this) : 0x4DFFFFFF;
+        // A solid accent disc with a white glyph: the translucent fill plus elevation shadow
+        // used before rendered as a dark blob that hid the icon on light themes.
+        int focusFill = LiquidTheme.accent(this);
+        int idleTint = light ? 0xFF24403D : 0xD4FFFFFF;
+        int focusTint = light ? Color.WHITE : 0xFF071417;
         StateListDrawable states = new StateListDrawable();
-        states.addState(new int[]{android.R.attr.state_focused}, roundedShape(focusFill, focusStroke, 1, 22));
-        states.addState(new int[]{android.R.attr.state_pressed}, roundedShape(focusFill, focusStroke, 1, 22));
+        states.addState(new int[]{android.R.attr.state_focused}, roundedShape(focusFill, focusFill, 1, 22));
+        states.addState(new int[]{android.R.attr.state_pressed}, roundedShape(focusFill, focusFill, 1, 22));
         states.addState(new int[]{}, new android.graphics.drawable.ColorDrawable(Color.TRANSPARENT));
         icon.setBackground(states);
         icon.setFocusable(true);
         icon.setClickable(true);
-        icon.setOnFocusChangeListener(LiquidTheme::animateFocus);
+        icon.setOnFocusChangeListener((view, focused) -> {
+            icon.setColorFilter(focused ? focusTint : idleTint);
+            view.animate().cancel();
+            view.animate().scaleX(focused ? 1.18f : 1f).scaleY(focused ? 1.18f : 1f)
+                    .setDuration(android.animation.ValueAnimator.areAnimatorsEnabled() ? 150 : 0).start();
+        });
         icon.setOnClickListener(v -> action.run());
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 dp(compactNavigation ? 34 : 40), dp(compactNavigation ? 34 : 40));
@@ -3386,6 +3412,9 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
      * Until the viewer picks apps, Home starts with these streaming services, in this order, when
      * installed. Matched by label so it works with the Fire TV, Android TV and phone builds alike.
      */
+    /** 16:9 tiles so TV banners fit without cropping. */
+    private static final int APP_TILE_WIDTH = 160, APP_TILE_HEIGHT = 90;
+
     private static final String[] DEFAULT_APP_LABELS = {"movistar", "disney", "dazn", "prime video"};
 
     private List<String> defaultApps(List<AppEntry> available) {
@@ -4058,15 +4087,15 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
     }
 
     private final class SettingsScreen {
-        private static final int LIVE = 0, CHANNELS = 1, APPS = 2, APPEARANCE = 3, CLOCK = 4, DRM = 5, HOME = 6, BACKUP = 7, YOUTUBE = 8, CALENDAR = 9, SCHEDULES = 10, GAMES = 11, WEATHER = 12, NAVIGATION = 13;
-        private final String[] sections = {"Live TV", "Channels", "Apps", "Appearance", "Clock", "Playback & DRM", "Home button", "Backup & restore", "YouTube", "Calendar", "Schedules", "Games", "Weather", "Navigation"};
+        private static final int LIVE = 0, CHANNELS = 1, APPS = 2, APPEARANCE = 3, CLOCK = 4, DRM = 5, HOME = 6, BACKUP = 7, YOUTUBE = 8, CALENDAR = 9, SCHEDULES = 10, GAMES = 11, WEATHER = 12, NAVIGATION = 13, ABOUT = 14;
+        private final String[] sections = {"Live TV", "Channels", "Apps", "Appearance", "Clock", "Playback & DRM", "Home button", "Backup & restore", "YouTube", "Calendar", "Schedules", "Games", "Weather", "Navigation", "Version & updates"};
         private final int[] NAV_ORDER = {
             // Group 0: Content (5 items)
             LIVE, CHANNELS, YOUTUBE, CALENDAR, GAMES,
             // Group 1: Home & Display (5 items)
             APPS, APPEARANCE, CLOCK, WEATHER, NAVIGATION,
             // Group 2: System & Advanced (4 items)
-            SCHEDULES, HOME, DRM, BACKUP
+            SCHEDULES, HOME, DRM, BACKUP, ABOUT
         };
         private final String[] GROUP_LABELS = {"Content", "Home & Display", "System"};
         private final String[] descriptions = {
@@ -4077,7 +4106,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                 "Save or restore launcher settings and channels", "Save videos and playlists in Saved",
                 "Show events from a public Google Calendar", "Choose when content updates automatically",
                 "Import and manage your local NES library", "Current conditions and a three-day forecast",
-                "Choose which categories appear and their order"
+                "Choose which categories appear and their order",
+                "Installed version and in-app updates"
         };
         private final boolean compactSettings = getResources().getDisplayMetrics().widthPixels
                 / getResources().getDisplayMetrics().density < 1100;
@@ -4492,6 +4522,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                 case GAMES: renderGameSettings(page); break;
                 case WEATHER: renderWeatherSettings(page); break;
                 case NAVIGATION: renderNavigationSettings(page); break;
+                case ABOUT: renderAbout(page); break;
                 default: break;
             }
             if (firstControl != null) {
@@ -4673,6 +4704,67 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                     catch (Exception ignored) { Tr.toast(MainActivity.this, "Could not open Home settings.", Toast.LENGTH_LONG).show(); }
                 }
             });
+        }
+
+        private TextView updateStatus;
+        private Updater.Release availableUpdate;
+        private boolean updateBusy;
+
+        /** Version and self-update (Fire TV build published on GitHub). */
+        private void renderAbout(LinearLayout page) {
+            LinearLayout form = scrollForm(page);
+            addFormSectionHeader(form, "Installed version");
+            addFormHint(form, "Sva " + Updater.installedName(MainActivity.this)
+                    + "  ·  build " + Updater.installedCode(MainActivity.this));
+            addFormSectionHeader(form, "Updates");
+            updateStatus = label(availableUpdate == null ? "Pulsa «Buscar actualización» para comprobar si hay una versión nueva."
+                    : "Disponible: " + availableUpdate.versionName, 15, SettingsUi.text(MainActivity.this), false);
+            updateStatus.setPadding(dp(2), dp(6), dp(2), dp(10));
+            form.addView(updateStatus);
+            Button check = addFormButton(form, availableUpdate == null ? "Buscar actualización"
+                    : "Descargar e instalar " + availableUpdate.versionName, null);
+            check.setOnClickListener(v -> {
+                if (updateBusy) return;
+                updateBusy = true;
+                check.setEnabled(false);
+                final Updater.Release pending = availableUpdate;
+                setUpdateStatus(pending == null ? "Buscando…" : "Descargando…");
+                ioWorker.execute(() -> {
+                    String result;
+                    Updater.Release found = pending;
+                    try {
+                        if (pending == null) {
+                            found = Updater.latest();
+                            result = found.versionCode > Updater.installedCode(MainActivity.this)
+                                    ? "Hay una versión nueva: " + found.versionName + ". Pulsa de nuevo para instalarla."
+                                    : "Ya tienes la última versión.";
+                            if (found.versionCode <= Updater.installedCode(MainActivity.this)) found = null;
+                        } else {
+                            Updater.install(MainActivity.this, message -> handler.post(() -> setUpdateStatus(message)));
+                            result = "Confirma la instalación en la pantalla que aparece.";
+                        }
+                    } catch (Exception error) {
+                        result = "No se pudo completar: " + (error.getMessage() == null ? "error de red" : error.getMessage());
+                    }
+                    final String shown = result;
+                    final Updater.Release next = pending == null ? found : pending;
+                    handler.post(() -> {
+                        updateBusy = false;
+                        availableUpdate = next;
+                        if (settingsScreen != this || section != ABOUT) return;
+                        check.setEnabled(true);
+                        check.setText(availableUpdate == null ? "Buscar actualización"
+                                : "Descargar e instalar " + availableUpdate.versionName);
+                        setUpdateStatus(shown);
+                    });
+                });
+            });
+            addFormHint(form, "La primera vez, Fire TV pedirá permitir que Sva instale apps (Opciones para desarrolladores › "
+                    + "Instalar apps desconocidas › Sva). Tus ajustes se conservan al actualizar.");
+        }
+
+        private void setUpdateStatus(String message) {
+            if (updateStatus != null) updateStatus.setText(message);
         }
 
         private void renderBackup(LinearLayout page) {

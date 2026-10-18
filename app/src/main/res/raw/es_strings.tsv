@@ -111,7 +111,7 @@ Backup file is larger than 64 MB.	El archivo de copia de seguridad supera los 64
 Could not restore that backup.	No se pudo restaurar esa copia de seguridad.
 Restore failed: 	Error al restaurar: 
 Backup restored.	Copia de seguridad restaurada.
-Weather unavailable	Tiempo no disponible
+Weather unavailable	Sin datos
 Add weather	Añadir el tiempo
 Local conditions	Condiciones locales
 Network	Red
@@ -143,9 +143,9 @@ All day	Todo el día
 Playing on your TV	Reproduciendo en tu TV
 Resume playback	Reanudar reproducción
 Open Android Settings and allow Sva Now Playing notification access.	Abre los Ajustes de Android y permite el acceso a notificaciones de Sva Now Playing.
-Weather not set	Tiempo sin configurar
-Refresh in Settings	Actualizar en Ajustes
-Configure in Settings	Configurar en Ajustes
+Weather not set	Sin ubicación
+Refresh in Settings	Actualiza en Ajustes
+Configure in Settings	Ve a Ajustes
 Feels like 	Sensación de 
 . Wind 	. Viento 
 Forecast unavailable	Previsión no disponible
@@ -539,3 +539,8 @@ Weather service returned 	El servicio del tiempo devolvió
 Weather response was too large.	La respuesta del servicio del tiempo era demasiado grande.
 YouTube video	Vídeo de YouTube
 YouTube playlist	Lista de YouTube
+TODAY	HOY
+Version & updates	Versión y actualizaciones
+Installed version and in-app updates	Versión instalada y actualizaciones
+Installed version	Versión instalada
+Updates	Versiones nuevas

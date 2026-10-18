@@ -11,6 +11,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
@@ -36,7 +38,18 @@ public final class MatchesActivity extends Activity {
     private static final int MATCHES = 0, TEAMS = 1, APPS = 2;
     private static final Locale SPANISH = new Locale("es", "ES");
 
+    private static final String[] TAB_LABELS = {"Próximos partidos", "Mis equipos", "Dónde verlos"};
+    private static final String[] TAB_HINTS = {
+            "Pulsa un partido para abrir la app donde lo ves. Mantén pulsado para cambiar esa app.",
+            "Los equipos que sigues. Pulsa uno para cambiar su calendario o quitarlo.",
+            "Qué app se abre para cada competición. La primera vez que abras un partido te lo pregunta; aquí puedes cambiarlo.",
+    };
+
     private LinearLayout content;
+    private TextView screenHint;
+    private final Button[] tabButtons = new Button[3];
+    private Button refreshButton;
+    private ProgressBar spinner;
     private int screen = MATCHES;
     private boolean refreshing;
 
@@ -46,17 +59,23 @@ public final class MatchesActivity extends Activity {
         super.onCreate(state);
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-        LinearLayout page = SettingsUi.page(this, "Partidos",
-                "Tus equipos en un solo sitio. Pulsa un partido para abrir la app donde lo ves; mantén pulsado para cambiarla.",
-                this::handleBack);
+        LinearLayout page = SettingsUi.page(this, "Partidos", "Tus equipos en un solo sitio.", this::handleBack);
         BackNavigation.install(this, this::handleBack);
         LinearLayout tabs = new LinearLayout(this);
         tabs.setGravity(Gravity.CENTER_VERTICAL);
-        addTab(tabs, "Próximos", () -> show(MATCHES));
-        addTab(tabs, "Equipos", () -> show(TEAMS));
-        addTab(tabs, "Apps", () -> show(APPS));
-        addTab(tabs, "Actualizar", () -> refresh(true));
+        for (int i = 0; i < TAB_LABELS.length; i++) {
+            final int target = i;
+            tabButtons[i] = addTab(tabs, TAB_LABELS[i], 1f, () -> show(target));
+        }
+        refreshButton = addTab(tabs, "Actualizar", 0.8f, () -> refresh(true));
+        spinner = new ProgressBar(this, null, android.R.attr.progressBarStyleSmall);
+        spinner.setIndeterminate(true);
+        spinner.setVisibility(View.GONE);
+        tabs.addView(spinner, new LinearLayout.LayoutParams(SettingsUi.dp(this, 32), SettingsUi.dp(this, 32)));
         page.addView(tabs, new LinearLayout.LayoutParams(-1, -2));
+        screenHint = SettingsUi.text(this, "", 15, true);
+        screenHint.setPadding(SettingsUi.dp(this, 2), SettingsUi.dp(this, 4), 0, SettingsUi.dp(this, 10));
+        page.addView(screenHint);
         content = SettingsUi.scroll(page);
         setContentView(page);
         handleIntent(getIntent());
@@ -80,13 +99,14 @@ public final class MatchesActivity extends Activity {
         finish();
     }
 
-    private void addTab(LinearLayout tabs, String label, Runnable click) {
+    private Button addTab(LinearLayout tabs, String label, float weight, Runnable click) {
         Button button = SettingsUi.action(this, label, click);
         button.setGravity(Gravity.CENTER);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, SettingsUi.dp(this, 56), 1);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, SettingsUi.dp(this, 56), weight);
         params.rightMargin = SettingsUi.dp(this, 8);
         params.bottomMargin = SettingsUi.dp(this, 10);
         tabs.addView(button, params);
+        return button;
     }
 
     private void handleIntent(Intent intent) {
@@ -118,6 +138,12 @@ public final class MatchesActivity extends Activity {
     private void show(int next) { screen = next; render(); }
 
     private void render() {
+        // The current tab stays highlighted so it is clear which list is on screen.
+        for (int i = 0; i < tabButtons.length; i++) {
+            tabButtons[i].setBackground(SettingsUi.states(this, i == screen));
+            tabButtons[i].setTypeface(LiquidTheme.font(this), i == screen ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+        }
+        screenHint.setText(TAB_HINTS[screen]);
         content.removeAllViews();
         switch (screen) {
             case TEAMS: renderTeams(); break;
@@ -135,12 +161,12 @@ public final class MatchesActivity extends Activity {
         boolean anyFeed = false;
         for (MatchRepository.Team team : MatchRepository.teams(this)) anyFeed |= team.configured();
         if (!anyFeed) {
-            SettingsUi.hint(content, "Todavía no hay calendarios. Entra en «Equipos» y añade el enlace iCal de cada equipo.");
-            SettingsUi.add(content, SettingsUi.action(this, "Configurar equipos", () -> show(TEAMS)));
+            SettingsUi.hint(content, "Todavía no sigues ningún equipo.");
+            SettingsUi.add(content, SettingsUi.action(this, "Añadir un equipo", this::addTeam));
             return;
         }
         if (refreshing && matches.isEmpty()) {
-            SettingsUi.hint(content, "Buscando partidos…");
+            SettingsUi.hint(content, "Buscando partidos de tus equipos…");
             return;
         }
         String errors = MatchRepository.lastErrors(this);
@@ -159,7 +185,8 @@ public final class MatchesActivity extends Activity {
             SettingsUi.add(content, matchRow(match, now));
         }
         long refreshed = MatchRepository.refreshedAt(this);
-        if (refreshed > 0) SettingsUi.hint(content, "Actualizado " + timeLabel(refreshed) + ".");
+        if (refreshed > 0) SettingsUi.hint(content, "Última actualización: " + dayLabel(refreshed, now).toLowerCase(SPANISH)
+                + " a las " + timeLabel(refreshed) + ".");
     }
 
     private View matchRow(MatchRepository.Match match, long now) {
@@ -201,11 +228,9 @@ public final class MatchesActivity extends Activity {
     // ------------------------------------------------------------------ teams
 
     private void renderTeams() {
-        SettingsUi.hint(content, "Cada equipo usa un calendario público iCal (por ejemplo, el de FotMob: "
-                + "página del equipo › Sincronizar calendario). También puedes añadirlos desde el ordenador con ADB.");
-        SettingsUi.add(content, SettingsUi.action(this, "Añadir equipo", () -> editTeam(null)));
+        SettingsUi.add(content, SettingsUi.action(this, "+ Añadir equipo", this::addTeam));
         for (MatchRepository.Team team : MatchRepository.teams(this)) {
-            String state = team.configured() ? hostOf(team.url) : "sin calendario";
+            String state = team.configured() ? "Calendario de " + hostOf(team.url) : "Sin calendario: pulsa para añadirlo";
             if (!team.appPackage.isEmpty()) state += " · " + MatchRepository.appLabel(this, team.appPackage);
             SettingsUi.add(content, SettingsUi.action(this, team.name + "\n" + state, () -> teamOptions(team)));
         }
@@ -223,6 +248,28 @@ public final class MatchesActivity extends Activity {
                 MatchRepository.removeTeam(this, team.name);
                 render();
             }
+        }).setNegativeButton("Cancelar", null).show();
+    }
+
+    /** Known teams are one click; anything else takes a public iCal link. */
+    private void addTeam() {
+        ArrayList<String> options = new ArrayList<>();
+        ArrayList<String> presetNames = new ArrayList<>();
+        for (String[] preset : MatchRepository.PRESET_TEAMS) {
+            boolean followed = false;
+            for (MatchRepository.Team team : MatchRepository.teams(this)) {
+                followed |= MatchRepository.fold(team.name).equals(MatchRepository.fold(preset[0])) && team.configured();
+            }
+            if (!followed) { options.add(preset[0]); presetNames.add(preset[0]); }
+        }
+        options.add("Otro equipo (pegar enlace del calendario)…");
+        dialog().setTitle("Añadir equipo").setItems(options.toArray(new String[0]), (d, which) -> {
+            if (which >= presetNames.size()) { editTeam(null); return; }
+            String name = presetNames.get(which);
+            MatchRepository.upsertTeam(this, name, MatchRepository.presetFeed(name));
+            toast("Siguiendo a " + name);
+            render();
+            refresh(false);
         }).setNegativeButton("Cancelar", null).show();
     }
 
@@ -262,13 +309,12 @@ public final class MatchesActivity extends Activity {
     // ------------------------------------------------------------------ apps
 
     private void renderApps() {
-        SettingsUi.hint(content, "La app que se abre al pulsar un partido de cada competición. "
-                + "Los partidos sin competición reconocida usan la app por defecto del equipo.");
         Map<String, String> chosen = MatchRepository.competitionApps(this);
         for (String competition : MatchRepository.knownCompetitions()) {
             if (MatchRepository.OTHER.equals(competition)) continue;
             String app = chosen.get(competition);
-            String label = app == null || app.isEmpty() ? "sin elegir" : MatchRepository.appLabel(this, app);
+            String label = app == null || app.isEmpty() ? "Sin elegir: te preguntará al abrir un partido"
+                    : "Se abre con " + MatchRepository.appLabel(this, app);
             SettingsUi.add(content, SettingsUi.action(this, competition + "\n" + label,
                     () -> pickApp("¿Con qué app ves " + competition + "?", picked -> {
                         MatchRepository.setCompetitionApp(this, competition, picked);
@@ -294,7 +340,7 @@ public final class MatchesActivity extends Activity {
     private void refresh(boolean manual) {
         if (refreshing) return;
         refreshing = true;
-        if (manual) toast("Actualizando partidos…");
+        setBusy(true);
         if (screen == MATCHES) render();
         final Context app = getApplicationContext();
         new Thread(() -> {
@@ -302,10 +348,19 @@ public final class MatchesActivity extends Activity {
             runOnUiThread(() -> {
                 refreshing = false;
                 if (isFinishing() || isDestroyed()) return;
-                if (manual) toast(error == null ? "Partidos actualizados" : "Actualizado con avisos");
+                setBusy(false);
+                if (manual) toast(error == null ? "Partidos actualizados" : "Actualizado, pero algún calendario falló");
                 render();
             });
         }, "sva-matches").start();
+    }
+
+    /** Visible progress while feeds download: spinner, disabled button and its label. */
+    private void setBusy(boolean busy) {
+        spinner.setVisibility(busy ? View.VISIBLE : View.GONE);
+        refreshButton.setEnabled(!busy);
+        refreshButton.setText(busy ? "Actualizando…" : "Actualizar");
+        refreshButton.setAlpha(busy ? 0.6f : 1f);
     }
 
     private AlertDialog.Builder dialog() {

@@ -47,6 +47,7 @@ final class MatchRepository {
     private static final String KEY_ERRORS = "lastErrors";
     private static final String KEY_COMPETITION_APPS = "competitionApps";
     private static final String KEY_SEEDED = "seeded";
+    private static final String KEY_FEEDS_FILLED = "presetFeedsFilled";
     private static final long HOUR_MS = 60L * 60L * 1000L;
     private static final long STALE_MS = 3L * HOUR_MS;
     private static final long DEFAULT_LENGTH_MS = 2L * HOUR_MS;
@@ -65,6 +66,23 @@ final class MatchRepository {
             {"Mundial de Clubes", "club world cup", "mundial de clubes"},
             {"Amistoso", "friendly", "amistoso", "club friendlies"},
     };
+
+    /** Teams offered in "Añadir equipo", with their FotMob team id (public iCal feed). */
+    static final String[][] PRESET_TEAMS = {
+            {"Real Madrid", "8633"},
+            {"Sevilla", "8302"},
+            {"Málaga", "9864"},
+    };
+
+    static String fotmobFeed(String teamId) {
+        return "https://pub.fotmob.com/prod/pub/api/v2/calendar/team/" + teamId + ".ics";
+    }
+
+    /** The preset feed for a team name, or "" when it is not a preset. */
+    static String presetFeed(String name) {
+        for (String[] preset : PRESET_TEAMS) if (fold(preset[0]).equals(fold(name))) return fotmobFeed(preset[1]);
+        return "";
+    }
 
     private MatchRepository() { }
 
@@ -109,11 +127,9 @@ final class MatchRepository {
         SharedPreferences preferences = prefs(context);
         if (!preferences.getBoolean(KEY_SEEDED, false)) {
             ArrayList<Team> defaults = new ArrayList<>();
-            defaults.add(new Team("Real Madrid", "", ""));
-            defaults.add(new Team("Málaga", "", ""));
-            defaults.add(new Team("Sevilla", "", ""));
+            for (String[] preset : PRESET_TEAMS) defaults.add(new Team(preset[0], fotmobFeed(preset[1]), ""));
             saveTeams(context, defaults);
-            preferences.edit().putBoolean(KEY_SEEDED, true).apply();
+            preferences.edit().putBoolean(KEY_SEEDED, true).putBoolean(KEY_FEEDS_FILLED, true).apply();
             return defaults;
         }
         ArrayList<Team> result = new ArrayList<>();
@@ -125,6 +141,20 @@ final class MatchRepository {
                 if (!team.name.isEmpty()) result.add(team);
             }
         } catch (Exception ignored) { }
+        // Earlier builds seeded these teams without a feed: fill them in once.
+        if (!preferences.getBoolean(KEY_FEEDS_FILLED, false)) {
+            boolean changed = false;
+            for (int i = 0; i < result.size(); i++) {
+                Team team = result.get(i);
+                String feed = presetFeed(team.name);
+                if (!team.configured() && !feed.isEmpty()) {
+                    result.set(i, new Team(team.name, feed, team.appPackage));
+                    changed = true;
+                }
+            }
+            preferences.edit().putBoolean(KEY_FEEDS_FILLED, true).apply();
+            if (changed) { saveTeams(context, result); invalidate(context); }
+        }
         return result;
     }
 

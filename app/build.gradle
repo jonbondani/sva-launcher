@@ -20,8 +20,11 @@ android {
         minSdk 26
         targetSdk 36
 
-        versionCode 5
-        versionName "4.0.1"
+        // Fire TV builds: FIRETV_BUILD (set by the Fire TV APK workflow) makes each published
+        // APK newer than the last, which the in-app updater relies on.
+        def firetvBuild = (System.getenv("FIRETV_BUILD") ?: "0").toInteger()
+        versionCode 100 + firetvBuild
+        versionName firetvBuild > 0 ? "4.0.1-firetv." + firetvBuild : "4.0.1"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
 
         ndk {
