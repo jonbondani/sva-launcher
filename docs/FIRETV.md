@@ -5,6 +5,7 @@ Esta rama adapta Sva Launcher a Fire OS y añade **Partidos**: los próximos enc
 ## Cambios respecto al original
 
 - **Botón Home en Fire OS.** El servicio de accesibilidad de Sva ahora reconoce el inicio de Amazon (`com.amazon.tv.launcher`). Fire OS no deja elegir otro launcher, así que Sva se reabre en cuanto aparece el de Amazon. El de Amazon **sigue instalado y activo**; no hay que desactivarlo.
+  Para que sea instantáneo, Sva se reabre con una alarma del sistema (exenta del retraso de 5 s que Android aplica tras pulsar Home) y tapa el inicio de Amazon mientras tanto. Necesita el ajuste `alarm_manager_constants min_futurity=0`, que pone `firetv-optimizer.sh sva-inicio` y quita `sva-inicio off`. Técnica adaptada de [dumbtv](https://github.com/humblemuzzu/dumbtv) (MIT).
 - **Partidos.** Icono de balón arriba a la derecha, junto a Red y Ajustes.
   - Cada equipo usa un **calendario público iCal**, como el de FotMob o el del propio club.
   - Equipos por defecto: Real Madrid, Málaga y Sevilla, sin enlace todavía. Puedes añadir o quitar los que quieras.

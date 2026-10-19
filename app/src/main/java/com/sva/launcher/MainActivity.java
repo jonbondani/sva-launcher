@@ -4998,6 +4998,10 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                     : "✕ Sva launcher override is currently disabled.");
             if (isFireOs() && enabled) {
                 addFormHint(form, "Listo: al pulsar Home en el mando se abrirá Sva. Para desactivarlo:  ./firetv-optimizer.sh sva-inicio off");
+                if (!LauncherOverrideService.instantHome(this)) {
+                    addFormHint(form, "Home puede tardar unos segundos en volver a Sva. Para que sea instantáneo, vuelve a ejecutar "
+                            + "./firetv-optimizer.sh sva-inicio  (o por ADB: adb shell settings put global alarm_manager_constants min_futurity=0)");
+                }
                 return;
             }
             if (isFireOs()) {
