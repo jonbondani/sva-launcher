@@ -29,6 +29,14 @@ sleep 8
 shot 07-matches
 key KEYCODE_BACK 2
 shot 08-back-home
+# Same screens in dark mode.
+adb shell cmd uimode night yes
+adb shell am force-stop com.sva.launcher
+adb shell am start -W -n com.sva.launcher/.MainActivity > /dev/null
+sleep 12
+shot 09-dark-home
+key KEYCODE_DPAD_RIGHT; shot 10-dark-focus
+adb shell cmd uimode night no
 adb shell dumpsys tv_input > "$OUT/tv_input.txt" 2>&1
 adb logcat -d | grep -vE "RuntimeInit|commands.input|Shutting down VM|default boot image|lock profiling" | tail -400 > "$OUT/log.txt"
 if grep -q "FATAL EXCEPTION" "$OUT/log.txt"; then echo "CRASH" > "$OUT/CRASHED"; fi

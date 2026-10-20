@@ -33,7 +33,7 @@ final class LiquidTheme {
     /** Body text and secondary lines. */
     static Typeface regular(Context context) {
         synchronized (LiquidTheme.class) {
-            if (regularFont == null) regularFont = inter(context, 450);
+            if (regularFont == null) regularFont = inter(context, 400);
             return regularFont;
         }
     }
@@ -49,16 +49,15 @@ final class LiquidTheme {
     /** Large numerals (the clock): light and wide, as on the Apple TV screensaver. */
     static Typeface display(Context context) {
         synchronized (LiquidTheme.class) {
-            if (displayFont == null) displayFont = inter(context, 300);
+            if (displayFont == null) displayFont = inter(context, 400);
             return displayFont;
         }
     }
 
     private static Typeface inter(Context context, int weight) {
+        int res = weight >= 700 ? R.font.inter_bold : weight >= 550 ? R.font.inter_semibold : R.font.inter_regular;
         try {
-            Typeface face = new Typeface.Builder(context.getAssets(), "fonts/InterVariable.ttf")
-                    .setFontVariationSettings("'wght' " + weight)
-                    .build();
+            Typeface face = context.getResources().getFont(res);
             if (face != null) return face;
         } catch (RuntimeException ignored) { }
         try {

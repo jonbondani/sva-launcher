@@ -2619,6 +2619,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
      */
     private void maybeAutoUpdate() {
         if (autoUpdateRunning || settingsScreen != null) return;
+        // Test builds never offer updates on their own; Settings › Version still lets you go back.
+        if (String.valueOf(Updater.installedName(this)).contains("-test")) return;
         long now = System.currentTimeMillis();
         int installed = Updater.installedCode(this);
         int ready = preferences.getInt("updateReadyCode", 0);

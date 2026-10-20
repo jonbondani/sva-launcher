@@ -23,8 +23,12 @@ android {
         // Fire TV builds: FIRETV_BUILD (set by the Fire TV APK workflow) makes each published
         // APK newer than the last, which the in-app updater relies on.
         def firetvBuild = (System.getenv("FIRETV_BUILD") ?: "0").toInteger()
-        versionCode 100 + firetvBuild
-        versionName firetvBuild > 0 ? "4.0.1-firetv." + firetvBuild : "4.0.1"
+        // Test channel (firetv-next): one above the published version so it installs over it, and
+        // "-test" in the name so the in-app updater leaves it alone.
+        def testCode = (System.getenv("FIRETV_TEST_CODE") ?: "0").toInteger()
+        versionCode testCode > 0 ? testCode : 100 + firetvBuild
+        versionName testCode > 0 ? "4.0.1-test." + firetvBuild
+                : (firetvBuild > 0 ? "4.0.1-firetv." + firetvBuild : "4.0.1")
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
 
         ndk {

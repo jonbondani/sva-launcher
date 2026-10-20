@@ -39,7 +39,13 @@ jobs:
       - name: Unit tests and debug APK
         env:
           FIRETV_BUILD: ${{ github.run_number }}
-        run: ./gradlew --no-daemon testDebugUnitTest assembleDebug
+        run: |
+          # One above the published Fire TV version, so the test APK installs over it.
+          stable=$(curl -fsSL "https://github.com/${GITHUB_REPOSITORY}/releases/download/firetv-latest/version.json" \
+            | python3 -c 'import json,sys; print(json.load(sys.stdin)["versionCode"])' || echo 100)
+          export FIRETV_TEST_CODE=$((stable + 1))
+          echo "Test versionCode: $FIRETV_TEST_CODE"
+          ./gradlew --no-daemon testDebugUnitTest assembleDebug
       - name: Publish firetv-test pre-release
         env:
           GH_TOKEN: ${{ github.token }}
