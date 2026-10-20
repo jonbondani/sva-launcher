@@ -58,9 +58,11 @@ jobs:
       - name: Screenshots on an Android TV emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
+          # Sva ships arm and x86_64 native libraries only, and Android TV images are 32-bit x86,
+          # so the screens are checked on a plain x86_64 Android 11 image with a 1080p TV profile.
           api-level: 30
-          target: android-tv
-          arch: x86
+          target: default
+          arch: x86_64
           profile: tv_1080p
           disable-animations: false
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim

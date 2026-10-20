@@ -12,7 +12,8 @@ key()  { adb shell input keyevent "$1"; sleep "${2:-1.2}"; }
 for i in $(seq 1 60); do [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" = 1 ] && break; sleep 2; done
 adb shell input keyevent KEYCODE_WAKEUP
 sleep 20
-adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb install -r app/build/outputs/apk/debug/app-debug.apk 2>&1 | tee "$OUT/install.txt"
+grep -q Success "$OUT/install.txt" || { echo "INSTALL FAILED" > "$OUT/CRASHED"; }
 adb logcat -c
 adb shell am start -W -n com.sva.launcher/.MainActivity | tee "$OUT/start.txt"
 sleep 15
