@@ -54,7 +54,7 @@ final class WeatherForecastDialog {
         view.setText(value);
         view.setTextSize(size);
         view.setTextColor(color);
-        view.setTypeface(bold ? Typeface.create(LiquidTheme.font(activity), Typeface.BOLD) : LiquidTheme.font(activity));
+        view.setTypeface(bold ? LiquidTheme.bold(activity) : LiquidTheme.font(activity));
         view.setIncludeFontPadding(false);
         return view;
     }

@@ -9,6 +9,7 @@ public final class SvaApplication extends Application implements Application.Act
 
     @Override public void onCreate() {
         super.onCreate();
+        CrashWatch.install(this);
         guideReminders = new GuideReminders(this);
         registerActivityLifecycleCallbacks(this);
     }

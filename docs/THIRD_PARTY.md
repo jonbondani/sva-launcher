@@ -9,6 +9,7 @@ Original upstream files and notices remain in the vendored source or dependencie
 | nes_ntsc | 0.2.2, as vendored by Nestopia | LGPL-2.1-or-later | `third_party/nestopia/source/nes_ntsc` |
 | libretro-common | As vendored by Nestopia | Per-file licenses, including MIT | `third_party/nestopia/libretro/libretro-common` |
 | Manrope | Bundled font | SIL OFL 1.1 | `app/src/main/assets/licenses/manrope_ofl.txt` |
+| Inter | Bundled font (`assets/fonts/InterVariable.ttf`) | SIL OFL 1.1 | `app/src/main/assets/licenses/inter_ofl.txt` |
 | AndroidX Media3 | 1.8.1 | Apache-2.0 | [androidx/media](https://github.com/androidx/media) |
 | AndroidX RecyclerView | 1.4.0 | Apache-2.0 | [AndroidX](https://android.googlesource.com/platform/frameworks/support/) |
 | JUnit (tests only) | 4.13.2 | EPL-1.0 | [junit4](https://github.com/junit-team/junit4) |

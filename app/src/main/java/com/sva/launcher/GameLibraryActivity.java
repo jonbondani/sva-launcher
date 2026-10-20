@@ -95,8 +95,8 @@ public final class GameLibraryActivity extends Activity {
         if (photo == null) photo = getDrawable(R.drawable.mountain_wallpaper);
         GradientDrawable veil = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
                 LiquidTheme.isLight(this)
-                        ? new int[]{0xB8E9F1EE, 0xE8E9F1EE, 0xF4E9F1EE}
-                        : new int[]{0x91041114, 0xC907171A, 0xF4071417});
+                        ? new int[]{0xB8F2F2F7, 0xE8F2F2F7, 0xF4F2F2F7}
+                        : new int[]{0x8C050507, 0xC80A0A0D, 0xF40B0B0F});
         return new LayerDrawable(new Drawable[]{photo, veil});
     }
 

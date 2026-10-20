@@ -119,7 +119,7 @@ public final class MainActivity extends Activity {
     private static final int PANEL = 0xF21B1B1B;
     private static final int PANEL_FOCUSED = 0xFF2A2A2A;
     private static final int MUTED = 0xFFB7B7B7;
-    private static final int ACCENT = 0xFF7BE7F4;
+    private static final int ACCENT = 0xFF409CFF;
     private static final int LAVENDER = 0xFFB7B7B7;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final List<IptvRepository.Channel> channels = new ArrayList<>();
@@ -194,6 +194,8 @@ public final class MainActivity extends Activity {
     /** A followed team's game in play (ESPN live score), shown before calendar fixtures. */
     private LiveScores.Game homeLiveGame;
     private LinearLayout homeLiveStrip;
+    /** HDMI ports and the tuner of a TV (empty on sticks and boxes), shown first in the app row. */
+    private List<TvInputs.Input> tvInputs = new ArrayList<>();
     private String homeLiveSignature = "";
     private boolean liveScoresRunning;
     private Runnable matchTick;
@@ -600,7 +602,7 @@ public final class MainActivity extends Activity {
         setContentView(scene);
 
         heroFrame = new FrameLayout(this);
-        heroFrame.setBackgroundColor(light ? LiquidTheme.background(this) : 0xFF071417);
+        heroFrame.setBackgroundColor(light ? LiquidTheme.background(this) : 0xFF0B0B0F);
         wallpaperImage = backgroundImage();
         wallpaperImage.setImageResource(R.drawable.mountain_wallpaper);
         wallpaperImage.setVisibility(View.VISIBLE);
@@ -628,7 +630,7 @@ public final class MainActivity extends Activity {
         heroFrame.addView(bottomFade, new FrameLayout.LayoutParams(-1, -1));
         scene.addView(heroFrame, new FrameLayout.LayoutParams(-1, -1));
         browsingShade = new View(this);
-        browsingShade.setBackgroundColor(light ? 0xFFE9F1EE : 0xFF071417);
+        browsingShade.setBackgroundColor(light ? 0xFFE9F1EE : 0xFF0B0B0F);
         browsingShade.setAlpha(light ? 0.50f : 0f);
         scene.addView(browsingShade, new FrameLayout.LayoutParams(-1, -1));
         LinearLayout tabShell = new LinearLayout(this);
@@ -655,8 +657,8 @@ public final class MainActivity extends Activity {
         LinearLayout navbar = new LinearLayout(this);
         navbar.setGravity(Gravity.CENTER_VERTICAL);
         navbar.setPadding(dp(10), 0, dp(14), 0);
-        navbar.setBackground(roundedShape(light ? 0xE9F9FCF8 : 0xD508181A,
-                light ? 0x887C9E9A : 0x55C4D9D2, 1, 24));
+        navbar.setBackground(roundedShape(light ? 0xE9FFFFFF : 0xD508181A,
+                light ? 0x26000000 : 0x55C4D9D2, 1, 24));
         navbar.setElevation(dp(6));
         navigation.addView(navbar, new LinearLayout.LayoutParams(-2, dp(58)));
 
@@ -699,11 +701,10 @@ public final class MainActivity extends Activity {
         timeStack.setPadding(0, 0, 0, 0);
         clock = new TextView(this);
         clock.setTextColor(light ? LiquidTheme.text(this) : Color.WHITE);
-        // Keep the clock deliberately distinct from the compact Manrope UI copy.
-        // The wider medium face remains easy to read from across the room.
+        // Large clock in Inter semibold with display tracking, readable from across the room.
         clock.setTextSize(compactNavigation ? 40 : 46);
-        clock.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
-        clock.setLetterSpacing(.015f);
+        clock.setTypeface(LiquidTheme.font(this));
+        clock.setLetterSpacing(-.01f);
         clock.setIncludeFontPadding(false);
         clock.setSingleLine(true);
         LinearLayout timeLine = new LinearLayout(this);
@@ -746,7 +747,7 @@ public final class MainActivity extends Activity {
         weatherCopyParams.leftMargin = dp(6);
         weatherPanel.addView(weatherCopy, weatherCopyParams);
         weatherTemperature = label("Add weather", 16, light ? LiquidTheme.text(this) : Color.WHITE, true);
-        weatherTemperature.setTypeface(Typeface.create(LiquidTheme.font(this), Typeface.BOLD));
+        weatherTemperature.setTypeface(LiquidTheme.bold(this));
         weatherTemperature.setTextColor(light ? LiquidTheme.text(this) : Color.WHITE);
         weatherTemperature.setIncludeFontPadding(false);
         weatherTemperature.setSingleLine(true);
@@ -928,7 +929,7 @@ public final class MainActivity extends Activity {
         musicTitle.setSingleLine(true);
         musicTitle.setEllipsize(TextUtils.TruncateAt.END);
         musicCopy.addView(musicTitle);
-        musicArtist = label("", 10, light ? LiquidTheme.secondaryText(this) : 0xFFB8CFCC, false);
+        musicArtist = label("", 10, light ? LiquidTheme.secondaryText(this) : 0xFFAEAEB2, false);
         musicArtist.setSingleLine(true);
         musicArtist.setEllipsize(TextUtils.TruncateAt.END);
         musicCopy.addView(musicArtist);
@@ -1397,8 +1398,8 @@ public final class MainActivity extends Activity {
                             ? selectedPill : new android.graphics.drawable.ColorDrawable(Color.TRANSPARENT));
                     tabButtons[i].setBackground(states);
                     tabButtons[i].setTypeface(LiquidTheme.font(this));
-                    int selectedTextColor = light ? Color.WHITE : 0xFF071417;
-                    int unselectedTextColor = light ? 0xFF24403D : 0xD4FFFFFF;
+                    int selectedTextColor = light ? Color.WHITE : 0xFF0B0B0F;
+                    int unselectedTextColor = light ? 0xFF3A3A3C : 0xD4FFFFFF;
                     tabButtons[i].setTextColor(selected ? selectedTextColor : unselectedTextColor);
                     navigationGlyphs[i].setGlyphColor(selected ? selectedTextColor : unselectedTextColor);
                 }
@@ -1751,9 +1752,9 @@ public final class MainActivity extends Activity {
         states.addState(new int[]{-android.R.attr.state_enabled},
                 calendarGlassShape(Color.TRANSPARENT, Color.TRANSPARENT, 24));
         states.addState(new int[]{android.R.attr.state_pressed},
-                calendarGlassShape(light ? 0xFF087D91 : 0xFFB6FFF0, light ? 0x887C9E9A : 0xFFFFFFFF, 24));
+                calendarGlassShape(light ? 0xFF007AFF : 0xFFB6FFF0, light ? 0x26000000 : 0xFFFFFFFF, 24));
         states.addState(new int[]{android.R.attr.state_focused},
-                calendarGlassShape(light ? 0xFF087D91 : 0xFF7BE7F4, light ? 0x887C9E9A : 0xCCFFFFFF, 24));
+                calendarGlassShape(light ? 0xFF007AFF : 0xFF409CFF, light ? 0x26000000 : 0xCCFFFFFF, 24));
         states.addState(new int[]{},
                 calendarGlassShape(Color.TRANSPARENT, Color.TRANSPARENT, 24));
         button.setBackground(states);
@@ -1762,7 +1763,7 @@ public final class MainActivity extends Activity {
                 new int[]{android.R.attr.state_pressed},
                 new int[]{android.R.attr.state_focused}, new int[]{}
         }, light ? new int[]{0x55132B2B, Color.WHITE, Color.WHITE, LiquidTheme.text(this)}
-                 : new int[]{0x55FFFFFF, 0xFF071417, 0xFF071417, Color.WHITE}));
+                 : new int[]{0x55FFFFFF, 0xFF0B0B0F, 0xFF0B0B0F, Color.WHITE}));
         button.setOnFocusChangeListener(LiquidTheme::animateContainedFocus);
     }
 
@@ -2183,7 +2184,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             else if (color == LAVENDER) color = LiquidTheme.lavender(this);
         }
         v.setTextColor(color);
-        v.setTypeface(LiquidTheme.font(this));
+        // tvOS hierarchy: bold for titles, regular weight for body and secondary text.
+        v.setTypeface(bold ? LiquidTheme.bold(this) : (size >= 16 ? LiquidTheme.font(this) : LiquidTheme.regular(this)));
         return v;
     }
 
@@ -2902,6 +2904,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         appRow.addView(loading, new LinearLayout.LayoutParams(dp(180), dp(72)));
         ioWorker.execute(() -> {
             List<AppEntry> loaded = installedApps();
+            List<TvInputs.Input> inputs = preferences.getBoolean("showTvInputs", true)
+                    ? TvInputs.list(MainActivity.this) : new ArrayList<>();
             List<String> selected = selectedPackages(loaded);
             if (selected.isEmpty() && !preferences.getBoolean("customApps", false)) {
                 selected.addAll(defaultApps(loaded));
@@ -2924,6 +2928,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             handler.post(() -> {
                 appBanners.clear();
                 appBanners.addAll(banners);
+                tvInputs = inputs;
                 showApps(withIcons);
             });
         });
@@ -2942,6 +2947,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             selected.addAll(defaultApps(all));
             if (selected.isEmpty()) for (AppEntry entry : all) selected.add(entry.packageName);
         }
+        for (TvInputs.Input input : tvInputs) addInputTile(input, light);
         int displayed = 0;
         for (String packageName : selected) {
             AppEntry entry = findApp(all, packageName);
@@ -2961,10 +2967,10 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                     : brand.contains("disney") ? 0xF00D1A55
                     : brand.contains("youtube") ? 0xF4FAFAFA
                     : brand.contains("apple") ? 0xF4FAFAFA
-                    : (light ? LiquidTheme.surface(this) : 0xCE102328);
+                    : (light ? LiquidTheme.surface(this) : 0xCE1C1C1E);
             boolean whiteCard = brand.contains("youtube") || brand.contains("apple");
             int focusColor = isBranded ? cardColor : (light ? LiquidTheme.raisedSurface(this) : cardColor);
-            int unfocusedBg = isBranded ? cardColor : (light ? LiquidTheme.surface(this) : 0xB5101C20);
+            int unfocusedBg = isBranded ? cardColor : (light ? LiquidTheme.surface(this) : 0xB51C1C1E);
             int unfocusedBorder = light ? LiquidTheme.border(this) : 0x66FFFFFF;
             int focusedBorder = LiquidTheme.accent(this);
             appTileStates.addState(new int[]{android.R.attr.state_focused},
@@ -3009,7 +3015,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(APP_TILE_WIDTH), dp(APP_TILE_HEIGHT));
             lp.setMargins(0, 0, dp(8), 0);
             appRow.addView(tile, lp);
-            if (displayed == 0) tabEntryFocus[TAB_HOME] = tile;
+            if (displayed == 0) tabEntryFocus[TAB_HOME] = tvInputs.isEmpty() ? tile : appRow.getChildAt(0);
             displayed++;
             if (initialAppFocus && activeTab == TAB_HOME && settingsScreen == null
                     && packageName.equals(focusedPackage)) tile.requestFocus();
@@ -3025,7 +3031,9 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                 for (int i = 0; i < appRow.getChildCount(); i++) {
                     View child = appRow.getChildAt(i);
                     if (focusedPackage != null && focusedPackage.equals(child.getTag())) { destination = child; break; }
-                    if (destination == null && child.isFocusable()) destination = child;
+                    // Without a remembered tile, start on the first app rather than on an input.
+                    boolean isInput = String.valueOf(child.getTag()).startsWith("input:");
+                    if (destination == null && child.isFocusable() && !isInput) destination = child;
                 }
                 if (destination != null) destination.requestFocus();
             });
@@ -3035,6 +3043,48 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             empty.setGravity(Gravity.CENTER_VERTICAL);
             appRow.addView(empty, new LinearLayout.LayoutParams(dp(240), dp(72)));
         }
+    }
+
+    /** A tile that switches the TV to one of its inputs (HDMI port or the antenna tuner). */
+    private void addInputTile(TvInputs.Input input, boolean light) {
+        LinearLayout tile = new LinearLayout(this);
+        tile.setId(View.generateViewId());
+        tile.setOrientation(LinearLayout.VERTICAL);
+        tile.setGravity(Gravity.CENTER);
+        tile.setFocusable(true);
+        tile.setClickable(true);
+        tile.setFocusableInTouchMode(false);
+        int base = light ? LiquidTheme.surface(this) : 0xB51C1C1E;
+        int raised = light ? LiquidTheme.raisedSurface(this) : 0xCE1C1C1E;
+        StateListDrawable states = new StateListDrawable();
+        states.addState(new int[]{android.R.attr.state_focused}, roundedShape(raised, LiquidTheme.accent(this), 2, 16));
+        states.addState(new int[]{android.R.attr.state_pressed}, roundedShape(raised, LiquidTheme.accent(this), 2, 16));
+        states.addState(new int[]{}, roundedShape(base, light ? LiquidTheme.border(this) : 0x66FFFFFF, 1, 16));
+        tile.setBackground(states);
+        tile.setElevation(dp(2));
+        tile.setOnFocusChangeListener(LiquidTheme::animateFocus);
+        tile.setTag("input:" + input.id);
+        tile.setContentDescription(input.label);
+        int ink = light ? LiquidTheme.text(this) : Color.WHITE;
+        ImageView icon = new ImageView(this);
+        icon.setImageResource(input.kind == TvInputs.TUNER ? R.drawable.ic_antenna : R.drawable.ic_hdmi);
+        icon.setColorFilter(input.connected ? ink : (ink & 0x00FFFFFF) | 0x80000000);
+        tile.addView(icon, new LinearLayout.LayoutParams(dp(34), dp(34)));
+        TextView name = label(input.label, 14, input.connected ? ink : MUTED, true);
+        name.setGravity(Gravity.CENTER);
+        name.setSingleLine(true);
+        name.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        LinearLayout.LayoutParams nameParams = new LinearLayout.LayoutParams(-1, -2);
+        nameParams.topMargin = dp(4);
+        tile.addView(name, nameParams);
+        tile.setPadding(dp(8), dp(8), dp(8), dp(8));
+        tile.setOnClickListener(v -> {
+            if (!TvInputs.open(this, input)) Tr.toast(this, "Esta tele no deja abrir " + input.label + " desde aquí.",
+                    Toast.LENGTH_LONG).show();
+        });
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(APP_TILE_WIDTH), dp(APP_TILE_HEIGHT));
+        lp.setMargins(0, 0, dp(8), 0);
+        appRow.addView(tile, lp);
     }
 
     private List<YouTubeCard> savedYouTubeCards() {
@@ -3123,8 +3173,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             thumbnail.setTag(card.url);
             poster.addView(thumbnail, new FrameLayout.LayoutParams(-1, -1));
             // The title becomes the artwork when YouTube has no usable thumbnail.
-            TextView fallback = label(card.title, 20, light ? 0xFF1A353D : Color.WHITE, true);
-            fallback.setTextColor(light ? 0xFF1A353D : Color.WHITE);
+            TextView fallback = label(card.title, 20, light ? 0xFF2C2C2E : Color.WHITE, true);
+            fallback.setTextColor(light ? 0xFF2C2C2E : Color.WHITE);
             fallback.setGravity(Gravity.BOTTOM | Gravity.LEFT);
             fallback.setMaxLines(3);
             fallback.setEllipsize(android.text.TextUtils.TruncateAt.END);
@@ -3389,8 +3439,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
      */
     private void addTopIcon(LinearLayout container, String title, int iconResource, Runnable action) {
         boolean light = LiquidTheme.isLight(this);
-        int idleTint = light ? 0xFF24403D : 0xD4FFFFFF;
-        int focusTint = light ? Color.WHITE : 0xFF071417;
+        int idleTint = light ? 0xFF3A3A3C : 0xD4FFFFFF;
+        int focusTint = light ? Color.WHITE : 0xFF0B0B0F;
         ImageView icon = new ImageView(this);
         icon.setImageResource(iconResource);
         icon.setColorFilter(idleTint);
@@ -3468,7 +3518,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         heading.setText(info[0]);
         heading.setTextColor(Color.WHITE);
         heading.setTextSize(28);
-        heading.setTypeface(Typeface.create(LiquidTheme.font(this), Typeface.BOLD));
+        heading.setTypeface(LiquidTheme.bold(this));
         copy.addView(heading);
         TextView body = new TextView(this);
         body.setText(info[1]);
@@ -3503,7 +3553,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         if (active == null || active.getBackground() == null) return;
         boolean light = LiquidTheme.isLight(this);
         active.getBackground().mutate().setAlpha(dim ? 0 : 255);
-        int color = dim ? (light ? 0xFF24403D : 0xD4FFFFFF) : (light ? Color.WHITE : 0xFF071417);
+        int color = dim ? (light ? 0xFF3A3A3C : 0xD4FFFFFF) : (light ? Color.WHITE : 0xFF0B0B0F);
         active.setTextColor(color);
         if (navigationGlyphs[activeTab] != null) navigationGlyphs[activeTab].setGlyphColor(color);
         active.invalidate();
@@ -3634,7 +3684,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         StateListDrawable states = new StateListDrawable();
         Drawable focused = light
                 ? calendarGlassShape(0x25087D91, LiquidTheme.accent(this), 14)
-                : roundedShape(0x443D5B61, 0xFF7BE7F4, 1, 14);
+                : roundedShape(0x443D5B61, 0xFF409CFF, 1, 14);
         states.addState(new int[]{android.R.attr.state_focused}, focused);
         states.addState(new int[]{android.R.attr.state_pressed}, focused);
         states.addState(new int[]{}, new android.graphics.drawable.ColorDrawable(Color.TRANSPARENT));
@@ -3644,9 +3694,9 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
     private Drawable topWidgetBackground() {
         StateListDrawable states = new StateListDrawable();
         states.addState(new int[]{android.R.attr.state_focused},
-                roundedShape(0xE0173032, 0xFF7BE7F4, 2, 18));
+                roundedShape(0xE02C2C2E, 0xFF409CFF, 2, 18));
         states.addState(new int[]{android.R.attr.state_pressed},
-                roundedShape(0xE0173032, 0xFF7BE7F4, 2, 18));
+                roundedShape(0xE02C2C2E, 0xFF409CFF, 2, 18));
         states.addState(new int[]{},
                 roundedShape(0xD0151719, 0x66FFFFFF, 1, 18));
         return states;
@@ -5829,6 +5879,13 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
 
         private void renderAppSettings(LinearLayout page) {
             addFormHint(page, "Choose up to five apps for Home. Use arrows to change their order.");
+            if (!TvInputs.list(MainActivity.this).isEmpty()) {
+                addChoice(page, "Entradas de la tele en el inicio", new String[]{"Mostrar", "Ocultar"},
+                        preferences.getBoolean("showTvInputs", true) ? 0 : 1, index -> {
+                            preferences.edit().putBoolean("showTvInputs", index == 0).apply();
+                            renderApps();
+                        });
+            }
             appList = new RecyclerView(MainActivity.this);
             appList.setLayoutManager(new LinearLayoutManager(MainActivity.this));
             appList.setClipChildren(false);

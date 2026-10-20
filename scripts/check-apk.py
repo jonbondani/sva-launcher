@@ -8,7 +8,7 @@ import sys
 import zipfile
 
 ABIS = {'arm64-v8a', 'armeabi-v7a', 'x86_64'}
-LICENSES = {'NOTICE.txt', 'apache-2.0.txt', 'gpl-3.0.txt', 'manrope_ofl.txt',
+LICENSES = {'NOTICE.txt', 'apache-2.0.txt', 'gpl-3.0.txt', 'manrope_ofl.txt', 'inter_ofl.txt',
             'nes-ntsc-lgpl-2.1.txt', 'nestopia-gpl-2.0.txt', 'vendored-native-notices.txt',
             'ndk-r28-runtime-notices.txt', 'runtime-dependencies.txt'}
 

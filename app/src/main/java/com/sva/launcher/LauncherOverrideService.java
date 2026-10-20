@@ -52,6 +52,8 @@ public final class LauncherOverrideService extends AccessibilityService {
     @Override protected void onServiceConnected() {
         super.onServiceConnected();
         running = this;
+        // Turned on again on purpose: a fresh start for the crash safety net.
+        CrashWatch.clear(this);
         try {
             View view = new View(this);
             view.setBackgroundColor(COVER_COLOR);
@@ -117,6 +119,12 @@ public final class LauncherOverrideService extends AccessibilityService {
             return;
         }
 
+        if (CrashWatch.tooManyCrashes(this)) {
+            // Sva keeps crashing: leave the TV's own home screen alone and switch the override off.
+            uncover();
+            disableSelf();
+            return;
+        }
         long now = SystemClock.uptimeMillis();
         if (now - lastReopenAt < REOPEN_THROTTLE_MS) return;
         lastReopenAt = now;
