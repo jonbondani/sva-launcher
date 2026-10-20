@@ -988,9 +988,11 @@ public final class MainActivity extends Activity {
         HorizontalScrollView appScroll = new HorizontalScrollView(this);
         appScroll.setHorizontalScrollBarEnabled(false);
         appScroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        appScroll.setPadding(dp(4), dp(10), dp(4), dp(10));
+        // Room around the row for the focus lift (6 % zoom): the zoomed tile may draw into the
+        // padding, while tiles scrolled out of view are still clipped at the row's edges.
+        appScroll.setPadding(dp(12), dp(10), dp(12), dp(10));
         appScroll.setClipChildren(true);
-        appScroll.setClipToPadding(true);
+        appScroll.setClipToPadding(false);
         appRow = new LinearLayout(this);
         appRow.setOrientation(LinearLayout.HORIZONTAL);
         appRow.setClipChildren(false);

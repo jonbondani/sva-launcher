@@ -24,6 +24,17 @@ key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_RIGHT; shot 03-home-focus-fourth-tile
 key KEYCODE_DPAD_UP 1.5; shot 04-home-up
 key KEYCODE_DPAD_UP 1.5; shot 05-home-top
 key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_RIGHT; shot 06-top-right
+# Dock tabs, the shortcut preview panel and Sva's settings.
+key KEYCODE_DPAD_DOWN 1.5; shot 06b-dock-home
+key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_CENTER 3; shot 06c-tab-livetv
+key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_CENTER 3; shot 06d-tab-games
+key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_CENTER 3; shot 06e-tab-events
+key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_CENTER 3; shot 06f-tab-saved
+key KEYCODE_DPAD_RIGHT 1.5; shot 06g-shortcut-matches-preview
+for i in 1 2 3 4; do key KEYCODE_DPAD_RIGHT 1; done; shot 06h-shortcut-settings-preview
+key KEYCODE_DPAD_CENTER 3; shot 06i-sva-settings
+key KEYCODE_DPAD_DOWN; key KEYCODE_DPAD_DOWN; shot 06j-sva-settings-focus
+key KEYCODE_BACK 2; key KEYCODE_BACK 2
 adb shell am start -n com.sva.launcher/.MatchesActivity
 sleep 8
 shot 07-matches
