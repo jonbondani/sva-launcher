@@ -8,10 +8,15 @@ mkdir -p "$OUT"
 shot() { adb exec-out screencap -p > "$OUT/$1.png"; echo "shot $1"; }
 key()  { adb shell input keyevent "$1"; sleep "${2:-1.2}"; }
 
+# Wait until the system has fully booted and the screen is on.
+for i in $(seq 1 60); do [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" = 1 ] && break; sleep 2; done
+adb shell input keyevent KEYCODE_WAKEUP
+sleep 20
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 adb logcat -c
-adb shell am start -n com.sva.launcher/.MainActivity
+adb shell am start -W -n com.sva.launcher/.MainActivity | tee "$OUT/start.txt"
 sleep 15
+adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" > "$OUT/resumed.txt"
 shot 01-home
 key KEYCODE_DPAD_RIGHT; shot 02-home-focus-second-tile
 key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_RIGHT; shot 03-home-focus-fourth-tile
@@ -24,7 +29,7 @@ shot 07-matches
 key KEYCODE_BACK 2
 shot 08-back-home
 adb shell dumpsys tv_input > "$OUT/tv_input.txt" 2>&1
-adb logcat -d | grep -E "AndroidRuntime|FATAL|com.sva.launcher" | tail -300 > "$OUT/log.txt"
+adb logcat -d | grep -vE "RuntimeInit|commands.input|Shutting down VM|default boot image|lock profiling" | tail -400 > "$OUT/log.txt"
 if grep -q "FATAL EXCEPTION" "$OUT/log.txt"; then echo "CRASH" > "$OUT/CRASHED"; fi
 adb shell am force-stop com.sva.launcher
 ls -la "$OUT"
