@@ -201,6 +201,7 @@ public final class MainActivity extends Activity {
     private boolean demoTvInputs;
     /** App being moved in the home row (hold OK on a tile), or null. */
     private String movingPackage;
+    private boolean swallowNextClick;
     private List<AppEntry> lastShownApps;
     private String homeLiveSignature = "";
     private boolean liveScoresRunning;
@@ -814,9 +815,14 @@ public final class MainActivity extends Activity {
         homeLiveStrip.setOrientation(LinearLayout.HORIZONTAL);
         homeLiveStrip.setClipChildren(false);
         homeLiveStrip.setVisibility(View.GONE);
-        FrameLayout.LayoutParams stripParams = new FrameLayout.LayoutParams(-2, -2, Gravity.BOTTOM | Gravity.START);
-        stripParams.setMargins(dp(40), 0, dp(20), dp(6));
-        heroContent.addView(homeLiveStrip, stripParams);
+        // Greeting and today's games stacked at the bottom-left of the hero area, clear of the header.
+        LinearLayout heroColumn = new LinearLayout(this);
+        heroColumn.setOrientation(LinearLayout.VERTICAL);
+        heroColumn.setClipChildren(false);
+        FrameLayout.LayoutParams columnParams = new FrameLayout.LayoutParams(-2, -2, Gravity.BOTTOM | Gravity.START);
+        columnParams.setMargins(dp(40), 0, dp(20), dp(6));
+        heroContent.addView(heroColumn, columnParams);
+        LinearLayout.LayoutParams stripParams = new LinearLayout.LayoutParams(-2, -2);
         greeting = new TextView(this);
         greeting.setTextSize(compactNavigation ? 30 : 34);
         greeting.setTypeface(LiquidTheme.bold(this));
@@ -825,9 +831,10 @@ public final class MainActivity extends Activity {
         greeting.setShadowLayer(dp(8), 0, dp(1), LiquidTheme.isLight(this) ? 0x33FFFFFF : 0x66000000);
         greeting.setSingleLine(true);
         greeting.setVisibility(preferences.getBoolean("showGreeting", true) ? View.VISIBLE : View.GONE);
-        FrameLayout.LayoutParams greetingParams = new FrameLayout.LayoutParams(-2, -2, Gravity.TOP | Gravity.START);
-        greetingParams.setMargins(dp(48), dp(18), dp(20), 0);
-        heroContent.addView(greeting, greetingParams);
+        LinearLayout.LayoutParams greetingParams = new LinearLayout.LayoutParams(-2, -2);
+        greetingParams.setMargins(dp(8), 0, 0, dp(10));
+        heroColumn.addView(greeting, greetingParams);
+        heroColumn.addView(homeLiveStrip, stripParams);
         renderWeather();
 
         int topCardHeight = dp(compactNavigation ? 78 : 82);
@@ -3044,13 +3051,25 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                 tile.addView(name, new LinearLayout.LayoutParams(-1, -1));
             }
             tile.setOnClickListener(v -> {
+                if (swallowNextClick) { swallowNextClick = false; return; }
                 if (movingPackage != null) { finishMove(); return; }
                 launchApp(entry.packageName);
             });
             // Hold OK to move the app; left/right moves it, OK or Back drops it.
-            tile.setOnLongClickListener(v -> { startMove(entry.packageName); return true; });
+            tile.setOnLongClickListener(v -> {
+                if (movingPackage == null) { swallowNextClick = true; startMove(entry.packageName); }
+                return true;
+            });
             final List<String> rowOrder = selected;
             tile.setOnKeyListener((v, keyCode, event) -> {
+                boolean ok = keyCode == KeyEvent.KEYCODE_DPAD_CENTER || keyCode == KeyEvent.KEYCODE_ENTER;
+                if (movingPackage == null && ok && event.getAction() == KeyEvent.ACTION_DOWN
+                        && event.getRepeatCount() > 0) {
+                    // OK held down on the remote: pick the app up.
+                    swallowNextClick = true;
+                    startMove(entry.packageName);
+                    return true;
+                }
                 if (!entry.packageName.equals(movingPackage)) return false;
                 if (event.getAction() != KeyEvent.ACTION_DOWN) return keyCode == KeyEvent.KEYCODE_DPAD_LEFT
                         || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT || keyCode == KeyEvent.KEYCODE_BACK;
@@ -3112,6 +3131,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
 
     private void finishMove() {
         movingPackage = null;
+        swallowNextClick = false;
         if (lastShownApps != null) showApps(lastShownApps);
     }
 

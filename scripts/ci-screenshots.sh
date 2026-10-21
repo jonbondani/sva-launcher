@@ -47,7 +47,7 @@ sleep 12
 shot 08b-inputs
 key KEYCODE_DPAD_LEFT; key KEYCODE_DPAD_LEFT; key KEYCODE_DPAD_LEFT; key KEYCODE_DPAD_LEFT; shot 08c-inputs-focus
 # Reorder: hold OK on an app, move it right, drop it.
-key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_RIGHT
+key KEYCODE_DPAD_RIGHT
 adb shell input keyevent --longpress KEYCODE_DPAD_CENTER; sleep 1.5; shot 08d-move-start
 key KEYCODE_DPAD_RIGHT 1.5; shot 08e-moved-right
 key KEYCODE_DPAD_CENTER 1.5; shot 08f-dropped
