@@ -93,6 +93,15 @@ final class TvInputs {
         return out;
     }
 
+    /** Sample inputs for screenshot tests on emulators, which have none. */
+    static List<Input> samples() {
+        List<Input> out = new ArrayList<>();
+        out.add(new Input("demo/hdmi1", "Fire TV", HDMI, 1, true));
+        out.add(new Input("demo/hdmi2", "HDMI 2", HDMI, 2, false));
+        out.add(new Input("demo/tuner", "TDT", TUNER, 0, true));
+        return out;
+    }
+
     /** Port number from the label the TV gives the port ("HDMI 2", "HDMI2 (ARC)"); otherwise its position. */
     static int portNumber(String systemLabel, int fallback) {
         if (systemLabel == null) return fallback;

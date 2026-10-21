@@ -40,6 +40,12 @@ sleep 8
 shot 07-matches
 key KEYCODE_BACK 2
 shot 08-back-home
+# The input tiles (HDMI, TDT) with sample inputs, since the emulator has none.
+adb shell am force-stop com.sva.launcher
+adb shell am start -W -n com.sva.launcher/.MainActivity --ez demo_tv_inputs true > /dev/null
+sleep 12
+shot 08b-inputs
+key KEYCODE_DPAD_LEFT; key KEYCODE_DPAD_LEFT; key KEYCODE_DPAD_LEFT; key KEYCODE_DPAD_LEFT; shot 08c-inputs-focus
 # Same screens in dark mode.
 adb shell cmd uimode night yes
 adb shell am force-stop com.sva.launcher

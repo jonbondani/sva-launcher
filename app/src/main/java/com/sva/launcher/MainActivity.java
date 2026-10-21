@@ -196,6 +196,7 @@ public final class MainActivity extends Activity {
     private LinearLayout homeLiveStrip;
     /** HDMI ports and the tuner of a TV (empty on sticks and boxes), shown first in the app row. */
     private List<TvInputs.Input> tvInputs = new ArrayList<>();
+    private boolean demoTvInputs;
     private String homeLiveSignature = "";
     private boolean liveScoresRunning;
     private Runnable matchTick;
@@ -270,6 +271,9 @@ public final class MainActivity extends Activity {
         }
         iptv = new IptvRepository(this);
         acceptReminderIntent(getIntent());
+        // Screenshot tests only: emulators have no TV inputs, so sample ones can be shown
+        // (am start ... --ez demo_tv_inputs true). Nothing is stored and the TV is not touched.
+        demoTvInputs = getIntent() != null && getIntent().getBooleanExtra("demo_tv_inputs", false);
         logoLoader = new ChannelLogoLoader(this);
         weatherForecast = cachedWeather();
         hiddenChannelKeys.addAll(preferences.getStringSet("hiddenChannels", Collections.emptySet()));
@@ -2908,8 +2912,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         appRow.addView(loading, new LinearLayout.LayoutParams(dp(180), dp(72)));
         ioWorker.execute(() -> {
             List<AppEntry> loaded = installedApps();
-            List<TvInputs.Input> inputs = preferences.getBoolean("showTvInputs", true)
-                    ? TvInputs.list(MainActivity.this) : new ArrayList<>();
+            List<TvInputs.Input> inputs = !preferences.getBoolean("showTvInputs", true) ? new ArrayList<>()
+                    : demoTvInputs ? TvInputs.samples() : TvInputs.list(MainActivity.this);
             List<String> selected = selectedPackages(loaded);
             if (selected.isEmpty() && !preferences.getBoolean("customApps", false)) {
                 selected.addAll(defaultApps(loaded));
