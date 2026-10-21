@@ -151,7 +151,8 @@ public final class MainActivity extends Activity {
     private LinearLayout root, homeContent, liveContent, gamesContent, eventsContent, savedContent;
     private LinearLayout appRow, youtubeRow, youtubeSection;
     /** Packages whose Home tile shows a TV banner (the rest show their icon). */
-    private final Set<String> appBanners = new HashSet<>();
+    /** Each shown app's own colour (from its icon), tinting its glass tile. */
+    private final Map<String, Integer> appColors = new HashMap<>();
     private GridLayout gameGrid, calendarMonthGrid;
     private TextView calendarHeaderDate, calendarHeaderEvents;
     private Button previousMonthButton, nextMonthButton;
@@ -716,13 +717,14 @@ public final class MainActivity extends Activity {
         }
         rebuildNavigationButtons();
         LinearLayout timeStack = new LinearLayout(this);
-        timeStack.setOrientation(LinearLayout.VERTICAL);
+        // Clock pill: time, then the date in a quieter weight, on one line.
+        timeStack.setOrientation(LinearLayout.HORIZONTAL);
         timeStack.setGravity(Gravity.CENTER_VERTICAL);
         timeStack.setPadding(0, 0, 0, 0);
         clock = new TextView(this);
         clock.setTextColor(light ? LiquidTheme.text(this) : Color.WHITE);
         // Large clock in Inter semibold with display tracking, readable from across the room.
-        clock.setTextSize(compactNavigation ? 40 : 46);
+        clock.setTextSize(compactNavigation ? 17 : 19);
         clock.setTypeface(LiquidTheme.font(this));
         clock.setLetterSpacing(-.01f);
         clock.setIncludeFontPadding(false);
@@ -735,18 +737,17 @@ public final class MainActivity extends Activity {
         LinearLayout.LayoutParams clockDividerParams = new LinearLayout.LayoutParams(dp(1), dp(32));
         clockDividerParams.setMargins(dp(10), 0, dp(10), 0);
         clockDivider.setVisibility(View.GONE);
-        clockPeriod = label("", compactNavigation ? 16 : 20, light ? LiquidTheme.secondaryText(this) : 0xFFBEC4CD, false);
-        clockPeriod.setPadding(dp(10), dp(18), 0, 0);
+        clockPeriod = label("", 12, light ? LiquidTheme.secondaryText(this) : 0xFFBEC4CD, false);
+        clockPeriod.setPadding(dp(4), 0, 0, 0);
         timeLine.addView(clockPeriod, new LinearLayout.LayoutParams(-2, -2));
         timeStack.addView(timeLine, new LinearLayout.LayoutParams(-2, -2));
-        date = label("", compactNavigation ? 11 : 13, light ? LiquidTheme.secondaryText(this) : 0xFFF5F7F7, false);
-        date.setTypeface(LiquidTheme.font(this));
-        date.setLetterSpacing(.16f);
+        date = label("", compactNavigation ? 12 : 13, light ? LiquidTheme.secondaryText(this) : 0xD9FFFFFF, false);
+        date.setTypeface(LiquidTheme.regular(this));
         date.setSingleLine(true);
         date.setEllipsize(TextUtils.TruncateAt.END);
         LinearLayout.LayoutParams dateParams = new LinearLayout.LayoutParams(-2, -2);
-        dateParams.topMargin = dp(2);
-        timeStack.addView(date, 0, dateParams);
+        dateParams.leftMargin = dp(10);
+        timeStack.addView(date, dateParams);
 
         weatherPanel = new LinearLayout(this);
         weatherPanel.setOrientation(LinearLayout.HORIZONTAL);
@@ -757,42 +758,51 @@ public final class MainActivity extends Activity {
         weatherPanel.setClipToPadding(false);
         weatherPanel.setPadding(0, 0, 0, 0);
         weatherPanel.setContentDescription("Weather unavailable");
-        weatherSymbol = label("☀", compactNavigation ? 36 : 42, 0xFFFFBD38, true);
+        weatherSymbol = label("☀", 21, 0xFFFFBD38, true);
         weatherSymbol.setGravity(Gravity.CENTER);
-        weatherPanel.addView(weatherSymbol, new LinearLayout.LayoutParams(dp(60), -1));
+        weatherSymbol.setIncludeFontPadding(false);
+        weatherPanel.addView(weatherSymbol, new LinearLayout.LayoutParams(dp(28), -1));
         LinearLayout weatherCopy = new LinearLayout(this);
-        weatherCopy.setOrientation(LinearLayout.VERTICAL);
+        weatherCopy.setOrientation(LinearLayout.HORIZONTAL);
         weatherCopy.setGravity(Gravity.CENTER_VERTICAL);
-        LinearLayout.LayoutParams weatherCopyParams = new LinearLayout.LayoutParams(0, -2, 1);
+        LinearLayout.LayoutParams weatherCopyParams = new LinearLayout.LayoutParams(-2, -2);
         weatherCopyParams.leftMargin = dp(6);
         weatherPanel.addView(weatherCopy, weatherCopyParams);
-        weatherTemperature = label("Add weather", 16, light ? LiquidTheme.text(this) : Color.WHITE, true);
+        weatherTemperature = label("Add weather", 19, light ? LiquidTheme.text(this) : Color.WHITE, true);
         weatherTemperature.setTypeface(LiquidTheme.bold(this));
         weatherTemperature.setTextColor(light ? LiquidTheme.text(this) : Color.WHITE);
         weatherTemperature.setIncludeFontPadding(false);
         weatherTemperature.setSingleLine(true);
         weatherTemperature.setMaxWidth(dp(weatherMaxWidth));
         weatherCopy.addView(weatherTemperature);
-        weatherCondition = label("Local conditions", 13, light ? LiquidTheme.secondaryText(this) : 0xFFCCD0D6, false);
-        weatherCondition.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+        weatherCondition = label("Local conditions", 12, light ? LiquidTheme.text(this) : Color.WHITE, true);
         weatherCondition.setIncludeFontPadding(false);
         weatherCondition.setSingleLine(true);
         weatherCondition.setMaxWidth(dp(weatherMaxWidth));
         weatherCondition.setEllipsize(TextUtils.TruncateAt.END);
-        weatherCopy.addView(weatherCondition);
+        LinearLayout weatherText = new LinearLayout(this);
+        weatherText.setOrientation(LinearLayout.VERTICAL);
+        weatherText.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout.LayoutParams weatherTextParams = new LinearLayout.LayoutParams(-2, -2);
+        weatherTextParams.leftMargin = dp(9);
+        weatherCopy.addView(weatherText, weatherTextParams);
+        weatherText.addView(weatherCondition);
         LinearLayout weatherFacts = new LinearLayout(this);
         weatherFacts.setOrientation(LinearLayout.VERTICAL);
         weatherFacts.setGravity(Gravity.CENTER_VERTICAL);
         weatherFacts.setPadding(dp(16), 0, 0, 0);
         weatherDetails = label("", 11, light ? LiquidTheme.secondaryText(this) : 0xFFCCD0D6, false);
-        weatherLocation = label("", 11, light ? LiquidTheme.secondaryText(this) : 0xFFCCD0D6, false);
+        weatherLocation = label("", 10, light ? LiquidTheme.secondaryText(this) : 0xB3FFFFFF, false);
         weatherLocation.setSingleLine(true);
         weatherLocation.setEllipsize(TextUtils.TruncateAt.END);
         weatherMetrics = label("", 11, light ? LiquidTheme.secondaryText(this) : 0xFFF0F1F3, false);
         weatherFacts.addView(weatherDetails);
-        weatherFacts.addView(weatherLocation);
         weatherFacts.addView(weatherMetrics);
-        weatherPanel.addView(weatherFacts, new LinearLayout.LayoutParams(0, -1, 1.15f));
+        // The pill keeps it short: the place goes under the condition, the rest is in the forecast.
+        weatherLocation.setMaxWidth(dp(150));
+        weatherText.addView(weatherLocation);
+        weatherFacts.setVisibility(View.GONE);
+        weatherPanel.addView(weatherFacts, new LinearLayout.LayoutParams(-2, -1));
 
         systemShortcuts = new LinearLayout(this);
         systemShortcuts.setGravity(Gravity.CENTER_VERTICAL);
@@ -819,7 +829,7 @@ public final class MainActivity extends Activity {
         heroContent.setClipChildren(false);
         // Leave exactly the height of the app row block (spacer + row + bottom padding) above
         // the dock, so taller banner tiles are not hidden behind it.
-        int appBlockDp = 6 + APP_TILE_HEIGHT + 40 + 12 + 6;
+        int appBlockDp = 6 + SHELF_HEIGHT + 14;
         root.addView(heroContent, new LinearLayout.LayoutParams(-1,
                 dp(Math.max(180, heroHeightDp() - dockHeight - appBlockDp))));
         // Today's games of the followed teams, Google-sports style, above the app row.
@@ -837,7 +847,7 @@ public final class MainActivity extends Activity {
         heroContent.addView(heroColumn, columnParams);
         LinearLayout.LayoutParams stripParams = new LinearLayout.LayoutParams(-2, -2);
         greeting = new TextView(this);
-        greeting.setTextSize(compactNavigation ? 26 : 30);
+        greeting.setTextSize(compactNavigation ? 22 : 26);
         greeting.setTypeface(LiquidTheme.bold(this));
         greeting.setLetterSpacing(-.01f);
         greeting.setTextColor(LiquidTheme.isLight(this) ? LiquidTheme.text(this) : Color.WHITE);
@@ -851,13 +861,11 @@ public final class MainActivity extends Activity {
         watchingStrip.setClipChildren(false);
         watchingStrip.setVisibility(View.GONE);
         heroColumn.addView(watchingStrip, new LinearLayout.LayoutParams(-2, -2));
-        // The greeting sits right under the clock, above today's games.
-        FrameLayout.LayoutParams greetingParams = new FrameLayout.LayoutParams(-2, -2, Gravity.TOP | Gravity.START);
-        greetingParams.setMargins(dp(48), dp(16) + dp(compactNavigation ? 78 : 82) + dp(4), dp(20), 0);
-        heroContent.addView(greeting, greetingParams);
         renderWeather();
 
-        int topCardHeight = dp(compactNavigation ? 78 : 82);
+        // Top bar after the webOS Liquid Glass launcher: greeting on the left, glass pills on the right.
+        int pillHeight = dp(44);
+        int topCardHeight = dp(56);
         int weatherWidth = dp(compactNavigation ? 240 : 270);
 
         // Top-Left: Time
@@ -865,8 +873,8 @@ public final class MainActivity extends Activity {
         timeCard.setId(View.generateViewId());
         timeCard.setOrientation(LinearLayout.VERTICAL);
         timeCard.setGravity(Gravity.CENTER_VERTICAL);
-        timeCard.setPadding(dp(16), dp(2), dp(16), dp(2));
-        timeCard.setBackground(headerSectionBackground());
+        timeCard.setPadding(dp(18), 0, dp(20), 0);
+        timeCard.setBackground(pillBackground());
         timeCard.setElevation(0);
         // Display only: on Fire TV the date settings shortcut lands in Amazon's launcher.
         timeCard.setFocusable(false);
@@ -877,16 +885,17 @@ public final class MainActivity extends Activity {
         homeCalendarCard = new LinearLayout(this);
         homeCalendarCard.setId(View.generateViewId());
         homeCalendarCard.setGravity(Gravity.CENTER_VERTICAL);
-        homeCalendarCard.setPadding(dp(12), dp(6), dp(12), dp(6));
-        homeCalendarCard.setBackground(headerSectionBackground());
+        homeCalendarCard.setPadding(dp(12), 0, dp(20), 0);
+        homeCalendarCard.setBackground(pillBackground());
         homeCalendarCard.setElevation(0);
-        TextView calendarIcon = label("", 26, light ? LiquidTheme.accent(this) : 0xFF81B8F2, true);
+        ImageView calendarIcon = new ImageView(this);
         NavigationGlyph eventGlyph = new NavigationGlyph(TAB_EVENTS);
-        eventGlyph.setBounds(0, 0, dp(27), dp(27));
-        eventGlyph.setGlyphColor(light ? LiquidTheme.accent(this) : 0xFF81B8F2);
-        calendarIcon.setCompoundDrawables(null, eventGlyph, null, null);
-        calendarIcon.setGravity(Gravity.CENTER);
-        homeCalendarCard.addView(calendarIcon, new LinearLayout.LayoutParams(dp(44), dp(46)));
+        eventGlyph.setGlyphColor(light ? LiquidTheme.text(this) : Color.WHITE);
+        calendarIcon.setImageDrawable(eventGlyph);
+        calendarIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        LinearLayout.LayoutParams calendarIconParams = new LinearLayout.LayoutParams(dp(20), dp(20));
+        calendarIconParams.setMargins(dp(4), 0, dp(10), 0);
+        homeCalendarCard.addView(calendarIcon, calendarIconParams);
         View calendarDivider = new View(this);
         calendarDivider.setBackgroundColor(light ? LiquidTheme.border(this) : 0x558FADB2);
         LinearLayout.LayoutParams calendarDividerParams = new LinearLayout.LayoutParams(dp(1), dp(36));
@@ -895,21 +904,22 @@ public final class MainActivity extends Activity {
         LinearLayout calendarCopy = new LinearLayout(this);
         calendarCopy.setOrientation(LinearLayout.VERTICAL);
         calendarCopy.setGravity(Gravity.CENTER_VERTICAL);
-        homeCalendarCard.addView(calendarCopy, new LinearLayout.LayoutParams(0, -2, 1));
+        homeCalendarCard.addView(calendarCopy, new LinearLayout.LayoutParams(-2, -2));
         homeCalendarEyebrow = label("UP NEXT", 10, light ? LiquidTheme.secondaryText(this) : 0xFFBEC4CD, false);
+        // Two lines fit a pill: the title and when. The eyebrow stays for the live state only.
+        homeCalendarEyebrow.setVisibility(View.GONE);
         calendarCopy.addView(homeCalendarEyebrow);
-        homeCalendarTitle = label("No events today", 16, light ? LiquidTheme.text(this) : Color.WHITE, true);
+        homeCalendarTitle = label("No events today", 13, light ? LiquidTheme.text(this) : Color.WHITE, true);
+        homeCalendarTitle.setMaxWidth(dp(compactNavigation ? 200 : 260));
         homeCalendarTitle.setSingleLine(true);
         homeCalendarTitle.setMaxLines(1);
         homeCalendarTitle.setEllipsize(TextUtils.TruncateAt.END);
         calendarCopy.addView(homeCalendarTitle);
-        homeCalendarSubtitle = label("Open your calendar", 11, light ? LiquidTheme.secondaryText(this) : 0xFFBCCBD0, false);
+        homeCalendarSubtitle = label("Open your calendar", 11, light ? LiquidTheme.secondaryText(this) : 0xB3FFFFFF, false);
+        homeCalendarSubtitle.setMaxWidth(dp(compactNavigation ? 200 : 260));
         homeCalendarSubtitle.setSingleLine(true);
         homeCalendarSubtitle.setEllipsize(TextUtils.TruncateAt.END);
         calendarCopy.addView(homeCalendarSubtitle);
-        TextView calendarArrow = label("›", 24, light ? LiquidTheme.secondaryText(this) : Color.WHITE, false);
-        calendarArrow.setGravity(Gravity.CENTER);
-        homeCalendarCard.addView(calendarArrow, new LinearLayout.LayoutParams(dp(22), dp(40)));
         homeCalendarCard.setFocusable(true);
         homeCalendarCard.setClickable(true);
         homeCalendarCard.setOnFocusChangeListener(LiquidTheme::animateFocus);
@@ -941,14 +951,14 @@ public final class MainActivity extends Activity {
         weatherCard.setId(View.generateViewId());
         weatherCard.setOrientation(LinearLayout.HORIZONTAL);
         weatherCard.setGravity(Gravity.CENTER_VERTICAL);
-        weatherCard.setPadding(dp(12), dp(6), dp(14), dp(6));
-        weatherCard.setBackground(headerSectionBackground());
+        weatherCard.setPadding(dp(14), 0, dp(20), 0);
+        weatherCard.setBackground(pillBackground());
         weatherCard.setElevation(0);
         weatherCard.setFocusable(true);
         weatherCard.setClickable(true);
         weatherCard.setOnFocusChangeListener(LiquidTheme::animateFocus);
         weatherCard.setOnClickListener(v -> showWeatherForecast());
-        weatherCard.addView(weatherPanel, new LinearLayout.LayoutParams(-1, -1));
+        weatherCard.addView(weatherPanel, new LinearLayout.LayoutParams(-2, -1));
 
 
         nowPlayingSection = new LinearLayout(this);
@@ -995,26 +1005,31 @@ public final class MainActivity extends Activity {
         nowPlayingSection.addView(nowPlayingCard, new LinearLayout.LayoutParams(weatherWidth, dp(68)));
         weatherStack.addView(nowPlayingSection);
 
-        timeCard.setNextFocusRightId(weatherCard.getId());
-        weatherCard.setNextFocusLeftId(weatherCard.getId());
-        weatherCard.setNextFocusRightId(homeCalendarCard.getId());
-        homeCalendarCard.setNextFocusLeftId(weatherCard.getId());
+        // Left to right: next match or event, weather, clock (display only).
+        homeCalendarCard.setNextFocusLeftId(homeCalendarCard.getId());
+        homeCalendarCard.setNextFocusRightId(weatherCard.getId());
+        weatherCard.setNextFocusLeftId(homeCalendarCard.getId());
+        weatherCard.setNextFocusRightId(weatherCard.getId());
 
         LinearLayout header = new LinearLayout(this);
         header.setGravity(Gravity.CENTER_VERTICAL);
-        header.setPadding(dp(14), dp(4), dp(10), dp(4));
+        header.setPadding(dp(8), 0, dp(6), 0);
+        header.setClipChildren(false);
+        header.setClipToPadding(false);
         header.setBackgroundColor(Color.TRANSPARENT);
-        header.addView(timeCard, new LinearLayout.LayoutParams(0, -1, 22));
-        View timeRule = new View(this);
-        timeRule.setBackgroundColor(light ? LiquidTheme.border(this) : 0x55CDD0D4);
-        header.addView(timeRule, new LinearLayout.LayoutParams(dp(1), dp(48)));
-        header.addView(weatherCard, new LinearLayout.LayoutParams(0, -1, 38));
-        View eventRule = new View(this);
-        eventRule.setBackgroundColor(light ? LiquidTheme.border(this) : 0x55CDD0D4);
-        header.addView(eventRule, new LinearLayout.LayoutParams(dp(1), dp(48)));
-        header.addView(homeCalendarCard, new LinearLayout.LayoutParams(0, -1, 40));
+        header.addView(greeting, new LinearLayout.LayoutParams(-2, -2));
+        header.addView(new View(this), new LinearLayout.LayoutParams(0, 1, 1));
+        LinearLayout.LayoutParams calendarPillParams = new LinearLayout.LayoutParams(-2, pillHeight);
+        calendarPillParams.rightMargin = dp(12);
+        header.addView(homeCalendarCard, calendarPillParams);
+        LinearLayout.LayoutParams weatherPillParams = new LinearLayout.LayoutParams(-2, pillHeight);
+        weatherPillParams.rightMargin = dp(12);
+        header.addView(weatherCard, weatherPillParams);
+        header.addView(timeCard, new LinearLayout.LayoutParams(-2, pillHeight));
         FrameLayout topBar = new FrameLayout(this);
-        topBar.setPadding(dp(20), dp(16), dp(20), 0);
+        topBar.setPadding(dp(40), dp(18), dp(40), 0);
+        topBar.setClipChildren(false);
+        topBar.setClipToPadding(false);
         topBar.addView(header, new FrameLayout.LayoutParams(-1, topCardHeight));
         FrameLayout.LayoutParams musicParams = new FrameLayout.LayoutParams(weatherWidth, -2, Gravity.END | Gravity.TOP);
         musicParams.topMargin = topCardHeight + dp(8);
@@ -1023,7 +1038,7 @@ public final class MainActivity extends Activity {
 
         homeContent = new LinearLayout(this);
         homeContent.setOrientation(LinearLayout.VERTICAL);
-        homeContent.setPadding(dp(40), 0, dp(20), dp(12));
+        homeContent.setPadding(dp(40), 0, dp(40), dp(14));
         homeContent.setClipChildren(true);
         homeContent.setClipToPadding(false);
         homeContent.setBackgroundColor(Color.TRANSPARENT);
@@ -1032,26 +1047,29 @@ public final class MainActivity extends Activity {
         View appsSpacer = new View(this);
         homeContent.addView(appsSpacer, new LinearLayout.LayoutParams(-1, dp(6)));
 
+        // The glass shelf: square glass tiles (inputs, a divider, apps, then "+") on frosted glass.
+        FrameLayout shelf = new FrameLayout(this);
+        shelf.setBackground(shelfBackground());
+        shelf.setPadding(dp(SHELF_SIDE), 0, dp(SHELF_SIDE), 0);
+        // Tiles scrolled out of view stop at the shelf's inner edge.
+        shelf.setClipChildren(true);
+        shelf.setClipToPadding(true);
         HorizontalScrollView appScroll = new HorizontalScrollView(this);
         appScrollView = appScroll;
         appScroll.setHorizontalScrollBarEnabled(false);
         appScroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        // Room around the row for the focus lift (6 % zoom): the zoomed tile may draw into the
-        // padding, while tiles scrolled out of view are still clipped at the row's edges.
-        appScroll.setPadding(0, dp(18), 0, dp(18));
+        // Room above and below for the focus lift and ring, inside the shelf.
+        appScroll.setPadding(0, dp(SHELF_PAD), 0, dp(SHELF_PAD));
         appScroll.setClipChildren(true);
         appScroll.setClipToPadding(false);
         appScroll.setHorizontalFadingEdgeEnabled(true);
-        appScroll.setFadingEdgeLength(dp(18));
+        appScroll.setFadingEdgeLength(dp(14));
         appRow = new LinearLayout(this);
         appRow.setOrientation(LinearLayout.HORIZONTAL);
+        appRow.setGravity(Gravity.CENTER_VERTICAL);
         appRow.setClipChildren(false);
         appRow.setClipToPadding(false);
-        // Inner margin so the first and last tiles can zoom on focus without being cut square.
-        // Left margin for the first tile's focus zoom. No right margin: the fifth tile's gap ends
-        // exactly at the row's edge, so the next tile starts just out of view instead of peeking in cut.
-        appRow.setPadding(dp(18), 0, 0, 0);
-        appScroll.addView(appRow);
+        appScroll.addView(appRow, new HorizontalScrollView.LayoutParams(-2, -1));
         appScroll.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
             int width = r - l;
             if (width > 0 && width != laidOutRowWidth) {
@@ -1059,7 +1077,9 @@ public final class MainActivity extends Activity {
                 if (lastShownApps != null && movingPackage == null) v.post(() -> showApps(lastShownApps));
             }
         });
-        homeContent.addView(appScroll, new LinearLayout.LayoutParams(-1, dp(APP_TILE_HEIGHT + 40)));
+        shelf.addView(appScroll, new FrameLayout.LayoutParams(-1, -1));
+        shelf.setElevation(dp(8));
+        homeContent.addView(shelf, new LinearLayout.LayoutParams(-1, dp(SHELF_HEIGHT)));
 
         LinearLayout gamesHeading = new LinearLayout(this);
         gamesHeading.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
@@ -2305,7 +2325,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         clockDivider.setVisibility(View.GONE);
         date.setVisibility(preferences.getBoolean("showDate", true)
                 ? View.VISIBLE : View.GONE);
-        date.setText(new java.text.SimpleDateFormat("EEE, dd MMM yyyy", Locale.getDefault()).format(now).toUpperCase(Locale.getDefault()));
+        String day = new java.text.SimpleDateFormat("EEEE, d 'de' MMMM", Locale.getDefault()).format(now);
+        date.setText(day.isEmpty() ? day : day.substring(0, 1).toUpperCase(Locale.getDefault()) + day.substring(1));
         if (greeting != null) {
             int hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY);
             greeting.setText(Greeting.line(hour, preferences.getString("userName", Greeting.DEFAULT_NAME)));
@@ -2403,7 +2424,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         if (weatherForecast == null) {
             weatherSymbol.setText("☀");
             weatherTemperature.setText(hasWeatherLocation() ? "Weather unavailable" : "Weather not set");
-            weatherTemperature.setTextSize(compactNavigation ? 14 : 16);
+            weatherTemperature.setTextSize(13);
             weatherTemperature.setTextColor(light ? LiquidTheme.text(this) : 0xFFF5FAF8);
             weatherCondition.setText(hasWeatherLocation() ? "Refresh in Settings" : "Configure in Settings");
             weatherCondition.setVisibility(View.VISIBLE);
@@ -2417,7 +2438,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         boolean fahrenheit = preferences.getBoolean("weatherFahrenheit", false);
         weatherSymbol.setText(WeatherRepository.symbol(weatherForecast.code, weatherForecast.day));
         double temperature = fahrenheit ? WeatherRepository.fahrenheit(weatherForecast.temperature) : weatherForecast.temperature;
-        weatherTemperature.setTextSize(compactNavigation ? 28 : 32);
+        weatherTemperature.setTextSize(compactNavigation ? 17 : 19);
         weatherTemperature.setTextColor(light ? LiquidTheme.text(this) : Color.WHITE);
         String temperatureText = Math.round(temperature) + (fahrenheit ? "°F" : "°C");
         SpannableString styledTemperature = new SpannableString(temperatureText);
@@ -2433,7 +2454,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         weatherCondition.setVisibility(View.VISIBLE);
         weatherDetails.setText("Feels like " + Math.round(apparent) + (fahrenheit ? "°F" : "°C"));
         weatherDetails.setVisibility(View.VISIBLE);
-        weatherLocation.setText("⌖  " + weatherForecast.location);
+        weatherLocation.setText(weatherForecast.location);
         weatherMetrics.setText("≋  " + Math.round(wind) + (mph ? " mph" : " km/h")
                 + (weatherForecast.humidity >= 0 ? "    💧 " + weatherForecast.humidity + "%" : ""));
         weatherPanel.setContentDescription(weatherTemperature.getText() + ". " + weatherCondition.getText()
@@ -2799,7 +2820,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             homeCalendarEyebrow.setText("EN DIRECTO · " + homeLiveGame.status().toUpperCase(Locale.ROOT)
                     + " · " + homeLiveGame.competition.toUpperCase(Locale.ROOT));
             homeCalendarTitle.setText(homeLiveGame.scoreLine());
-            homeCalendarSubtitle.setText("Pulsa para verlo");
+            homeCalendarSubtitle.setText("En directo · " + homeLiveGame.status() + " · " + homeLiveGame.competition);
             return;
         }
         // A live match, or one starting within a day and a half, takes over the event card.
@@ -2809,7 +2830,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             homeCalendarEyebrow.setText(live ? "EN DIRECTO · " + homeMatch.competition.toUpperCase(Locale.ROOT)
                     : "PRÓXIMO PARTIDO");
             homeCalendarTitle.setText(homeMatch.title);
-            homeCalendarSubtitle.setText(live ? "Pulsa para verlo"
+            homeCalendarSubtitle.setText(live ? "En directo · " + homeMatch.competition
                     : MatchesActivity.dayLabel(homeMatch.startMs, matchNow) + " · "
                     + (homeMatch.timeTbc ? "hora por confirmar" : MatchesActivity.timeLabel(homeMatch.startMs))
                     + " · " + homeMatch.competition);
@@ -2989,20 +3010,20 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             Set<String> selectedSet = new HashSet<>(selected);
             PackageManager packageManager = getPackageManager();
             ArrayList<AppEntry> withIcons = new ArrayList<>(loaded.size());
-            HashSet<String> banners = new HashSet<>();
+            HashMap<String, Integer> colors = new HashMap<>();
             for (AppEntry entry : loaded) {
                 Drawable icon = null;
                 if (selectedSet.contains(entry.packageName)) {
-                    // TV apps ship a 16:9 banner; fall back to the launcher icon.
-                    try { icon = packageManager.getApplicationBanner(entry.info); } catch (Exception ignored) { }
-                    if (icon != null) banners.add(entry.packageName);
-                    else try { icon = packageManager.getApplicationIcon(entry.info); } catch (Exception ignored) { }
+                    // Square glass tiles show the app's own icon; the 16:9 banner only when there is no icon.
+                    try { icon = packageManager.getApplicationIcon(entry.info); } catch (Exception ignored) { }
+                    if (icon == null) try { icon = packageManager.getApplicationBanner(entry.info); } catch (Exception ignored) { }
+                    colors.put(entry.packageName, ShelfTile.dominantColor(icon));
                 }
                 withIcons.add(new AppEntry(entry.info, entry.packageName, entry.label, icon));
             }
             handler.post(() -> {
-                appBanners.clear();
-                appBanners.addAll(banners);
+                appColors.clear();
+                appColors.putAll(colors);
                 tvInputs = inputs;
                 showApps(withIcons);
             });
@@ -3024,72 +3045,42 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             if (selected.isEmpty()) for (AppEntry entry : all) selected.add(entry.packageName);
         }
         for (TvInputs.Input input : tvInputs) addInputTile(input, light);
+        if (!tvInputs.isEmpty()) addShelfDivider();
         int displayed = 0;
         for (String packageName : selected) {
             AppEntry entry = findApp(all, packageName);
             if (entry == null) continue;
-            LinearLayout tile = new LinearLayout(this);
+            FrameLayout tile = new FrameLayout(this);
             tile.setId(View.generateViewId());
-            tile.setGravity(Gravity.CENTER);
-            tile.setOrientation(LinearLayout.HORIZONTAL);
             tile.setFocusable(true);
             tile.setClickable(true);
-            StateListDrawable appTileStates = new StateListDrawable();
-            String brand = (entry.packageName + " " + entry.label).toLowerCase(Locale.ROOT);
-            boolean isBranded = brand.contains("netflix") || brand.contains("prime") || brand.contains("disney")
-                    || brand.contains("youtube") || brand.contains("apple");
-            int cardColor = brand.contains("netflix") ? 0xED071316
-                    : brand.contains("prime") ? 0xF00678B9
-                    : brand.contains("disney") ? 0xF00D1A55
-                    : brand.contains("youtube") ? 0xF4FAFAFA
-                    : brand.contains("apple") ? 0xF4FAFAFA
-                    : (light ? LiquidTheme.surface(this) : 0xCE1C1C1E);
-            boolean whiteCard = brand.contains("youtube") || brand.contains("apple");
-            int focusColor = isBranded ? cardColor : (light ? LiquidTheme.raisedSurface(this) : cardColor);
-            int unfocusedBg = isBranded ? cardColor : (light ? LiquidTheme.surface(this) : 0xB51C1C1E);
-            int unfocusedBorder = light ? LiquidTheme.border(this) : 0x66FFFFFF;
-            int focusedBorder = LiquidTheme.accent(this);
-            if (isBranded) {
-                appTileStates.addState(new int[]{android.R.attr.state_focused},
-                        roundedShape(focusColor, LiquidTheme.glassFocusedRim(this), 1, 16));
-                appTileStates.addState(new int[]{android.R.attr.state_pressed},
-                        roundedShape(focusColor, LiquidTheme.glassFocusedRim(this), 1, 16));
-                appTileStates.addState(new int[]{}, roundedShape(unfocusedBg, LiquidTheme.glassRim(this), 1, 16));
-                tile.setBackground(appTileStates);
-            } else {
-                tile.setBackground(glassTileStates(16));
-            }
             tile.setFocusableInTouchMode(false);
-            tile.setElevation(dp(2));
-            tile.setOnFocusChangeListener(LiquidTheme::animateFocus);
             tile.setTag(packageName);
             tile.setContentDescription(entry.label);
-            // Image-only tiles: the app's TV banner fills the card; otherwise its icon, centred.
-            ImageView icon = new ImageView(this);
-            icon.setImageDrawable(entry.icon);
-            boolean banner = appBanners.contains(entry.packageName) && entry.icon != null;
-            if (banner) {
-                tile.setPadding(dp(3), dp(3), dp(3), dp(3));
-                icon.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            boolean moving = entry.packageName.equals(movingPackage);
+            Integer color = appColors.get(entry.packageName);
+            FrameLayout glass = ShelfTile.glass(this, color != null ? color : ShelfTile.dominantColor(entry.icon), moving);
+            if (entry.icon != null) {
+                // The app's icon, rounded like an iOS icon, in the middle of the glass.
+                ImageView icon = new ImageView(this);
+                icon.setImageDrawable(entry.icon);
+                icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
                 icon.setClipToOutline(true);
                 icon.setOutlineProvider(new android.view.ViewOutlineProvider() {
                     @Override public void getOutline(View view, android.graphics.Outline outline) {
-                        outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), dp(13));
+                        outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), dp(14));
                     }
                 });
-                tile.addView(icon, new LinearLayout.LayoutParams(-1, -1));
-            } else if (entry.icon != null) {
-                tile.setPadding(dp(8), dp(8), dp(8), dp(8));
-                icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                tile.addView(icon, new LinearLayout.LayoutParams(dp(56), dp(56)));
+                glass.addView(icon, ShelfTile.logoParams(this));
             } else {
                 // No artwork at all: keep the name so the tile is still identifiable.
-                TextView name = label(entry.label, 13, isBranded && !whiteCard ? Color.WHITE
-                        : (light ? LiquidTheme.text(this) : Color.WHITE), true);
+                TextView name = label(entry.label, 12, light ? LiquidTheme.text(this) : Color.WHITE, true);
                 name.setGravity(Gravity.CENTER);
-                name.setMaxLines(2);
-                tile.addView(name, new LinearLayout.LayoutParams(-1, -1));
+                name.setMaxLines(3);
+                name.setPadding(dp(8), 0, dp(8), 0);
+                glass.addView(name, new FrameLayout.LayoutParams(-1, -1));
             }
+            ShelfTile.mount(tile, glass);
             tile.setOnClickListener(v -> {
                 if (swallowNextClick) { swallowNextClick = false; return; }
                 if (movingPackage != null) { finishMove(); return; }
@@ -3126,12 +3117,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                         || keyCode == KeyEvent.KEYCODE_ENTER) { finishMove(); return true; }
                 return true;
             });
-            if (entry.packageName.equals(movingPackage)) {
-                tile.setBackground(roundedShape(LiquidTheme.glassFocusedTint(this), LiquidTheme.accent(this), 3, 16));
-            }
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(appTileWidthPx(), dp(APP_TILE_HEIGHT));
-            lp.setMargins(0, 0, dp(APP_TILE_GAP), 0);
-            appRow.addView(tile, lp);
+            appRow.addView(tile, new LinearLayout.LayoutParams(slotWidthPx(), -1));
             if (displayed == 0) tabEntryFocus[TAB_HOME] = tvInputs.isEmpty() ? tile : appRow.getChildAt(0);
             displayed++;
             if ((initialAppFocus || movingPackage != null) && activeTab == TAB_HOME && settingsScreen == null
@@ -3309,31 +3295,44 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
 
     /** Last tile of the row: opens the app picker so apps can be added straight from Home. */
     private void addMoreAppsTile(boolean light) {
-        LinearLayout tile = new LinearLayout(this);
+        FrameLayout tile = new FrameLayout(this);
         tile.setId(View.generateViewId());
-        tile.setOrientation(LinearLayout.VERTICAL);
-        tile.setGravity(Gravity.CENTER);
         tile.setFocusable(true);
         tile.setClickable(true);
         tile.setFocusableInTouchMode(false);
-        tile.setBackground(glassTileStates(16));
-        tile.setElevation(dp(2));
-        tile.setOnFocusChangeListener(LiquidTheme::animateFocus);
         tile.setTag("add-apps");
         tile.setContentDescription("Añadir apps");
+        FrameLayout glass = ShelfTile.glass(this, 0xFF9FB4D6, false);
         int ink = light ? LiquidTheme.text(this) : Color.WHITE;
-        TextView plus = label("+", 34, ink, false);
+        LinearLayout copy = new LinearLayout(this);
+        copy.setOrientation(LinearLayout.VERTICAL);
+        copy.setGravity(Gravity.CENTER);
+        TextView plus = label("+", 36, ink, false);
         plus.setGravity(Gravity.CENTER);
         plus.setIncludeFontPadding(false);
-        tile.addView(plus, new LinearLayout.LayoutParams(-2, -2));
-        TextView name = label("Añadir apps", 13, LiquidTheme.secondaryText(this), true);
+        copy.addView(plus, new LinearLayout.LayoutParams(-2, -2));
+        TextView name = label("Añadir", 12, light ? LiquidTheme.secondaryText(this) : 0xCCFFFFFF, true);
         name.setGravity(Gravity.CENTER);
-        tile.addView(name, new LinearLayout.LayoutParams(-2, -2));
+        copy.addView(name, new LinearLayout.LayoutParams(-2, -2));
+        glass.addView(copy, new FrameLayout.LayoutParams(-1, -1));
+        ShelfTile.mount(tile, glass);
         tile.setOnLongClickListener(v -> true);
         tile.setOnClickListener(v -> openAppSettings());
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(appTileWidthPx(), dp(APP_TILE_HEIGHT));
-        lp.setMargins(0, 0, dp(APP_TILE_GAP), 0);
-        appRow.addView(tile, lp);
+        appRow.addView(tile, new LinearLayout.LayoutParams(slotWidthPx(), -1));
+    }
+
+    /** Thin vertical line, bright in the middle, between the TV's inputs and the apps. */
+    private void addShelfDivider() {
+        View line = new View(this);
+        line.setTag("divider");
+        line.setFocusable(false);
+        line.setBackground(new android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
+                LiquidTheme.isLight(this) ? new int[]{0x00000000, 0x33000000, 0x33000000, 0x00000000}
+                        : new int[]{0x00FFFFFF, 0x52FFFFFF, 0x52FFFFFF, 0x00FFFFFF}));
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(Math.max(1, dp(1)), dp(ShelfTile.GLASS_DP));
+        params.setMargins(dp((SHELF_DIVIDER - 1) / 2), 0, dp(SHELF_DIVIDER - 1 - (SHELF_DIVIDER - 1) / 2), 0);
+        appRow.addView(line, params);
     }
 
     private void openAppSettings() {
@@ -3357,39 +3356,39 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
 
     /** A tile that switches the TV to one of its inputs (HDMI port or the antenna tuner). */
     private void addInputTile(TvInputs.Input input, boolean light) {
-        LinearLayout tile = new LinearLayout(this);
+        FrameLayout tile = new FrameLayout(this);
         tile.setId(View.generateViewId());
-        tile.setOrientation(LinearLayout.VERTICAL);
-        tile.setGravity(Gravity.CENTER);
         tile.setFocusable(true);
         tile.setClickable(true);
         tile.setFocusableInTouchMode(false);
-        tile.setBackground(glassTileStates(16));
-        tile.setElevation(dp(2));
-        tile.setOnFocusChangeListener(LiquidTheme::animateFocus);
         tile.setTag("input:" + input.id);
         tile.setContentDescription(input.label);
+        // HDMI glows soft blue, the antenna green, like the reference launcher's input tiles.
+        FrameLayout glass = ShelfTile.glass(this, input.kind == TvInputs.TUNER ? 0xFF6FD08C : 0xFF8FB8FF, false);
         int ink = light ? LiquidTheme.text(this) : Color.WHITE;
+        LinearLayout copy = new LinearLayout(this);
+        copy.setOrientation(LinearLayout.VERTICAL);
+        copy.setGravity(Gravity.CENTER);
+        copy.setPadding(dp(8), 0, dp(8), 0);
         ImageView icon = new ImageView(this);
         icon.setImageResource(input.kind == TvInputs.TUNER ? R.drawable.ic_antenna : R.drawable.ic_hdmi);
         icon.setColorFilter(input.connected ? ink : (ink & 0x00FFFFFF) | 0x80000000);
-        tile.addView(icon, new LinearLayout.LayoutParams(dp(34), dp(34)));
-        TextView name = label(input.label, 14, input.connected ? ink : LiquidTheme.secondaryText(this), true);
+        copy.addView(icon, new LinearLayout.LayoutParams(dp(36), dp(36)));
+        TextView name = label(input.label, 12, input.connected ? ink : (light ? LiquidTheme.secondaryText(this) : 0xB3FFFFFF), true);
         name.setGravity(Gravity.CENTER);
         name.setSingleLine(true);
         name.setEllipsize(android.text.TextUtils.TruncateAt.END);
         LinearLayout.LayoutParams nameParams = new LinearLayout.LayoutParams(-1, -2);
-        nameParams.topMargin = dp(4);
-        tile.addView(name, nameParams);
-        tile.setPadding(dp(8), dp(8), dp(8), dp(8));
+        nameParams.topMargin = dp(6);
+        copy.addView(name, nameParams);
+        glass.addView(copy, new FrameLayout.LayoutParams(-1, -1));
+        ShelfTile.mount(tile, glass);
         tile.setOnLongClickListener(v -> true);   // inputs stay first; holding OK does nothing
         tile.setOnClickListener(v -> {
             if (!TvInputs.open(this, input)) Tr.toast(this, "Esta tele no deja abrir " + input.label + " desde aquí.",
                     Toast.LENGTH_LONG).show();
         });
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(appTileWidthPx(), dp(APP_TILE_HEIGHT));
-        lp.setMargins(0, 0, dp(APP_TILE_GAP), 0);
-        appRow.addView(tile, lp);
+        appRow.addView(tile, new LinearLayout.LayoutParams(slotWidthPx(), -1));
     }
 
     private List<YouTubeCard> savedYouTubeCards() {
@@ -3972,6 +3971,39 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         return roundedShape(startColor, strokeColor, strokeWidth, radiusDp);
     }
 
+    /** Top bar pill: dark frosted glass with a bright top edge; focus lights it and draws a white rim. */
+    private StateListDrawable pillBackground() {
+        boolean light = LiquidTheme.isLight(this);
+        StateListDrawable states = new StateListDrawable();
+        Drawable focused = pillShape(light ? new int[]{0xF2FFFFFF, 0xE6FFFFFF} : new int[]{0x8C5A6280, 0x80343A58},
+                light ? LiquidTheme.accent(this) : Color.WHITE, 2);
+        states.addState(new int[]{android.R.attr.state_focused}, focused);
+        states.addState(new int[]{android.R.attr.state_pressed}, focused);
+        states.addState(new int[]{}, pillShape(light ? new int[]{0xB3FFFFFF, 0x8CFFFFFF} : new int[]{0x8A363C5A, 0x7314192F, 0x80202640},
+                light ? 0x99FFFFFF : 0x40FFFFFF, 1));
+        return states;
+    }
+
+    private Drawable pillShape(int[] colors, int rim, int rimDp) {
+        android.graphics.drawable.GradientDrawable shape = new android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.TL_BR, colors);
+        shape.setCornerRadius(dp(999));
+        shape.setStroke(dp(rimDp), rim);
+        return shape;
+    }
+
+    /** The glass shelf behind the app tiles (webOS Liquid Glass dock): frost, sheen and a thin rim. */
+    private Drawable shelfBackground() {
+        boolean light = LiquidTheme.isLight(this);
+        android.graphics.drawable.GradientDrawable shape = new android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.TL_BR, light
+                        ? new int[]{0xB3FFFFFF, 0x8CFFFFFF, 0x80FFFFFF, 0x99FFFFFF}
+                        : new int[]{0x8A3A4062, 0x6E1C2240, 0x6614193A, 0x7A2A3050});
+        shape.setCornerRadius(dp(42));
+        shape.setStroke(Math.max(1, dp(1)), light ? 0x99FFFFFF : 0x38FFFFFF);
+        return shape;
+    }
+
     /** Liquid Glass tile: frosted wallpaper with a thin rim; focus brightens it and the rim turns white. */
     private StateListDrawable glassTileStates(int radiusDp) {
         StateListDrawable states = new StateListDrawable();
@@ -4088,24 +4120,23 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
      * Until the viewer picks apps, Home starts with these streaming services, in this order, when
      * installed. Matched by label so it works with the Fire TV, Android TV and phone builds alike.
      */
-    /** 16:9 tiles so TV banners fit without cropping. */
-    private static final int APP_TILE_WIDTH = 160, APP_TILE_HEIGHT = 90;
-    /** Gap between home tiles: wide enough that the focus zoom never touches the neighbours. */
-    private static final int APP_TILE_GAP = 16;
-    private static final int APP_TILES_VISIBLE = 5;
+    /** Shelf geometry (dp): glass tiles of {@link ShelfTile#GLASS_DP} with room for the focus lift and ring. */
+    private static final int SHELF_PAD = 19, SHELF_SIDE = 14;
+    private static final int SHELF_HEIGHT = ShelfTile.GLASS_DP + 2 * SHELF_PAD;
+    /** Divider between the TV inputs and the apps: 1 dp line with 10 dp either side. */
+    private static final int SHELF_DIVIDER = 21;
 
     /**
-     * Tile width so exactly five tiles and their gaps fill the row on this screen: no tile is cut
-     * at the right edge until the row actually scrolls. Row insets: home padding 40+20, row 18 on the left.
+     * Width of one tile slot so a whole number of slots (plus the divider, when the TV has inputs)
+     * fills the shelf exactly: nothing is cut at the right edge until the row scrolls.
      */
-    private int appTileWidthPx() {
-        // Measured on screen: the row's real width, minus its left margin, shared by five tiles and
-        // their gaps. Before the first layout, estimate from the screen width.
-        int gap = dp(APP_TILE_GAP);
-        int rowWidth = appScrollView != null ? appScrollView.getWidth() : 0;
-        if (rowWidth <= 0) rowWidth = getResources().getDisplayMetrics().widthPixels - dp(40 + 20);
-        int width = (rowWidth - dp(18) - gap * APP_TILES_VISIBLE) / APP_TILES_VISIBLE;
-        return Math.max(dp(120), Math.min(dp(200), width));
+    private int slotWidthPx() {
+        int width = appScrollView != null ? appScrollView.getWidth() : 0;
+        if (width <= 0) width = getResources().getDisplayMetrics().widthPixels - dp(40 + 40 + 2 * SHELF_SIDE);
+        int divider = tvInputs.isEmpty() ? 0 : dp(SHELF_DIVIDER);
+        int room = Math.max(dp(ShelfTile.SLOT_DP), width - divider);
+        int slots = Math.max(1, room / dp(ShelfTile.SLOT_DP));
+        return room / slots;
     }
 
     private static final String[] DEFAULT_APP_LABELS = {"movistar", "disney", "dazn", "prime video"};

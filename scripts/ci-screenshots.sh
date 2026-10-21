@@ -69,6 +69,13 @@ adb shell am start -W -n com.sva.launcher/.MainActivity > /dev/null
 sleep 12
 shot 09-dark-home
 key KEYCODE_DPAD_RIGHT; shot 10-dark-focus
+# The TV as it will look: inputs, today's row and the shelf together, in dark mode.
+adb shell am force-stop com.sva.launcher
+adb shell am start -W -n com.sva.launcher/.MainActivity --ez demo_tv_inputs true --ez demo_watching true > /dev/null
+sleep 15
+shot 11-tv-full
+key KEYCODE_DPAD_LEFT; shot 11b-tv-full-input-focus
+key KEYCODE_DPAD_UP 1.5; key KEYCODE_DPAD_UP 1.5; shot 11c-tv-full-top-pill
 adb shell cmd uimode night no
 adb shell dumpsys tv_input > "$OUT/tv_input.txt" 2>&1
 adb logcat -d | grep -vE "RuntimeInit|commands.input|Shutting down VM|default boot image|lock profiling" | tail -400 > "$OUT/log.txt"
