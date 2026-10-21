@@ -815,6 +815,8 @@ public final class MainActivity extends Activity {
         tabShell.removeView(navigation);
         tabShell.addView(navigation, new LinearLayout.LayoutParams(-1, dp(dockHeight)));
         FrameLayout heroContent = new FrameLayout(this);
+        // Let focused cards (today's games, Estoy viendo) zoom past their column without a square cut.
+        heroContent.setClipChildren(false);
         // Leave exactly the height of the app row block (spacer + row + bottom padding) above
         // the dock, so taller banner tiles are not hidden behind it.
         int appBlockDp = 6 + APP_TILE_HEIGHT + 40 + 12 + 6;
