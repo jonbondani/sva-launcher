@@ -185,6 +185,8 @@ public final class MainActivity extends Activity {
     private String focusedPackage;
     private ImageView wallpaperImage, slideA, slideB;
     private TextView clock, clockPeriod, date, status;
+    /** "Buenos días, jonbondani": large tvOS-style title above the home rows. */
+    private TextView greeting;
     private LinearLayout weatherPanel;
     private TextView weatherTemperature, weatherCondition, weatherDetails, weatherLocation, weatherMetrics;
     private TextView weatherSymbol, homeCalendarEyebrow, homeCalendarTitle, homeCalendarSubtitle;
@@ -197,6 +199,9 @@ public final class MainActivity extends Activity {
     /** HDMI ports and the tuner of a TV (empty on sticks and boxes), shown first in the app row. */
     private List<TvInputs.Input> tvInputs = new ArrayList<>();
     private boolean demoTvInputs;
+    /** App being moved in the home row (hold OK on a tile), or null. */
+    private String movingPackage;
+    private List<AppEntry> lastShownApps;
     private String homeLiveSignature = "";
     private boolean liveScoresRunning;
     private Runnable matchTick;
@@ -801,7 +806,7 @@ public final class MainActivity extends Activity {
         FrameLayout heroContent = new FrameLayout(this);
         // Leave exactly the height of the app row block (spacer + row + bottom padding) above
         // the dock, so taller banner tiles are not hidden behind it.
-        int appBlockDp = 34 + APP_TILE_HEIGHT + 24 + 32 + 6;
+        int appBlockDp = 34 + APP_TILE_HEIGHT + 40 + 32 + 6;
         root.addView(heroContent, new LinearLayout.LayoutParams(-1,
                 dp(Math.max(180, heroHeightDp() - dockHeight - appBlockDp))));
         // Today's games of the followed teams, Google-sports style, above the app row.
@@ -812,6 +817,17 @@ public final class MainActivity extends Activity {
         FrameLayout.LayoutParams stripParams = new FrameLayout.LayoutParams(-2, -2, Gravity.BOTTOM | Gravity.START);
         stripParams.setMargins(dp(40), 0, dp(20), dp(6));
         heroContent.addView(homeLiveStrip, stripParams);
+        greeting = new TextView(this);
+        greeting.setTextSize(compactNavigation ? 30 : 34);
+        greeting.setTypeface(LiquidTheme.bold(this));
+        greeting.setLetterSpacing(-.01f);
+        greeting.setTextColor(LiquidTheme.isLight(this) ? LiquidTheme.text(this) : Color.WHITE);
+        greeting.setShadowLayer(dp(8), 0, dp(1), LiquidTheme.isLight(this) ? 0x33FFFFFF : 0x66000000);
+        greeting.setSingleLine(true);
+        greeting.setVisibility(preferences.getBoolean("showGreeting", true) ? View.VISIBLE : View.GONE);
+        FrameLayout.LayoutParams greetingParams = new FrameLayout.LayoutParams(-2, -2, Gravity.TOP | Gravity.START);
+        greetingParams.setMargins(dp(48), dp(18), dp(20), 0);
+        heroContent.addView(greeting, greetingParams);
         renderWeather();
 
         int topCardHeight = dp(compactNavigation ? 78 : 82);
@@ -994,7 +1010,7 @@ public final class MainActivity extends Activity {
         appScroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         // Room around the row for the focus lift (6 % zoom): the zoomed tile may draw into the
         // padding, while tiles scrolled out of view are still clipped at the row's edges.
-        appScroll.setPadding(dp(12), dp(10), dp(12), dp(10));
+        appScroll.setPadding(dp(14), dp(18), dp(14), dp(18));
         appScroll.setClipChildren(true);
         appScroll.setClipToPadding(false);
         appRow = new LinearLayout(this);
@@ -1002,7 +1018,7 @@ public final class MainActivity extends Activity {
         appRow.setClipChildren(false);
         appRow.setClipToPadding(false);
         appScroll.addView(appRow);
-        homeContent.addView(appScroll, new LinearLayout.LayoutParams(-1, dp(APP_TILE_HEIGHT + 24)));
+        homeContent.addView(appScroll, new LinearLayout.LayoutParams(-1, dp(APP_TILE_HEIGHT + 40)));
 
         LinearLayout gamesHeading = new LinearLayout(this);
         gamesHeading.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
@@ -2247,6 +2263,10 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         date.setVisibility(preferences.getBoolean("showDate", true)
                 ? View.VISIBLE : View.GONE);
         date.setText(new java.text.SimpleDateFormat("EEE, dd MMM yyyy", Locale.getDefault()).format(now).toUpperCase(Locale.getDefault()));
+        if (greeting != null) {
+            int hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY);
+            greeting.setText(Greeting.line(hour, preferences.getString("userName", Greeting.DEFAULT_NAME)));
+        }
     }
 
     private void updateNowPlaying() {
@@ -2946,6 +2966,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         if (appRow == null || isFinishing()) return;
         appsLoading = false;
         appsLoaded = true;
+        lastShownApps = all;
         View previous = appRow.findFocus();
         if (previous != null && previous.getTag() instanceof String) focusedPackage = (String) previous.getTag();
         appRow.removeAllViews();
@@ -2981,13 +3002,16 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             int unfocusedBg = isBranded ? cardColor : (light ? LiquidTheme.surface(this) : 0xB51C1C1E);
             int unfocusedBorder = light ? LiquidTheme.border(this) : 0x66FFFFFF;
             int focusedBorder = LiquidTheme.accent(this);
-            appTileStates.addState(new int[]{android.R.attr.state_focused},
-                    roundedShape(focusColor, focusedBorder, 2, 16));
-            appTileStates.addState(new int[]{android.R.attr.state_pressed},
-                    roundedShape(focusColor, focusedBorder, 2, 16));
-            appTileStates.addState(new int[]{},
-                    roundedShape(unfocusedBg, unfocusedBorder, 1, 16));
-            tile.setBackground(appTileStates);
+            if (isBranded) {
+                appTileStates.addState(new int[]{android.R.attr.state_focused},
+                        roundedShape(focusColor, LiquidTheme.glassFocusedRim(this), 1, 16));
+                appTileStates.addState(new int[]{android.R.attr.state_pressed},
+                        roundedShape(focusColor, LiquidTheme.glassFocusedRim(this), 1, 16));
+                appTileStates.addState(new int[]{}, roundedShape(unfocusedBg, LiquidTheme.glassRim(this), 1, 16));
+                tile.setBackground(appTileStates);
+            } else {
+                tile.setBackground(glassTileStates(16));
+            }
             tile.setFocusableInTouchMode(false);
             tile.setElevation(dp(2));
             tile.setOnFocusChangeListener(LiquidTheme::animateFocus);
@@ -3019,13 +3043,39 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                 name.setMaxLines(2);
                 tile.addView(name, new LinearLayout.LayoutParams(-1, -1));
             }
-            tile.setOnClickListener(v -> launchApp(entry.packageName));
+            tile.setOnClickListener(v -> {
+                if (movingPackage != null) { finishMove(); return; }
+                launchApp(entry.packageName);
+            });
+            // Hold OK to move the app; left/right moves it, OK or Back drops it.
+            tile.setOnLongClickListener(v -> { startMove(entry.packageName); return true; });
+            final List<String> rowOrder = selected;
+            tile.setOnKeyListener((v, keyCode, event) -> {
+                if (!entry.packageName.equals(movingPackage)) return false;
+                if (event.getAction() != KeyEvent.ACTION_DOWN) return keyCode == KeyEvent.KEYCODE_DPAD_LEFT
+                        || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT || keyCode == KeyEvent.KEYCODE_BACK;
+                if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                    List<String> order = AppOrder.move(rowOrder, entry.packageName,
+                            keyCode == KeyEvent.KEYCODE_DPAD_LEFT ? -1 : 1);
+                    preferences.edit().putBoolean("customApps", true)
+                            .putString("selectedApps", String.join("\n", order)).apply();
+                    focusedPackage = entry.packageName;
+                    showApps(lastShownApps);
+                    return true;
+                }
+                if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_DPAD_CENTER
+                        || keyCode == KeyEvent.KEYCODE_ENTER) { finishMove(); return true; }
+                return true;
+            });
+            if (entry.packageName.equals(movingPackage)) {
+                tile.setBackground(roundedShape(LiquidTheme.glassFocusedTint(this), LiquidTheme.accent(this), 3, 16));
+            }
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(APP_TILE_WIDTH), dp(APP_TILE_HEIGHT));
             lp.setMargins(0, 0, dp(8), 0);
             appRow.addView(tile, lp);
             if (displayed == 0) tabEntryFocus[TAB_HOME] = tvInputs.isEmpty() ? tile : appRow.getChildAt(0);
             displayed++;
-            if (initialAppFocus && activeTab == TAB_HOME && settingsScreen == null
+            if ((initialAppFocus || movingPackage != null) && activeTab == TAB_HOME && settingsScreen == null
                     && packageName.equals(focusedPackage)) tile.requestFocus();
         }
         if (displayed > 0) {
@@ -3053,6 +3103,18 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         }
     }
 
+    private void startMove(String packageName) {
+        movingPackage = packageName;
+        focusedPackage = packageName;
+        if (lastShownApps != null) showApps(lastShownApps);
+        Tr.toast(this, "Mueve la app con ← y →. Pulsa OK para dejarla.", Toast.LENGTH_LONG).show();
+    }
+
+    private void finishMove() {
+        movingPackage = null;
+        if (lastShownApps != null) showApps(lastShownApps);
+    }
+
     /** A tile that switches the TV to one of its inputs (HDMI port or the antenna tuner). */
     private void addInputTile(TvInputs.Input input, boolean light) {
         LinearLayout tile = new LinearLayout(this);
@@ -3062,13 +3124,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         tile.setFocusable(true);
         tile.setClickable(true);
         tile.setFocusableInTouchMode(false);
-        int base = light ? LiquidTheme.surface(this) : 0xB51C1C1E;
-        int raised = light ? LiquidTheme.raisedSurface(this) : 0xCE1C1C1E;
-        StateListDrawable states = new StateListDrawable();
-        states.addState(new int[]{android.R.attr.state_focused}, roundedShape(raised, LiquidTheme.accent(this), 2, 16));
-        states.addState(new int[]{android.R.attr.state_pressed}, roundedShape(raised, LiquidTheme.accent(this), 2, 16));
-        states.addState(new int[]{}, roundedShape(base, light ? LiquidTheme.border(this) : 0x66FFFFFF, 1, 16));
-        tile.setBackground(states);
+        tile.setBackground(glassTileStates(16));
         tile.setElevation(dp(2));
         tile.setOnFocusChangeListener(LiquidTheme::animateFocus);
         tile.setTag("input:" + input.id);
@@ -3675,12 +3731,18 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         return roundedShape(startColor, strokeColor, strokeWidth, radiusDp);
     }
 
-    private void styleFocusableTile(View tile) {
+    /** Liquid Glass tile: frosted wallpaper with a thin rim; focus brightens it and the rim turns white. */
+    private StateListDrawable glassTileStates(int radiusDp) {
         StateListDrawable states = new StateListDrawable();
-        states.addState(new int[]{android.R.attr.state_focused}, tileShape(LiquidTheme.raisedSurface(this), LiquidTheme.accent(this), 2));
-        states.addState(new int[]{android.R.attr.state_pressed}, tileShape(LiquidTheme.raisedSurface(this), LiquidTheme.accent(this), 2));
-        states.addState(new int[]{}, tileShape(LiquidTheme.surface(this), LiquidTheme.border(this), 1));
-        tile.setBackground(states);
+        Drawable focused = roundedShape(LiquidTheme.glassFocusedTint(this), LiquidTheme.glassFocusedRim(this), 1, radiusDp);
+        states.addState(new int[]{android.R.attr.state_focused}, focused);
+        states.addState(new int[]{android.R.attr.state_pressed}, focused);
+        states.addState(new int[]{}, roundedShape(LiquidTheme.glassTint(this), LiquidTheme.glassRim(this), 1, radiusDp));
+        return states;
+    }
+
+    private void styleFocusableTile(View tile) {
+        tile.setBackground(glassTileStates(18));
         tile.setFocusable(true);
         tile.setFocusableInTouchMode(false);
         tile.setClickable(true);
@@ -5763,6 +5825,19 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                         dialog.dismiss();
                         MainActivity.this.recreate();
                     });
+            addFormSectionHeader(form, "Saludo");
+            addChoice(form, "Saludo en el inicio", new String[]{"Mostrar", "Ocultar"},
+                    preferences.getBoolean("showGreeting", true) ? 0 : 1, index -> {
+                        preferences.edit().putBoolean("showGreeting", index == 0).apply();
+                        if (greeting != null) greeting.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
+                    });
+            EditText nameField = addInput(form, "Tu nombre", Greeting.DEFAULT_NAME,
+                    preferences.getString("userName", Greeting.DEFAULT_NAME), false);
+            addFormButton(form, "Guardar nombre", v -> {
+                preferences.edit().putString("userName", nameField.getText().toString().trim()).apply();
+                updateClock();
+                Tr.toast(MainActivity.this, "Nombre guardado", Toast.LENGTH_SHORT).show();
+            });
 
             // — Now Playing ————————————————————————————————————————————————————
             addFormSectionHeader(form, "Now Playing");

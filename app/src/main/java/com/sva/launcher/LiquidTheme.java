@@ -89,6 +89,12 @@ final class LiquidTheme {
     static int accent(Context context) { return isLight(context) ? 0xFF007AFF : 0xFF409CFF; }
     static int lavender(Context context) { return secondaryText(context); }
 
+    // Liquid Glass tiles: mostly see-through over the blurred wallpaper, brighter when focused.
+    static int glassTint(Context context) { return isLight(context) ? 0x6BFFFFFF : 0x24FFFFFF; }
+    static int glassFocusedTint(Context context) { return isLight(context) ? 0xEBFFFFFF : 0x5CFFFFFF; }
+    static int glassRim(Context context) { return isLight(context) ? 0x8CFFFFFF : 0x38FFFFFF; }
+    static int glassFocusedRim(Context context) { return 0xF2FFFFFF; }
+
     static Drawable scenicBackground(Context context) {
         Drawable photo = context.getDrawable(R.drawable.mountain_wallpaper);
         GradientDrawable veil = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
@@ -105,9 +111,9 @@ final class LiquidTheme {
     static void animateFocus(android.view.View view, boolean focused) {
         view.animate().cancel();
         // tvOS-style focus: the item lifts towards the viewer (slight zoom and a deeper shadow).
-        float scale = focused ? 1.06f : 1f;
+        float scale = focused ? 1.08f : 1f;
         view.animate().scaleX(scale).scaleY(scale)
-                .translationZ(focused ? dp(view.getContext(), 14) : 0)
+                .translationZ(focused ? dp(view.getContext(), 10) : 0)
                 .setInterpolator(new android.view.animation.DecelerateInterpolator(1.6f))
                 .setDuration(android.animation.ValueAnimator.areAnimatorsEnabled() ? 200 : 0).start();
     }
