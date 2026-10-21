@@ -3325,11 +3325,24 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         ImageView light = new ImageView(this);
         light.setImageBitmap(art.glow);
         light.setScaleType(ImageView.ScaleType.FIT_XY);
-        light.setAlpha(.55f);
-        int lightSize = dp(Math.round(ShelfTile.GLASS_DP * .78f));
+        light.setAlpha(LiquidTheme.isLight(this) ? .5f : .7f);
+        // The blurred logo fills the glass: the light spreads well past the logo and sits a little low.
+        int lightSize = dp(ShelfTile.GLASS_DP);
         FrameLayout.LayoutParams lightParams = new FrameLayout.LayoutParams(lightSize, lightSize, Gravity.CENTER);
-        lightParams.topMargin = dp(8);
+        lightParams.topMargin = dp(10);
         glass.addView(light, lightParams);
+        if (LiquidTheme.isLight(this) && art.bare) {
+            // On light glass a white mark needs a faint shadow to stand out.
+            ImageView shade = new ImageView(this);
+            shade.setImageBitmap(art.glow);
+            shade.setScaleType(ImageView.ScaleType.FIT_XY);
+            shade.setColorFilter(0xFF000000, android.graphics.PorterDuff.Mode.SRC_IN);
+            shade.setAlpha(.22f);
+            int shadeSize = dp(Math.round(ShelfTile.GLASS_DP * .9f));
+            FrameLayout.LayoutParams shadeParams = new FrameLayout.LayoutParams(shadeSize, shadeSize, Gravity.CENTER);
+            shadeParams.topMargin = dp(3);
+            glass.addView(shade, shadeParams);
+        }
         ImageView logo = new ImageView(this);
         logo.setImageBitmap(art.logo);
         logo.setScaleType(ImageView.ScaleType.FIT_CENTER);

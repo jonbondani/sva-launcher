@@ -68,4 +68,18 @@ public final class AppLogoTest {
         assertFalse(cut.usable());
         assertNull(AppLogo.bounds(cut.pixels, N, N));
     }
+
+    @Test public void blurSpreadsLightWithoutDarkeningItsColour() {
+        int w = 21;
+        int[] px = new int[w * w];
+        px[10 * w + 10] = RED;
+        int[] out = AppLogo.blur(px, w, w, 2);
+        int centre = out[10 * w + 10];
+        assertEquals(RED & 0xFFFFFF, centre & 0xFFFFFF);
+        assertTrue((centre >>> 24) > 0 && (centre >>> 24) < 255);
+        assertEquals(RED & 0xFFFFFF, out[10 * w + 13] & 0xFFFFFF);
+        assertEquals(out[10 * w + 7], out[10 * w + 13]);
+        assertEquals(out[7 * w + 10], out[13 * w + 10]);
+        assertEquals(0, out[0]);
+    }
 }

@@ -187,10 +187,73 @@ final class AppLogo {
         return right < 0 ? null : new int[]{left, top, right, bottom};
     }
 
-    /** A soft, blurred copy of the logo for the coloured light behind it (shrunk and blown up). */
+    static final int GLOW_SIZE = 64, GLOW_LOGO = 34, GLOW_RADIUS = 5;
+
+    /**
+     * A soft, blurred copy of the logo for the coloured light behind it: the logo drawn small in the
+     * middle of a larger square and blurred, so the light spreads past the logo's edges.
+     */
     private static Bitmap glow(Bitmap logo) {
-        Bitmap tiny = Bitmap.createScaledBitmap(logo, 10, 10, true);
-        Bitmap mid = Bitmap.createScaledBitmap(tiny, 28, 28, true);
-        return Bitmap.createScaledBitmap(mid, 96, 96, true);
+        Bitmap canvasBitmap = Bitmap.createBitmap(GLOW_SIZE, GLOW_SIZE, Bitmap.Config.ARGB_8888);
+        int offset = (GLOW_SIZE - GLOW_LOGO) / 2;
+        android.graphics.Paint paint = new android.graphics.Paint(android.graphics.Paint.FILTER_BITMAP_FLAG);
+        new Canvas(canvasBitmap).drawBitmap(logo, null,
+                new android.graphics.Rect(offset, offset, offset + GLOW_LOGO, offset + GLOW_LOGO), paint);
+        int[] px = blur(pixels(canvasBitmap), GLOW_SIZE, GLOW_SIZE, GLOW_RADIUS);
+        return Bitmap.createBitmap(px, GLOW_SIZE, GLOW_SIZE, Bitmap.Config.ARGB_8888);
     }
+
+    /**
+     * Pure: three box-blur passes (close to a Gaussian) on premultiplied colour, so transparent
+     * pixels do not darken the edges. Input and output are plain ARGB.
+     */
+    static int[] blur(int[] argb, int w, int h, int radius) {
+        int n = argb.length;
+        double[][] ch = new double[4][n];
+        for (int i = 0; i < n; i++) {
+            int p = argb[i];
+            double a = (p >>> 24) / 255d;
+            ch[0][i] = a;
+            ch[1][i] = ((p >> 16) & 0xFF) * a;
+            ch[2][i] = ((p >> 8) & 0xFF) * a;
+            ch[3][i] = (p & 0xFF) * a;
+        }
+        double[] tmp = new double[n];
+        for (double[] c : ch) {
+            for (int pass = 0; pass < 3; pass++) {
+                boxPass(c, tmp, w, h, radius, true);
+                boxPass(tmp, c, w, h, radius, false);
+            }
+        }
+        int[] out = new int[n];
+        for (int i = 0; i < n; i++) {
+            double a = ch[0][i];
+            if (a <= 1e-4) continue;
+            int r = clamp(ch[1][i] / a), g = clamp(ch[2][i] / a), b = clamp(ch[3][i] / a);
+            out[i] = clamp(a * 255) << 24 | r << 16 | g << 8 | b;
+        }
+        return out;
+    }
+
+    private static void boxPass(double[] in, double[] out, int w, int h, int r, boolean horizontal) {
+        int lines = horizontal ? h : w, length = horizontal ? w : h;
+        double scale = 1d / (2 * r + 1);
+        for (int line = 0; line < lines; line++) {
+            double sum = 0;
+            for (int k = -r; k <= r; k++) sum += at(in, line, k, length, w, horizontal);
+            for (int k = 0; k < length; k++) {
+                int index = horizontal ? line * w + k : k * w + line;
+                out[index] = sum * scale;
+                sum += at(in, line, k + r + 1, length, w, horizontal) - at(in, line, k - r, length, w, horizontal);
+            }
+        }
+    }
+
+    /** Outside the image counts as clear. */
+    private static double at(double[] in, int line, int k, int length, int w, boolean horizontal) {
+        if (k < 0 || k >= length) return 0;
+        return in[horizontal ? line * w + k : k * w + line];
+    }
+
+    private static int clamp(double v) { return (int) Math.max(0, Math.min(255, Math.round(v))); }
 }
