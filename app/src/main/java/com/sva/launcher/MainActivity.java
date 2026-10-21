@@ -1021,15 +1021,15 @@ public final class MainActivity extends Activity {
         appScroll.setClipChildren(true);
         appScroll.setClipToPadding(false);
         appScroll.setHorizontalFadingEdgeEnabled(true);
-        // Tiles are clipped at the row's sides; the fade covers the row's 18dp inner margin, so a
-        // sixth tile only hints at more apps instead of showing up half cut.
         appScroll.setFadingEdgeLength(dp(18));
         appRow = new LinearLayout(this);
         appRow.setOrientation(LinearLayout.HORIZONTAL);
         appRow.setClipChildren(false);
         appRow.setClipToPadding(false);
         // Inner margin so the first and last tiles can zoom on focus without being cut square.
-        appRow.setPadding(dp(18), 0, dp(18), 0);
+        // Left margin for the first tile's focus zoom. No right margin: the fifth tile's gap ends
+        // exactly at the row's edge, so the next tile starts just out of view instead of peeking in cut.
+        appRow.setPadding(dp(18), 0, 0, 0);
         appScroll.addView(appRow);
         homeContent.addView(appScroll, new LinearLayout.LayoutParams(-1, dp(APP_TILE_HEIGHT + 40)));
 
@@ -3921,12 +3921,12 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
 
     /**
      * Tile width so exactly five tiles and their gaps fill the row on this screen: no tile is cut
-     * at the right edge until the row actually scrolls. Row insets: home padding 40+20, row 18+18.
+     * at the right edge until the row actually scrolls. Row insets: home padding 40+20, row 18 on the left.
      */
     private int appTileWidthDp() {
         float density = getResources().getDisplayMetrics().density;
         int screenDp = Math.round(getResources().getDisplayMetrics().widthPixels / density);
-        int available = screenDp - (40 + 20) - (18 + 18);
+        int available = screenDp - (40 + 20) - 18;
         int width = (available - APP_TILE_GAP * APP_TILES_VISIBLE) / APP_TILES_VISIBLE;
         return Math.max(120, Math.min(200, width));
     }
