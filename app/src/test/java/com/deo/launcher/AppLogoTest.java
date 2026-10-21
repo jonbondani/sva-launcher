@@ -82,4 +82,13 @@ public final class AppLogoTest {
         assertEquals(out[7 * w + 10], out[13 * w + 10]);
         assertEquals(0, out[0]);
     }
+
+    @Test public void faintShadowPixelsAreDroppedAndSolidOnesKept() {
+        int[] out = AppLogo.dropFaint(new int[]{0x33000000, 0x50FFFFFF, 0xFFFFFFFF, 0xC0E50914});
+        assertEquals(0, out[0]);
+        assertEquals(0, out[1]);
+        assertEquals(WHITE, out[2]);
+        assertEquals(0xE50914, out[3] & 0xFFFFFF);
+        assertTrue((out[3] >>> 24) > 0x80 && (out[3] >>> 24) < 0xC0);
+    }
 }

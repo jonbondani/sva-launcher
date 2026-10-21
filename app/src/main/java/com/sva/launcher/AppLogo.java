@@ -84,8 +84,25 @@ final class AppLogo {
         // A foreground that fills the icon is artwork, not a mark on a backdrop.
         if (covered / px.length > .8) return null;
         int backdrop = background == null ? 0 : ShelfTile.dominantColor(pixels(render(background, 24, 1.5f)));
-        Bitmap logo = trim(mark);
-        return new Art(logo, glow(logo), glowColor(backdrop, px), true);
+        // Material icons carry a faint long shadow on the mark's layer: off the backdrop it shows
+        // as a grey square, so faint pixels go and the edges of the mark stay soft.
+        int[] clean = dropFaint(px);
+        Bitmap logo = trim(Bitmap.createBitmap(clean, SIZE, SIZE, Bitmap.Config.ARGB_8888));
+        return new Art(logo, glow(logo), glowColor(backdrop, clean), true);
+    }
+
+    static final int FAINT = 80;
+
+    /** Pure: alpha below {@link #FAINT} becomes clear, the rest is stretched back to full range. */
+    static int[] dropFaint(int[] argb) {
+        int[] out = new int[argb.length];
+        for (int i = 0; i < argb.length; i++) {
+            int a = argb[i] >>> 24;
+            if (a <= FAINT) continue;
+            int stretched = Math.min(255, Math.round((a - FAINT) * 255f / (255 - FAINT)));
+            out[i] = stretched << 24 | (argb[i] & 0x00FFFFFF);
+        }
+        return out;
     }
 
     /** Pure: drops the backdrop colour (sampled around the edge) and keeps the mark, with soft edges. */
