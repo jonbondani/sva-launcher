@@ -13,7 +13,7 @@
 # =============================================================================
 set -u
 
-VERSION="1.7.0"
+VERSION="1.8.0"
 BASE_DIR="${FTVO_HOME:-$HOME/firetv-optimizer}"
 BACKUP_DIR="$BASE_DIR/copias"
 ADB="${ADB:-adb}"
@@ -74,8 +74,24 @@ com.amazon.tv.developer.dataservice
 com.amazon.logan
 com.amazon.tv.csapp
 com.amazon.ftvads.deeplinking
-com.amazon.hybridadidservice
-com.amazon.device.telemetry.emitter
+com.amazon.client.metrics.api
+com.amazon.dp.logger
+com.amazon.connectivitydiag
+com.amazon.perfc
+com.amazon.media.recommendations
+com.amazon.privacypassservice
+com.amazon.aria
+com.amazon.aca
+com.amazon.imp
+com.amazon.identity.auth.device.authorization
+com.amazon.securitysyncclient
+com.amazon.venezia
+com.amazon.firehomestarter
+com.amazon.tahoe
+com.amazon.tv.intentsupport
+com.amazon.alexadirectivebrokerservice
+com.amazon.alexa.datastore.app
+com.amazon.device.metrics
 "
 # Cualquier paquete que encaje con esto también queda protegido
 # (entradas HDMI, TDT, configuración inicial, Bluetooth, instalador...).
@@ -84,13 +100,10 @@ PROTECTED_REGEX='(mediatek|mstar|tvcenter|factory|hdmicec|\.cec|\.arc$|channelsc
 list_tier() {
   case "$1" in
     seguro) cat <<'EOF'
-com.amazon.dp.logger|Registro de actividad (telemetría)
 com.amazon.client.metrics|Métricas de uso enviadas a Amazon
-com.amazon.client.metrics.api|API de métricas de uso
 com.amazon.wirelessmetrics.service|Métricas de red wifi
 com.amazon.device.crashmanager|Envío de informes de fallos
 com.amazon.tv.fw.metrics|Métricas del sistema
-com.amazon.connectivitydiag|Diagnóstico de conectividad (envía datos)
 com.amazon.shoptv.client|Compras desde la tele
 com.amazon.shoptv.firetv.client|Compras desde la tele (Fire TV)
 com.amazon.device.sale.service|Ofertas y promociones de dispositivos
@@ -121,6 +134,28 @@ com.amazon.wifilocker|Guardar contraseñas wifi en tu cuenta Amazon
 com.amazon.communication.discovery|Descubrimiento de dispositivos Alexa
 com.amazon.whisperplay.contracts|Envío a la tele desde el móvil (Fling)
 com.amazon.ftv.profilepicker|Selector de perfiles al encender
+EOF
+    ;;
+    tele) cat <<'EOF'
+com.amazon.sneakpeek|Vistas previas automáticas en el inicio
+com.amazon.kso.blackbird|Salvapantallas con anuncios
+com.amazon.bueller.photos|Amazon Photos (salvapantallas de fotos)
+com.amazon.bueller.music|Amazon Music integrado en la interfaz
+com.amazon.shoptv.client|Compras desde la tele
+com.amazon.minitv.android.app|Amazon miniTV
+com.amazon.gamehub|Centro de juegos
+com.amazon.storm.lightning.tutorial|Tutorial del mando
+com.amazon.tmm.tutorial|Tutoriales
+com.amazon.tv.democontent.provider|Contenido de demostración de tienda
+com.amazon.wirelessmetrics.service|Métricas de red wifi
+com.amazon.perfcollection|Recolector de rendimiento
+com.amazon.device.telemetry.emitter|Envío de telemetría
+com.amazon.hybridadidservice|Identificador publicitario
+com.amazon.tv.acr|Reconocimiento de lo que ves en pantalla (ACR)
+com.amazon.ods.kindleconnect|Conexión con Kindle
+com.amazon.tv.easyupgrade|Asistente de actualización
+com.amazon.spiderpork|Servicio de fondo de Amazon
+com.amazon.hedwig|Notificaciones push de Amazon
 EOF
     ;;
     ota) cat <<'EOF'
@@ -601,6 +636,87 @@ restore_file() {
   mv "$f" "$f.restaurado"
 }
 
+# Método lento y seguro para teles: una app cada vez, comprobando y reiniciando entre una y otra.
+# Estado por tele en ~/firetv-optimizer/probados_<serie>.txt:  paquete ok|fallo|reiniciar
+probe_file() { printf '%s/probados_%s.txt' "$BASE_DIR" "$(device_id)"; }
+probe_state() { [ -f "$(probe_file)" ] && awk -v p="$1" '$1==p{s=$2} END{print s}' "$(probe_file)"; }
+probe_mark() { mkdir -p "$BASE_DIR"; echo "$1 $2" >> "$(probe_file)"; }
+
+probe_checklist() {
+  cat <<EOF
+  Comprueba en la tele, en este orden:
+    1. El menú lateral se abre y se mueve bien
+    2. Ajustes abre, y también sus apartados (Red, Pantalla y sonido, Preferencias…)
+    3. Las entradas: HDMI 1, HDMI 2 y TDT (cambia de canal)
+    4. Alexa: una pregunta por voz y una búsqueda por voz
+EOF
+}
+
+cmd_probar() {
+  resolve_target; check_fireos; load_pkg_state; load_wifi_owners
+  # 1) ¿Queda una prueba a medias, pendiente del reinicio?
+  local pending
+  pending=$([ -f "$(probe_file)" ] && awk '{s[$1]=$2} END{for (p in s) if (s[p]=="reiniciar") print p}' "$(probe_file)" | head -n 1)
+  if [ -n "$pending" ]; then
+    title "Prueba pendiente: $pending (desactivada antes del último reinicio)"
+    probe_checklist
+    if confirm "¿Después de reiniciar sigue funcionando todo?"; then
+      probe_mark "$pending" ok; ok "$pending queda desactivada y apuntada como segura en esta tele."
+    else
+      dsh pm enable "$pending" >/dev/null; probe_mark "$pending" fallo
+      warn "$pending reactivada y vetada en esta tele. Reinicia y comprueba que todo vuelve."
+      return
+    fi
+  fi
+  # 2) Siguiente candidata de la lista «tele» (o la indicada).
+  local pkg="${1:-}" desc="" p d
+  if [ -z "$pkg" ]; then
+    while IFS='|' read -r p d; do
+      [ -n "$p" ] || continue
+      pkg_installed "$p" || continue
+      pkg_disabled "$p" && continue
+      is_protected "$p" && continue
+      owns_wifi "$p" && continue
+      [ -n "$(probe_state "$p")" ] && continue
+      pkg="$p"; desc="$d"; break
+    done <<EOF
+$(list_tier tele)
+EOF
+    [ -n "$pkg" ] || { ok "No quedan apps por probar en esta tele."; return; }
+  else
+    desc=$(list_tier tele | awk -F'|' -v p="$pkg" '$1==p{print $2}')
+    [ -n "$desc" ] || die "$pkg no está en la lista revisada para teles. No se prueba."
+    pkg_installed "$pkg" || die "$pkg no está instalada."
+    owns_wifi "$pkg" && die "$pkg guardó una red wifi; no se toca."
+  fi
+  local pid; pid=$(dsh pidof "$pkg")
+  title "Probar: $pkg"
+  info "$desc"
+  if [ -n "$pid" ]; then info "Está en marcha ahora: desactivarla libera memoria."
+  else warn "No está en marcha ahora: desactivarla apenas ahorra memoria (sí quita lo que hace al arrancar)."; fi
+  [ "$DRY_RUN" -eq 1 ] && { info "Simulación: no se ha cambiado nada."; return; }
+  confirm "¿Desactivar solo esta app y comprobar?" || return
+  local bk; bk=$(new_backup_file probar)
+  local out; out=$(dsh pm disable-user --user 0 "$pkg")
+  case "$out" in
+    *"new state: disabled"*) echo "PKG $pkg" >> "$bk"; ok "Desactivada $pkg" ;;
+    *) rm -f "$bk"; die "No se pudo desactivar: $out" ;;
+  esac
+  echo
+  probe_checklist
+  echo
+  if confirm "¿Funciona todo?"; then
+    probe_mark "$pkg" reiniciar
+    ok "Bien. Falta la prueba tras reiniciar:"
+    info "  1) Reinicia la tele (opción 8 o «reiniciar»). Si ADB se apaga, reactívalo con Alexa > Ajustes."
+    info "  2) Vuelve a ejecutar «probar»: primero te preguntará si todo sigue bien tras el reinicio."
+  else
+    dsh pm enable "$pkg" >/dev/null; probe_mark "$pkg" fallo
+    mv "$bk" "$bk.restaurado"
+    warn "Reactivada $pkg y vetada en esta tele. Comprueba que todo vuelve; si no, reinicia."
+  fi
+}
+
 cmd_privacidad() {
   resolve_target; check_fireos
   title "Ajustes de privacidad"
@@ -632,6 +748,11 @@ EOF
 uid_of() { dsh pm list packages -U "$1" | sed -n "s/^package:$1 uid://p" | head -n 1 | tr -dc '0-9'; }
 
 cmd_blindar() {
+  err "«blindar» está retirado: quitar permisos a apps que Amazon protege es de alto riesgo"
+  die "(se aplicó el día que la tele Xiaomi dejó de funcionar). No se hace nada."
+}
+
+cmd_blindar_retirado() {
   resolve_target; check_fireos; load_pkg_state; tv_guard
   title "Apps de Amazon que no se dejan desactivar: sin permiso de segundo plano"
   local pkg desc todo="" uid
@@ -694,7 +815,12 @@ cmd_rescate() {
   title "Rescate: se deshará todo lo hecho con este script en $TARGET"
   [ -n "$files" ] && printf '  %s\n' $(printf '%s\n' "$files" | xargs -n1 basename)
   confirm "¿Deshacer todo?" || return
+  local touched q
+  touched=$(cat $files /dev/null 2>/dev/null | awk '$1=="OPS"{print $2}' | sort -u)
   for f in $files; do restore_file "$f"; done
+  for q in $touched com.amazon.tv.csapp com.amazon.ftvads.deeplinking com.amazon.device.metrics; do
+    dsh cmd appops reset "$q" >/dev/null 2>&1 && ok "Permisos de segundo plano restablecidos: $q"
+  done
   local dis p; dis=$(dsh pm list packages -d | sed -n 's/^package://p' | grep '^com\.amazon\.' || true)
   for p in $dis; do dsh pm enable "$p" >/dev/null && ok "Reactivado $p"; done
   # Deja fijas las opciones de desarrollador y la depuración ADB (red y USB).
@@ -970,6 +1096,7 @@ ${C_BOLD}Comandos${C_0}
   limpiar              Cierra procesos en segundo plano
   restaurar [copia]    Deshace la última copia (o la indicada)
   restaurar <tanda>    Deshace la última tanda de ese tipo (seguro, privacidad, blindar…)
+  probar [paquete]     Teles: desactiva UNA app de la lista revisada y te guía para comprobarla
   rescate              Deshace TODO lo hecho con el script en esta tele
   restaurar-todo       Reactiva TODOS los paquetes de Amazon desactivados
   reiniciar            Reinicia la tele
@@ -1056,10 +1183,11 @@ cmd_menu() {
     menu_head "PASO 2 · LIMPIAR" "(recomendado, en este orden)"
     menu_line 4 "Nivel seguro"    "Telemetría, anuncios, compras y promos. Sin efectos visibles"
     menu_line 5 "Privacidad"      "EXPERIMENTAL. Seguimiento publicitario, métricas, vídeo automático"
-    menu_line 6 "Blindar"         "EXPERIMENTAL. Sin segundo plano para telemetría protegida"
+    menu_line 6 "Blindar"         "RETIRADO: alto riesgo, no hace nada"
     menu_line 7 "Animaciones"     "Menús más ágiles (0.5x)"
     menu_line 8 "Reiniciar"       "Para notar el efecto completo"
     menu_head "PASO 3 · OPCIONAL" "(tras usar la tele un par de días)"
+    menu_line t2 "Probar una app" "Teles: una app cada vez, comprobando y reiniciando (lo seguro)"
     menu_line 9 "Nivel moderado"  "Además Alexa, Silk, Kids, perfiles. La voz puede fallar"
     menu_line m "Liberar memoria" "Cierra procesos en segundo plano (puntual)"
     menu_line e "Explorar flags"  "Ajustes ocultos, HDR, códecs, modos de pantalla (solo lee)"
@@ -1082,6 +1210,7 @@ cmd_menu() {
       1) ( cmd_estado ) ;;            p|P) ( cmd_rendimiento ) ;;            2) ( cmd_auditar ) ;;         3) ( cmd_plan seguro ) ;;
       4) ( cmd_aplicar seguro ) ;;    5) ( cmd_privacidad ) ;;      6) ( cmd_blindar ) ;;
       7) ( cmd_animaciones 0.5 ) ;;   8) ( cmd_reiniciar ) ;;       9) ( cmd_aplicar moderado ) ;;
+      t2|T2) ( cmd_probar ) ;;
       m|M) ( cmd_limpiar ) ;;         e|E) ( cmd_explorar ) ;;      o|O) ( cmd_aplicar ota ) ;;
       i|I) printf 'Ruta de un APK (Enter = descargar la última): '; read -r f
            f=${f%\"}; f=${f#\"}; f=${f%\'}; f=${f#\'}; f=${f% }
@@ -1135,6 +1264,7 @@ case "${CMD:-menu}" in
   restaurar)       cmd_restaurar "$@" ;;
   restaurar-todo)  cmd_restaurar_todo ;;
   rescate)         cmd_rescate ;;
+  probar)          cmd_probar "$@" ;;
   reiniciar)       cmd_reiniciar ;;
   instalar)        cmd_instalar "$@" ;;
   sva-inicio)      cmd_sva_inicio "$@" ;;

@@ -78,6 +78,21 @@ Aplicar el nivel seguro ampliado, Privacidad y Blindar en una Xiaomi F Pro con F
 - **Más apps protegidas:** todo lo de MediaTek y las piezas de Fire OS que llevan las entradas, el HDMI-CEC, la TDT y los ajustes rápidos.
 - **Privacidad y Blindar están marcados como experimentales.** Se aplicaron el día del incidente y no está descartado que influyeran.
 
+### Teles: el método «probar» (desde la 1.8.0)
+
+En una tele con Fire TV integrado no se aplica ningún nivel de golpe. `./firetv-optimizer.sh probar` (opción t2 del menú) desactiva **una sola app** de una lista revisada para Fire OS 8 en teles con el inicio de Amazon, ordenada de más beneficio y menos riesgo a menos:
+
+1. Te dice si la app está en marcha (si no lo está, desactivarla apenas ahorra memoria).
+2. La desactiva y te pide comprobar el menú lateral, Ajustes y sus apartados, las entradas (HDMI y TDT) y Alexa.
+3. Si algo falla, la reactiva al momento y la veta para esa tele.
+4. Si todo va bien, te pide reiniciar y volver a ejecutar `probar`, que primero confirma que tras el reinicio sigue todo bien.
+
+El resultado de cada app se guarda en `~/firetv-optimizer/probados_<serie>.txt`.
+
+Tras investigar el incidente: `client.metrics.api`, `dp.logger`, `logan`, `tv.developer.dataservice`, `connectivitydiag` y `perfc` pasan a la lista de nunca tocar (otras teles los desactivan solo cuando sustituyen el inicio de Amazon), y «Blindar» queda retirado (quitar permisos a apps que Amazon protege es de alto riesgo). `rescate` ahora también restablece esos permisos (`cmd appops reset`), que reactivar no deshace.
+
+Antes de nada de esto, lo que más acelera la tele sin riesgo: quitar el vídeo automático de los destacados, desinstalar ES File Explorer y las apps que no uses, y cambiar el salvapantallas de anuncios.
+
 ## 4. Deshacer
 
 ```sh
