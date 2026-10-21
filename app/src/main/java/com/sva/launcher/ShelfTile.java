@@ -59,6 +59,9 @@ final class ShelfTile {
         if (slot instanceof FrameLayout) slot.addView(glass, new FrameLayout.LayoutParams(size, size, Gravity.CENTER));
         else slot.addView(glass, new android.widget.LinearLayout.LayoutParams(size, size));
         slot.setOnFocusChangeListener((v, focused) -> animate(glass, focused));
+        // Android 8+ paints a grey box over a focused view without a focus state of its own;
+        // the glass already shows focus with its ring.
+        if (android.os.Build.VERSION.SDK_INT >= 26) slot.setDefaultFocusHighlightEnabled(false);
     }
 
     /** Logo at 62 % of the glass, centred. */

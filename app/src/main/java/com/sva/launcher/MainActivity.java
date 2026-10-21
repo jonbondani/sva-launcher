@@ -777,7 +777,7 @@ public final class MainActivity extends Activity {
         weatherCondition = label("Local conditions", 12, light ? LiquidTheme.text(this) : Color.WHITE, true);
         weatherCondition.setIncludeFontPadding(false);
         weatherCondition.setSingleLine(true);
-        weatherCondition.setMaxWidth(dp(compactNavigation ? 90 : 110));
+        weatherCondition.setMaxWidth(dp(compactNavigation ? 85 : 100));
         weatherCondition.setEllipsize(TextUtils.TruncateAt.END);
         LinearLayout weatherText = new LinearLayout(this);
         weatherText.setOrientation(LinearLayout.VERTICAL);
@@ -798,7 +798,7 @@ public final class MainActivity extends Activity {
         weatherFacts.addView(weatherDetails);
         weatherFacts.addView(weatherMetrics);
         // The pill keeps it short: the place goes under the condition, the rest is in the forecast.
-        weatherLocation.setMaxWidth(dp(compactNavigation ? 90 : 110));
+        weatherLocation.setMaxWidth(dp(compactNavigation ? 85 : 100));
         weatherText.addView(weatherLocation);
         weatherFacts.setVisibility(View.GONE);
         weatherPanel.addView(weatherFacts, new LinearLayout.LayoutParams(-2, -1));
@@ -846,7 +846,7 @@ public final class MainActivity extends Activity {
         heroContent.addView(heroColumn, columnParams);
         LinearLayout.LayoutParams stripParams = new LinearLayout.LayoutParams(-2, -2);
         greeting = new TextView(this);
-        greeting.setTextSize(compactNavigation ? 20 : 22);
+        greeting.setTextSize(compactNavigation ? 18 : 20);
         greeting.setTypeface(LiquidTheme.bold(this));
         greeting.setLetterSpacing(-.01f);
         greeting.setTextColor(LiquidTheme.isLight(this) ? LiquidTheme.text(this) : Color.WHITE);
@@ -909,13 +909,13 @@ public final class MainActivity extends Activity {
         homeCalendarEyebrow.setVisibility(View.GONE);
         calendarCopy.addView(homeCalendarEyebrow);
         homeCalendarTitle = label("No events today", 13, light ? LiquidTheme.text(this) : Color.WHITE, true);
-        homeCalendarTitle.setMaxWidth(dp(compactNavigation ? 130 : 160));
+        homeCalendarTitle.setMaxWidth(dp(compactNavigation ? 120 : 145));
         homeCalendarTitle.setSingleLine(true);
         homeCalendarTitle.setMaxLines(1);
         homeCalendarTitle.setEllipsize(TextUtils.TruncateAt.END);
         calendarCopy.addView(homeCalendarTitle);
         homeCalendarSubtitle = label("Open your calendar", 11, light ? LiquidTheme.secondaryText(this) : 0xB3FFFFFF, false);
-        homeCalendarSubtitle.setMaxWidth(dp(compactNavigation ? 130 : 160));
+        homeCalendarSubtitle.setMaxWidth(dp(compactNavigation ? 120 : 145));
         homeCalendarSubtitle.setSingleLine(true);
         homeCalendarSubtitle.setEllipsize(TextUtils.TruncateAt.END);
         calendarCopy.addView(homeCalendarSubtitle);
@@ -2335,7 +2335,11 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         clockDivider.setVisibility(View.GONE);
         date.setVisibility(preferences.getBoolean("showDate", true)
                 ? View.VISIBLE : View.GONE);
-        String day = new java.text.SimpleDateFormat("EEEE, d 'de' MMMM", Locale.getDefault()).format(now);
+        // "miércoles, 21 de octubre" in Spanish; the locale's own long form elsewhere.
+        Locale locale = Locale.getDefault();
+        String pattern = "es".equals(locale.getLanguage()) ? "EEEE, d 'de' MMMM"
+                : android.text.format.DateFormat.getBestDateTimePattern(locale, "EEEEdMMMM");
+        String day = new java.text.SimpleDateFormat(pattern, locale).format(now);
         date.setText(day.isEmpty() ? day : day.substring(0, 1).toUpperCase(Locale.getDefault()) + day.substring(1));
         if (greeting != null) {
             int hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY);
