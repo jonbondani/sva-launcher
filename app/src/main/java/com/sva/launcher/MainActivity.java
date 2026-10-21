@@ -1026,6 +1026,8 @@ public final class MainActivity extends Activity {
         appRow.setOrientation(LinearLayout.HORIZONTAL);
         appRow.setClipChildren(false);
         appRow.setClipToPadding(false);
+        // Inner margin so the first and last tiles can zoom on focus without being cut square.
+        appRow.setPadding(dp(10), 0, dp(10), 0);
         appScroll.addView(appRow);
         homeContent.addView(appScroll, new LinearLayout.LayoutParams(-1, dp(APP_TILE_HEIGHT + 40)));
 
