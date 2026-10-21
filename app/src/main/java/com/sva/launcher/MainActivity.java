@@ -1021,7 +1021,7 @@ public final class MainActivity extends Activity {
         appScroll.setClipChildren(true);
         appScroll.setClipToPadding(false);
         appScroll.setHorizontalFadingEdgeEnabled(true);
-        appScroll.setFadingEdgeLength(dp(56));
+        appScroll.setFadingEdgeLength(dp(20));
         appRow = new LinearLayout(this);
         appRow.setOrientation(LinearLayout.HORIZONTAL);
         appRow.setClipChildren(false);
@@ -3096,8 +3096,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             if (entry.packageName.equals(movingPackage)) {
                 tile.setBackground(roundedShape(LiquidTheme.glassFocusedTint(this), LiquidTheme.accent(this), 3, 16));
             }
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(APP_TILE_WIDTH), dp(APP_TILE_HEIGHT));
-            lp.setMargins(0, 0, dp(8), 0);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(appTileWidthDp()), dp(APP_TILE_HEIGHT));
+            lp.setMargins(0, 0, dp(APP_TILE_GAP), 0);
             appRow.addView(tile, lp);
             if (displayed == 0) tabEntryFocus[TAB_HOME] = tvInputs.isEmpty() ? tile : appRow.getChildAt(0);
             displayed++;
@@ -3154,8 +3154,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         tile.addView(name, new LinearLayout.LayoutParams(-2, -2));
         tile.setOnLongClickListener(v -> true);
         tile.setOnClickListener(v -> openAppSettings());
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(APP_TILE_WIDTH), dp(APP_TILE_HEIGHT));
-        lp.setMargins(0, 0, dp(8), 0);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(appTileWidthDp()), dp(APP_TILE_HEIGHT));
+        lp.setMargins(0, 0, dp(APP_TILE_GAP), 0);
         appRow.addView(tile, lp);
     }
 
@@ -3210,8 +3210,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             if (!TvInputs.open(this, input)) Tr.toast(this, "Esta tele no deja abrir " + input.label + " desde aquí.",
                     Toast.LENGTH_LONG).show();
         });
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(APP_TILE_WIDTH), dp(APP_TILE_HEIGHT));
-        lp.setMargins(0, 0, dp(8), 0);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(appTileWidthDp()), dp(APP_TILE_HEIGHT));
+        lp.setMargins(0, 0, dp(APP_TILE_GAP), 0);
         appRow.addView(tile, lp);
     }
 
@@ -3913,6 +3913,21 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
      */
     /** 16:9 tiles so TV banners fit without cropping. */
     private static final int APP_TILE_WIDTH = 160, APP_TILE_HEIGHT = 90;
+    /** Gap between home tiles: wide enough that the focus zoom never touches the neighbours. */
+    private static final int APP_TILE_GAP = 16;
+    private static final int APP_TILES_VISIBLE = 5;
+
+    /**
+     * Tile width so exactly five tiles and their gaps fill the row on this screen: no tile is cut
+     * at the right edge until the row actually scrolls. Row insets: home padding 40+20, scroll 14+14, row 18+18.
+     */
+    private int appTileWidthDp() {
+        float density = getResources().getDisplayMetrics().density;
+        int screenDp = Math.round(getResources().getDisplayMetrics().widthPixels / density);
+        int available = screenDp - (40 + 20) - (14 + 14) - (18 + 18);
+        int width = (available - APP_TILE_GAP * APP_TILES_VISIBLE) / APP_TILES_VISIBLE;
+        return Math.max(120, Math.min(200, width));
+    }
 
     private static final String[] DEFAULT_APP_LABELS = {"movistar", "disney", "dazn", "prime video"};
 
