@@ -741,13 +741,12 @@ public final class MainActivity extends Activity {
         clockPeriod.setPadding(dp(4), 0, 0, 0);
         timeLine.addView(clockPeriod, new LinearLayout.LayoutParams(-2, -2));
         timeStack.addView(timeLine, new LinearLayout.LayoutParams(-2, -2));
-        date = label("", compactNavigation ? 12 : 13, light ? LiquidTheme.secondaryText(this) : 0xD9FFFFFF, false);
+        date = label("", compactNavigation ? 12 : 13, light ? LiquidTheme.secondaryText(this) : 0xCCFFFFFF, false);
+        date.setShadowLayer(dp(6), 0, dp(1), light ? 0x33FFFFFF : 0x66000000);
         date.setTypeface(LiquidTheme.regular(this));
         date.setSingleLine(true);
         date.setEllipsize(TextUtils.TruncateAt.END);
-        LinearLayout.LayoutParams dateParams = new LinearLayout.LayoutParams(-2, -2);
-        dateParams.leftMargin = dp(10);
-        timeStack.addView(date, dateParams);
+        // The date goes under the greeting (see the top bar); the clock pill keeps just the time.
 
         weatherPanel = new LinearLayout(this);
         weatherPanel.setOrientation(LinearLayout.HORIZONTAL);
@@ -778,7 +777,7 @@ public final class MainActivity extends Activity {
         weatherCondition = label("Local conditions", 12, light ? LiquidTheme.text(this) : Color.WHITE, true);
         weatherCondition.setIncludeFontPadding(false);
         weatherCondition.setSingleLine(true);
-        weatherCondition.setMaxWidth(dp(weatherMaxWidth));
+        weatherCondition.setMaxWidth(dp(compactNavigation ? 90 : 110));
         weatherCondition.setEllipsize(TextUtils.TruncateAt.END);
         LinearLayout weatherText = new LinearLayout(this);
         weatherText.setOrientation(LinearLayout.VERTICAL);
@@ -799,7 +798,7 @@ public final class MainActivity extends Activity {
         weatherFacts.addView(weatherDetails);
         weatherFacts.addView(weatherMetrics);
         // The pill keeps it short: the place goes under the condition, the rest is in the forecast.
-        weatherLocation.setMaxWidth(dp(150));
+        weatherLocation.setMaxWidth(dp(compactNavigation ? 90 : 110));
         weatherText.addView(weatherLocation);
         weatherFacts.setVisibility(View.GONE);
         weatherPanel.addView(weatherFacts, new LinearLayout.LayoutParams(-2, -1));
@@ -847,7 +846,7 @@ public final class MainActivity extends Activity {
         heroContent.addView(heroColumn, columnParams);
         LinearLayout.LayoutParams stripParams = new LinearLayout.LayoutParams(-2, -2);
         greeting = new TextView(this);
-        greeting.setTextSize(compactNavigation ? 22 : 26);
+        greeting.setTextSize(compactNavigation ? 20 : 22);
         greeting.setTypeface(LiquidTheme.bold(this));
         greeting.setLetterSpacing(-.01f);
         greeting.setTextColor(LiquidTheme.isLight(this) ? LiquidTheme.text(this) : Color.WHITE);
@@ -910,13 +909,13 @@ public final class MainActivity extends Activity {
         homeCalendarEyebrow.setVisibility(View.GONE);
         calendarCopy.addView(homeCalendarEyebrow);
         homeCalendarTitle = label("No events today", 13, light ? LiquidTheme.text(this) : Color.WHITE, true);
-        homeCalendarTitle.setMaxWidth(dp(compactNavigation ? 200 : 260));
+        homeCalendarTitle.setMaxWidth(dp(compactNavigation ? 130 : 160));
         homeCalendarTitle.setSingleLine(true);
         homeCalendarTitle.setMaxLines(1);
         homeCalendarTitle.setEllipsize(TextUtils.TruncateAt.END);
         calendarCopy.addView(homeCalendarTitle);
         homeCalendarSubtitle = label("Open your calendar", 11, light ? LiquidTheme.secondaryText(this) : 0xB3FFFFFF, false);
-        homeCalendarSubtitle.setMaxWidth(dp(compactNavigation ? 200 : 260));
+        homeCalendarSubtitle.setMaxWidth(dp(compactNavigation ? 130 : 160));
         homeCalendarSubtitle.setSingleLine(true);
         homeCalendarSubtitle.setEllipsize(TextUtils.TruncateAt.END);
         calendarCopy.addView(homeCalendarSubtitle);
@@ -1017,8 +1016,19 @@ public final class MainActivity extends Activity {
         header.setClipChildren(false);
         header.setClipToPadding(false);
         header.setBackgroundColor(Color.TRANSPARENT);
-        header.addView(greeting, new LinearLayout.LayoutParams(-2, -2));
-        header.addView(new View(this), new LinearLayout.LayoutParams(0, 1, 1));
+        // Greeting with the date under it, taking what the pills leave (shortened if ever needed).
+        greeting.setEllipsize(TextUtils.TruncateAt.END);
+        LinearLayout greetingColumn = new LinearLayout(this);
+        greetingColumn.setOrientation(LinearLayout.VERTICAL);
+        greetingColumn.setGravity(Gravity.CENTER_VERTICAL);
+        greetingColumn.addView(greeting, new LinearLayout.LayoutParams(-2, -2));
+        date.setEllipsize(TextUtils.TruncateAt.END);
+        LinearLayout.LayoutParams dateParams = new LinearLayout.LayoutParams(-2, -2);
+        dateParams.topMargin = dp(1);
+        greetingColumn.addView(date, dateParams);
+        LinearLayout.LayoutParams greetingParams = new LinearLayout.LayoutParams(0, -2, 1);
+        greetingParams.rightMargin = dp(16);
+        header.addView(greetingColumn, greetingParams);
         LinearLayout.LayoutParams calendarPillParams = new LinearLayout.LayoutParams(-2, pillHeight);
         calendarPillParams.rightMargin = dp(12);
         header.addView(homeCalendarCard, calendarPillParams);
@@ -1060,10 +1070,11 @@ public final class MainActivity extends Activity {
         appScroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         // Room above and below for the focus lift and ring, inside the shelf.
         appScroll.setPadding(0, dp(SHELF_PAD), 0, dp(SHELF_PAD));
-        appScroll.setClipChildren(true);
+        // The row may draw into this padding (lift and ring); the shelf clips it at its inner edge.
+        appScroll.setClipChildren(false);
         appScroll.setClipToPadding(false);
-        appScroll.setHorizontalFadingEdgeEnabled(true);
-        appScroll.setFadingEdgeLength(dp(14));
+        // No fading edge: it adds its length to every focus scroll, so the slots stopped lining up.
+        appScroll.setHorizontalFadingEdgeEnabled(false);
         appRow = new LinearLayout(this);
         appRow.setOrientation(LinearLayout.HORIZONTAL);
         appRow.setGravity(Gravity.CENTER_VERTICAL);
@@ -1078,7 +1089,6 @@ public final class MainActivity extends Activity {
             }
         });
         shelf.addView(appScroll, new FrameLayout.LayoutParams(-1, -1));
-        shelf.setElevation(dp(8));
         homeContent.addView(shelf, new LinearLayout.LayoutParams(-1, dp(SHELF_HEIGHT)));
 
         LinearLayout gamesHeading = new LinearLayout(this);
@@ -3045,7 +3055,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             if (selected.isEmpty()) for (AppEntry entry : all) selected.add(entry.packageName);
         }
         for (TvInputs.Input input : tvInputs) addInputTile(input, light);
-        if (!tvInputs.isEmpty()) addShelfDivider();
+        if (!tvInputs.isEmpty()) addShelfDivider((FrameLayout) appRow.getChildAt(appRow.getChildCount() - 1));
         int displayed = 0;
         for (String packageName : selected) {
             AppEntry entry = findApp(all, packageName);
@@ -3321,8 +3331,11 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         appRow.addView(tile, new LinearLayout.LayoutParams(slotWidthPx(), -1));
     }
 
-    /** Thin vertical line, bright in the middle, between the TV's inputs and the apps. */
-    private void addShelfDivider() {
+    /**
+     * Thin vertical line, bright in the middle, between the TV's inputs and the apps. It sits on the
+     * edge of the last input's slot and takes no width, so every slot stays the same size.
+     */
+    private void addShelfDivider(FrameLayout lastInputSlot) {
         View line = new View(this);
         line.setTag("divider");
         line.setFocusable(false);
@@ -3330,9 +3343,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                 android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
                 LiquidTheme.isLight(this) ? new int[]{0x00000000, 0x33000000, 0x33000000, 0x00000000}
                         : new int[]{0x00FFFFFF, 0x52FFFFFF, 0x52FFFFFF, 0x00FFFFFF}));
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(Math.max(1, dp(1)), dp(ShelfTile.GLASS_DP));
-        params.setMargins(dp((SHELF_DIVIDER - 1) / 2), 0, dp(SHELF_DIVIDER - 1 - (SHELF_DIVIDER - 1) / 2), 0);
-        appRow.addView(line, params);
+        lastInputSlot.addView(line, new FrameLayout.LayoutParams(Math.max(1, dp(1)), dp(ShelfTile.GLASS_DP),
+                Gravity.END | Gravity.CENTER_VERTICAL));
     }
 
     private void openAppSettings() {
@@ -4123,20 +4135,15 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
     /** Shelf geometry (dp): glass tiles of {@link ShelfTile#GLASS_DP} with room for the focus lift and ring. */
     private static final int SHELF_PAD = 19, SHELF_SIDE = 14;
     private static final int SHELF_HEIGHT = ShelfTile.GLASS_DP + 2 * SHELF_PAD;
-    /** Divider between the TV inputs and the apps: 1 dp line with 10 dp either side. */
-    private static final int SHELF_DIVIDER = 21;
-
     /**
-     * Width of one tile slot so a whole number of slots (plus the divider, when the TV has inputs)
-     * fills the shelf exactly: nothing is cut at the right edge until the row scrolls.
+     * Width of one tile slot so a whole number of slots fills the shelf exactly: nothing is cut at
+     * either edge, and since focus scrolls move by whole slots, it stays that way while scrolling.
      */
     private int slotWidthPx() {
         int width = appScrollView != null ? appScrollView.getWidth() : 0;
         if (width <= 0) width = getResources().getDisplayMetrics().widthPixels - dp(40 + 40 + 2 * SHELF_SIDE);
-        int divider = tvInputs.isEmpty() ? 0 : dp(SHELF_DIVIDER);
-        int room = Math.max(dp(ShelfTile.SLOT_DP), width - divider);
-        int slots = Math.max(1, room / dp(ShelfTile.SLOT_DP));
-        return room / slots;
+        int slots = Math.max(1, width / dp(ShelfTile.SLOT_DP));
+        return width / slots;
     }
 
     private static final String[] DEFAULT_APP_LABELS = {"movistar", "disney", "dazn", "prime video"};

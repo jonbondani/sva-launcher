@@ -24,10 +24,11 @@ import android.widget.FrameLayout;
  * Home shelf tiles in the Liquid Glass style (after frxnnk/webos-liquid-glass-launcher, MIT):
  * a rounded square of clear glass with a soft glow of the app's own colour at the bottom, the
  * logo in the middle, and on focus a lift with a white ring. Sizes follow that launcher at TV
- * scale (glass 100 dp, radius 23 dp, slot 114 dp).
+ * scale (glass 96 dp, radius 22 dp; slots a little wider so the focus ring always has room).
  */
 final class ShelfTile {
-    static final int GLASS_DP = 100, RADIUS_DP = 23, SLOT_DP = 114, LOGO_PERCENT = 62;
+    /** Slot at least 124 dp so the focused glass (lifted, 10 % bigger, ring outside) never leaves its slot. */
+    static final int GLASS_DP = 96, RADIUS_DP = 22, SLOT_DP = 124, LOGO_PERCENT = 62;
     static final String GLASS_TAG = "shelf-glass";
     private static final int DEFAULT_COLOR = 0xFF9FB4D6;
 
@@ -45,7 +46,7 @@ final class ShelfTile {
                 outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), LiquidTheme.dp(context, RADIUS_DP));
             }
         });
-        glass.setElevation(LiquidTheme.dp(context, 4));
+        // No elevation: a shadow under translucent glass shows through it as a grey patch.
         return glass;
     }
 
@@ -72,7 +73,6 @@ final class ShelfTile {
         float scale = focused ? 1.1f : 1f;
         glass.animate().scaleX(scale).scaleY(scale)
                 .translationY(focused ? -LiquidTheme.dp(glass.getContext(), 6) : 0)
-                .translationZ(focused ? LiquidTheme.dp(glass.getContext(), 10) : 0)
                 .setInterpolator(new android.view.animation.OvershootInterpolator(1.1f))
                 .setDuration(android.animation.ValueAnimator.areAnimatorsEnabled() ? 260 : 0).start();
     }
@@ -132,7 +132,7 @@ final class ShelfTile {
             this.ringColor = moving ? LiquidTheme.accent(context) : Color.WHITE;
             this.radius = LiquidTheme.dp(context, RADIUS_DP);
             this.ring = LiquidTheme.dp(context, 2.5f);
-            this.ringGap = LiquidTheme.dp(context, 5);
+            this.ringGap = LiquidTheme.dp(context, 4);
             this.onePx = Math.max(1f, context.getResources().getDisplayMetrics().density * .75f);
         }
 
@@ -163,13 +163,10 @@ final class ShelfTile {
             paint.setShader(new RadialGradient(rect.centerX(), rect.bottom, Math.max(1f, h * .85f),
                     new int[]{(color & 0x00FFFFFF) | (tintAlpha << 24), color & 0x00FFFFFF}, null, Shader.TileMode.CLAMP));
             canvas.drawRoundRect(rect, radius, radius, paint);
-            // Sheen on the upper part.
-            canvas.save();
-            canvas.clipRect(rect.left, rect.top, rect.right, rect.top + h * .6f);
-            paint.setShader(new RadialGradient(rect.left + w * .26f, rect.top, Math.max(1f, w * .7f),
-                    new int[]{0x57FFFFFF, 0x00FFFFFF}, null, Shader.TileMode.CLAMP));
+            // Sheen from the upper-left corner, fading out well before the middle (no hard edge).
+            paint.setShader(new RadialGradient(rect.left + w * .26f, rect.top, Math.max(1f, h * .55f),
+                    new int[]{0x57FFFFFF, 0x1AFFFFFF, 0x00FFFFFF}, new float[]{0f, .5f, 1f}, Shader.TileMode.CLAMP));
             canvas.drawRoundRect(rect, radius, radius, paint);
-            canvas.restore();
             paint.setShader(null);
             // Rims: a bright top edge and a faint outline.
             paint.setStyle(Paint.Style.STROKE);
