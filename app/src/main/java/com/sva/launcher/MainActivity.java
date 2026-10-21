@@ -5853,7 +5853,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             addChoice(form, "Saludo en el inicio", new String[]{"Mostrar", "Ocultar"},
                     preferences.getBoolean("showGreeting", true) ? 0 : 1, index -> {
                         preferences.edit().putBoolean("showGreeting", index == 0).apply();
-                        if (greeting != null) greeting.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
+                        boolean gamesShown = homeLiveStrip != null && homeLiveStrip.getVisibility() == View.VISIBLE;
+                        if (greeting != null) greeting.setVisibility(index == 0 && !gamesShown ? View.VISIBLE : View.GONE);
                     });
             EditText nameField = addInput(form, "Tu nombre", Greeting.DEFAULT_NAME,
                     preferences.getString("userName", Greeting.DEFAULT_NAME), false);
