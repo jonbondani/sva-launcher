@@ -41,3 +41,9 @@ vendored core, native bridge, Gradle build files and license files. Keep this
 inventory and bundled notices in sync when dependencies change. Run
 `python3 scripts/update-notices.py` after updating native sources or the root notices;
 use `--check` to verify them. Set `ANDROID_HOME` to include the pinned NDK notices.
+
+Design credits (no code copied): the Home top bar pills and the glass shelf with
+square, colour-tinted tiles follow the look of
+[webos-liquid-glass-launcher](https://github.com/frxnnk/webos-liquid-glass-launcher) (MIT).
+Fire TV integration ideas come from [dumbtv](https://github.com/humblemuzzu/dumbtv) (MIT)
+and [Free My TV](https://github.com/simbasjungles/free-my-tv) (MIT).
