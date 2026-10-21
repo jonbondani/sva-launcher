@@ -1184,6 +1184,8 @@ public final class MainActivity extends Activity {
     }
 
     @Override public boolean dispatchKeyEvent(KeyEvent event) {
+        // Moving an app: the tile being moved takes the arrows, OK and Back itself.
+        if (movingPackage != null) return super.dispatchKeyEvent(event);
         if (event.getAction() == KeyEvent.ACTION_DOWN && isDpadDirection(event.getKeyCode())
                 && tabsInitialized && settingsScreen == null) {
             View focused = getCurrentFocus();
