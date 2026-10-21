@@ -94,6 +94,8 @@ final class LiquidTheme {
     static int glassFocusedTint(Context context) { return isLight(context) ? 0xEBFFFFFF : 0x5CFFFFFF; }
     static int glassRim(Context context) { return isLight(context) ? 0x8CFFFFFF : 0x38FFFFFF; }
     static int glassFocusedRim(Context context) { return 0xF2FFFFFF; }
+    /** The dock: a little more frosted than tiles so its labels stay readable. */
+    static int glassBarTint(Context context) { return isLight(context) ? 0x8CFFFFFF : 0x33FFFFFF; }
 
     static Drawable scenicBackground(Context context) {
         Drawable photo = context.getDrawable(R.drawable.mountain_wallpaper);

@@ -51,6 +51,10 @@ key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_RIGHT; key KEYC
 adb shell input keyevent --longpress KEYCODE_DPAD_CENTER; sleep 1.5; shot 08d-move-start
 key KEYCODE_DPAD_RIGHT 1.5; shot 08e-moved-right
 key KEYCODE_DPAD_CENTER 1.5; shot 08f-dropped
+# The "add apps" tile at the end of the row, and the picker it opens.
+for i in $(seq 1 14); do key KEYCODE_DPAD_RIGHT 0.5; done; sleep 1; shot 08g-add-apps
+key KEYCODE_DPAD_CENTER 3; shot 08h-app-picker
+key KEYCODE_BACK 2
 # Same screens in dark mode.
 adb shell cmd uimode night yes
 adb shell am force-stop com.sva.launcher

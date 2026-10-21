@@ -667,8 +667,7 @@ public final class MainActivity extends Activity {
         LinearLayout navbar = new LinearLayout(this);
         navbar.setGravity(Gravity.CENTER_VERTICAL);
         navbar.setPadding(dp(10), 0, dp(14), 0);
-        navbar.setBackground(roundedShape(light ? 0xE9FFFFFF : 0xD508181A,
-                light ? 0x26000000 : 0x55C4D9D2, 1, 24));
+        navbar.setBackground(roundedShape(LiquidTheme.glassBarTint(this), LiquidTheme.glassRim(this), 1, 28));
         navbar.setElevation(dp(6));
         navigation.addView(navbar, new LinearLayout.LayoutParams(-2, dp(58)));
 
@@ -807,7 +806,7 @@ public final class MainActivity extends Activity {
         FrameLayout heroContent = new FrameLayout(this);
         // Leave exactly the height of the app row block (spacer + row + bottom padding) above
         // the dock, so taller banner tiles are not hidden behind it.
-        int appBlockDp = 34 + APP_TILE_HEIGHT + 40 + 32 + 6;
+        int appBlockDp = 6 + APP_TILE_HEIGHT + 40 + 12 + 6;
         root.addView(heroContent, new LinearLayout.LayoutParams(-1,
                 dp(Math.max(180, heroHeightDp() - dockHeight - appBlockDp))));
         // Today's games of the followed teams, Google-sports style, above the app row.
@@ -824,17 +823,18 @@ public final class MainActivity extends Activity {
         heroContent.addView(heroColumn, columnParams);
         LinearLayout.LayoutParams stripParams = new LinearLayout.LayoutParams(-2, -2);
         greeting = new TextView(this);
-        greeting.setTextSize(compactNavigation ? 30 : 34);
+        greeting.setTextSize(compactNavigation ? 26 : 30);
         greeting.setTypeface(LiquidTheme.bold(this));
         greeting.setLetterSpacing(-.01f);
         greeting.setTextColor(LiquidTheme.isLight(this) ? LiquidTheme.text(this) : Color.WHITE);
         greeting.setShadowLayer(dp(8), 0, dp(1), LiquidTheme.isLight(this) ? 0x33FFFFFF : 0x66000000);
         greeting.setSingleLine(true);
         greeting.setVisibility(preferences.getBoolean("showGreeting", true) ? View.VISIBLE : View.GONE);
-        LinearLayout.LayoutParams greetingParams = new LinearLayout.LayoutParams(-2, -2);
-        greetingParams.setMargins(dp(8), 0, 0, dp(10));
-        heroColumn.addView(greeting, greetingParams);
         heroColumn.addView(homeLiveStrip, stripParams);
+        // The greeting sits right under the clock, above today's games.
+        FrameLayout.LayoutParams greetingParams = new FrameLayout.LayoutParams(-2, -2, Gravity.TOP | Gravity.START);
+        greetingParams.setMargins(dp(48), dp(16) + dp(compactNavigation ? 78 : 82) + dp(4), dp(20), 0);
+        heroContent.addView(greeting, greetingParams);
         renderWeather();
 
         int topCardHeight = dp(compactNavigation ? 78 : 82);
@@ -1003,14 +1003,14 @@ public final class MainActivity extends Activity {
 
         homeContent = new LinearLayout(this);
         homeContent.setOrientation(LinearLayout.VERTICAL);
-        homeContent.setPadding(dp(40), 0, dp(20), dp(32));
+        homeContent.setPadding(dp(40), 0, dp(20), dp(12));
         homeContent.setClipChildren(false);
         homeContent.setClipToPadding(false);
         homeContent.setBackgroundColor(Color.TRANSPARENT);
         root.addView(homeContent, new LinearLayout.LayoutParams(-1, -2));
 
         View appsSpacer = new View(this);
-        homeContent.addView(appsSpacer, new LinearLayout.LayoutParams(-1, dp(34)));
+        homeContent.addView(appsSpacer, new LinearLayout.LayoutParams(-1, dp(6)));
 
         HorizontalScrollView appScroll = new HorizontalScrollView(this);
         appScroll.setHorizontalScrollBarEnabled(false);
@@ -1020,6 +1020,8 @@ public final class MainActivity extends Activity {
         appScroll.setPadding(dp(14), dp(18), dp(14), dp(18));
         appScroll.setClipChildren(true);
         appScroll.setClipToPadding(false);
+        appScroll.setHorizontalFadingEdgeEnabled(true);
+        appScroll.setFadingEdgeLength(dp(56));
         appRow = new LinearLayout(this);
         appRow.setOrientation(LinearLayout.HORIZONTAL);
         appRow.setClipChildren(false);
@@ -2737,9 +2739,6 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         int focusIndex = focused == null ? -1 : homeLiveStrip.indexOfChild(focused);
         homeLiveStrip.removeAllViews();
         homeLiveStrip.setVisibility(games.isEmpty() ? View.GONE : View.VISIBLE);
-        // The hero area is short: the greeting gives way to today's games when there are any.
-        if (greeting != null) greeting.setVisibility(games.isEmpty() && preferences.getBoolean("showGreeting", true)
-                ? View.VISIBLE : View.GONE);
         for (int i = 0; i < Math.min(3, games.size()); i++) {
             LiveScores.Game game = games.get(i);
             String team = "";
@@ -2748,6 +2747,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             View card = LiveScores.card(this, game, v -> startActivity(MatchesActivity.intent(this)
                     .putExtra(MatchesActivity.EXTRA_OPEN_COMPETITION, game.competition)
                     .putExtra(MatchesActivity.EXTRA_OPEN_TEAM, involved)));
+            card.setBackground(glassTileStates(18));
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(dp(292), -2);
             params.rightMargin = dp(14);
             homeLiveStrip.addView(card, params);
@@ -3120,11 +3120,47 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                 if (destination != null) destination.requestFocus();
             });
         }
+        addMoreAppsTile(light);
         if (selected.isEmpty()) {
             TextView empty = label("No apps selected", 15, MUTED, false);
             empty.setGravity(Gravity.CENTER_VERTICAL);
             appRow.addView(empty, new LinearLayout.LayoutParams(dp(240), dp(72)));
         }
+    }
+
+    /** Last tile of the row: opens the app picker so apps can be added straight from Home. */
+    private void addMoreAppsTile(boolean light) {
+        LinearLayout tile = new LinearLayout(this);
+        tile.setId(View.generateViewId());
+        tile.setOrientation(LinearLayout.VERTICAL);
+        tile.setGravity(Gravity.CENTER);
+        tile.setFocusable(true);
+        tile.setClickable(true);
+        tile.setFocusableInTouchMode(false);
+        tile.setBackground(glassTileStates(16));
+        tile.setElevation(dp(2));
+        tile.setOnFocusChangeListener(LiquidTheme::animateFocus);
+        tile.setTag("add-apps");
+        tile.setContentDescription("Añadir apps");
+        int ink = light ? LiquidTheme.text(this) : Color.WHITE;
+        TextView plus = label("+", 34, ink, false);
+        plus.setGravity(Gravity.CENTER);
+        plus.setIncludeFontPadding(false);
+        tile.addView(plus, new LinearLayout.LayoutParams(-2, -2));
+        TextView name = label("Añadir apps", 13, LiquidTheme.secondaryText(this), true);
+        name.setGravity(Gravity.CENTER);
+        tile.addView(name, new LinearLayout.LayoutParams(-2, -2));
+        tile.setOnLongClickListener(v -> true);
+        tile.setOnClickListener(v -> openAppSettings());
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(APP_TILE_WIDTH), dp(APP_TILE_HEIGHT));
+        lp.setMargins(0, 0, dp(8), 0);
+        appRow.addView(tile, lp);
+    }
+
+    private void openAppSettings() {
+        if (settingsScreen == null) settingsScreen = new SettingsScreen();
+        settingsScreen.section = SettingsScreen.APPS;
+        settingsScreen.show();
     }
 
     private void startMove(String packageName) {
@@ -5855,8 +5891,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             addChoice(form, "Saludo en el inicio", new String[]{"Mostrar", "Ocultar"},
                     preferences.getBoolean("showGreeting", true) ? 0 : 1, index -> {
                         preferences.edit().putBoolean("showGreeting", index == 0).apply();
-                        boolean gamesShown = homeLiveStrip != null && homeLiveStrip.getVisibility() == View.VISIBLE;
-                        if (greeting != null) greeting.setVisibility(index == 0 && !gamesShown ? View.VISIBLE : View.GONE);
+                        if (greeting != null) greeting.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
                     });
             EditText nameField = addInput(form, "Tu nombre", Greeting.DEFAULT_NAME,
                     preferences.getString("userName", Greeting.DEFAULT_NAME), false);
@@ -5988,7 +6023,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         }
 
         private void renderAppSettings(LinearLayout page) {
-            addFormHint(page, "Choose up to five apps for Home. Use arrows to change their order.");
+            addFormHint(page, "Elige las apps del inicio y su orden con las flechas. En el inicio también puedes mantener OK sobre una app para moverla.");
             if (!TvInputs.list(MainActivity.this).isEmpty()) {
                 addChoice(page, "Entradas de la tele en el inicio", new String[]{"Mostrar", "Ocultar"},
                         preferences.getBoolean("showTvInputs", true) ? 0 : 1, index -> {
