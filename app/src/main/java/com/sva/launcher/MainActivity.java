@@ -1017,13 +1017,13 @@ public final class MainActivity extends Activity {
         appScroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         // Room around the row for the focus lift (6 % zoom): the zoomed tile may draw into the
         // padding, while tiles scrolled out of view are still clipped at the row's edges.
-        appScroll.setPadding(dp(14), dp(18), dp(14), dp(18));
+        appScroll.setPadding(0, dp(18), 0, dp(18));
         appScroll.setClipChildren(true);
         appScroll.setClipToPadding(false);
         appScroll.setHorizontalFadingEdgeEnabled(true);
-        // The fade covers exactly the strip outside the five whole tiles (scroll + row insets, 14 + 18),
-        // so a sixth tile only hints at more apps instead of showing up half cut.
-        appScroll.setFadingEdgeLength(dp(14 + 18));
+        // Tiles are clipped at the row's sides; the fade covers the row's 18dp inner margin, so a
+        // sixth tile only hints at more apps instead of showing up half cut.
+        appScroll.setFadingEdgeLength(dp(18));
         appRow = new LinearLayout(this);
         appRow.setOrientation(LinearLayout.HORIZONTAL);
         appRow.setClipChildren(false);
@@ -3921,12 +3921,12 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
 
     /**
      * Tile width so exactly five tiles and their gaps fill the row on this screen: no tile is cut
-     * at the right edge until the row actually scrolls. Row insets: home padding 40+20, scroll 14+14, row 18+18.
+     * at the right edge until the row actually scrolls. Row insets: home padding 40+20, row 18+18.
      */
     private int appTileWidthDp() {
         float density = getResources().getDisplayMetrics().density;
         int screenDp = Math.round(getResources().getDisplayMetrics().widthPixels / density);
-        int available = screenDp - (40 + 20) - (14 + 14) - (18 + 18);
+        int available = screenDp - (40 + 20) - (18 + 18);
         int width = (available - APP_TILE_GAP * APP_TILES_VISIBLE) / APP_TILES_VISIBLE;
         return Math.max(120, Math.min(200, width));
     }
