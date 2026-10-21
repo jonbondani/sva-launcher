@@ -2735,6 +2735,9 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         int focusIndex = focused == null ? -1 : homeLiveStrip.indexOfChild(focused);
         homeLiveStrip.removeAllViews();
         homeLiveStrip.setVisibility(games.isEmpty() ? View.GONE : View.VISIBLE);
+        // The hero area is short: the greeting gives way to today's games when there are any.
+        if (greeting != null) greeting.setVisibility(games.isEmpty() && preferences.getBoolean("showGreeting", true)
+                ? View.VISIBLE : View.GONE);
         for (int i = 0; i < Math.min(3, games.size()); i++) {
             LiveScores.Game game = games.get(i);
             String team = "";
@@ -3154,7 +3157,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         icon.setImageResource(input.kind == TvInputs.TUNER ? R.drawable.ic_antenna : R.drawable.ic_hdmi);
         icon.setColorFilter(input.connected ? ink : (ink & 0x00FFFFFF) | 0x80000000);
         tile.addView(icon, new LinearLayout.LayoutParams(dp(34), dp(34)));
-        TextView name = label(input.label, 14, input.connected ? ink : MUTED, true);
+        TextView name = label(input.label, 14, input.connected ? ink : LiquidTheme.secondaryText(this), true);
         name.setGravity(Gravity.CENTER);
         name.setSingleLine(true);
         name.setEllipsize(android.text.TextUtils.TruncateAt.END);
@@ -3162,6 +3165,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         nameParams.topMargin = dp(4);
         tile.addView(name, nameParams);
         tile.setPadding(dp(8), dp(8), dp(8), dp(8));
+        tile.setOnLongClickListener(v -> true);   // inputs stay first; holding OK does nothing
         tile.setOnClickListener(v -> {
             if (!TvInputs.open(this, input)) Tr.toast(this, "Esta tele no deja abrir " + input.label + " desde aquí.",
                     Toast.LENGTH_LONG).show();
