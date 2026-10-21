@@ -55,6 +55,13 @@ key KEYCODE_DPAD_CENTER 1.5; shot 08f-dropped
 for i in $(seq 1 14); do key KEYCODE_DPAD_RIGHT 0.5; done; sleep 1; shot 08g-add-apps
 key KEYCODE_DPAD_CENTER 3; shot 08h-app-picker
 key KEYCODE_BACK 2
+# "Estoy viendo" with sample Stremio items (real Cinemeta stills, made-up progress).
+adb shell am force-stop com.sva.launcher
+adb shell am start -W -n com.sva.launcher/.MainActivity --ez demo_watching true > /dev/null
+sleep 15
+shot 08i-watching
+key KEYCODE_DPAD_UP 1.5; shot 08j-watching-focus
+key KEYCODE_DPAD_RIGHT 1.5; shot 08k-watching-focus-2
 # Same screens in dark mode.
 adb shell cmd uimode night yes
 adb shell am force-stop com.sva.launcher

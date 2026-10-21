@@ -187,6 +187,13 @@ public final class MainActivity extends Activity {
     private TextView clock, clockPeriod, date, status;
     /** "Buenos días, jonbondani": large tvOS-style title above the home rows. */
     private TextView greeting;
+    /** Stremio "Estoy viendo" cards in the hero area. */
+    private LinearLayout watchingStrip;
+    private long watchingLoadedAt;
+    private List<Stremio.Item> lastWatching = new ArrayList<>();
+    private int watchingFitShown = -1;
+    private boolean watchingLoading;
+    private final android.util.LruCache<String, android.graphics.Bitmap> stillCache = new android.util.LruCache<>(16);
     private LinearLayout weatherPanel;
     private TextView weatherTemperature, weatherCondition, weatherDetails, weatherLocation, weatherMetrics;
     private TextView weatherSymbol, homeCalendarEyebrow, homeCalendarTitle, homeCalendarSubtitle;
@@ -198,7 +205,7 @@ public final class MainActivity extends Activity {
     private LinearLayout homeLiveStrip;
     /** HDMI ports and the tuner of a TV (empty on sticks and boxes), shown first in the app row. */
     private List<TvInputs.Input> tvInputs = new ArrayList<>();
-    private boolean demoTvInputs;
+    private boolean demoTvInputs, demoWatching;
     /** App being moved in the home row (hold OK on a tile), or null. */
     private String movingPackage;
     private boolean swallowNextClick;
@@ -282,6 +289,7 @@ public final class MainActivity extends Activity {
         // Screenshot tests only: emulators have no TV inputs, so sample ones can be shown
         // (am start ... --ez demo_tv_inputs true). Nothing is stored and the TV is not touched.
         demoTvInputs = getIntent() != null && getIntent().getBooleanExtra("demo_tv_inputs", false);
+        demoWatching = getIntent() != null && getIntent().getBooleanExtra("demo_watching", false);
         logoLoader = new ChannelLogoLoader(this);
         weatherForecast = cachedWeather();
         hiddenChannelKeys.addAll(preferences.getStringSet("hiddenChannels", Collections.emptySet()));
@@ -519,6 +527,7 @@ public final class MainActivity extends Activity {
         scheduleCalendarRefresh();
         scheduleMatchTick();
         maybeAutoUpdate();
+        maybeRefreshWatching(false);
         scheduleGooglePhotosRefresh();
         maybeRefreshWeather(false);
         scheduleWeatherRefresh();
@@ -818,7 +827,8 @@ public final class MainActivity extends Activity {
         homeLiveStrip.setVisibility(View.GONE);
         // Greeting and today's games stacked at the bottom-left of the hero area, clear of the header.
         LinearLayout heroColumn = new LinearLayout(this);
-        heroColumn.setOrientation(LinearLayout.VERTICAL);
+        heroColumn.setOrientation(LinearLayout.HORIZONTAL);
+        heroColumn.setGravity(Gravity.BOTTOM);
         heroColumn.setClipChildren(false);
         FrameLayout.LayoutParams columnParams = new FrameLayout.LayoutParams(-2, -2, Gravity.BOTTOM | Gravity.START);
         columnParams.setMargins(dp(40), 0, dp(20), dp(6));
@@ -833,6 +843,12 @@ public final class MainActivity extends Activity {
         greeting.setSingleLine(true);
         greeting.setVisibility(preferences.getBoolean("showGreeting", true) ? View.VISIBLE : View.GONE);
         heroColumn.addView(homeLiveStrip, stripParams);
+        // "Estoy viendo" from Stremio, to the right of today's games.
+        watchingStrip = new LinearLayout(this);
+        watchingStrip.setOrientation(LinearLayout.HORIZONTAL);
+        watchingStrip.setClipChildren(false);
+        watchingStrip.setVisibility(View.GONE);
+        heroColumn.addView(watchingStrip, new LinearLayout.LayoutParams(-2, -2));
         // The greeting sits right under the clock, above today's games.
         FrameLayout.LayoutParams greetingParams = new FrameLayout.LayoutParams(-2, -2, Gravity.TOP | Gravity.START);
         greetingParams.setMargins(dp(48), dp(16) + dp(compactNavigation ? 78 : 82) + dp(4), dp(20), 0);
@@ -2627,6 +2643,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                 if (!screenActive) return;
                 updateHomeCalendarWidget();
                 updateHomeLiveStrip();
+                maybeRefreshWatching(false);
                 // Scores are polled while a followed team plays today (every 45 s during a game).
                 long tickNow = System.currentTimeMillis();
                 if (!liveScoresRunning && LiveScores.isStale(MainActivity.this)
@@ -2767,6 +2784,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             homeLiveStrip.addView(card, params);
         }
         if (focusIndex >= 0 && focusIndex < homeLiveStrip.getChildCount()) homeLiveStrip.getChildAt(focusIndex).requestFocus();
+        // Today's games changed: re-fit the "Estoy viendo" cards next to them.
+        if (!lastWatching.isEmpty() && watchingFit() != watchingFitShown) renderWatching(lastWatching);
     }
 
     private void updateHomeCalendarWidget() {
@@ -3140,6 +3159,150 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             empty.setGravity(Gravity.CENTER_VERTICAL);
             appRow.addView(empty, new LinearLayout.LayoutParams(dp(240), dp(72)));
         }
+    }
+
+    /** Loads Stremio's "Estoy viendo" (at most every 3 minutes unless forced). */
+    private void maybeRefreshWatching(boolean force) {
+        if (watchingStrip == null || watchingLoading) return;
+        boolean signedIn = Stremio.signedIn(preferences);
+        if (!signedIn && !demoWatching) { watchingStrip.setVisibility(View.GONE); return; }
+        long now = System.currentTimeMillis();
+        if (!force && now - watchingLoadedAt < 3 * 60_000L) return;
+        watchingLoading = true;
+        String key = preferences.getString(Stremio.PREF_AUTH, "");
+        ioWorker.execute(() -> {
+            List<Stremio.Item> items = demoWatching ? Stremio.samples() : Stremio.watching(key, 4);
+            handler.post(() -> {
+                watchingLoading = false;
+                watchingLoadedAt = System.currentTimeMillis();
+                renderWatching(items);
+            });
+        });
+    }
+
+    private void renderWatching(List<Stremio.Item> items) {
+        if (watchingStrip == null) return;
+        lastWatching = items;
+        View focused = watchingStrip.findFocus();
+        int focusIndex = focused == null ? -1 : watchingStrip.indexOfChild(focused);
+        watchingStrip.removeAllViews();
+        int fit = watchingFit();
+        watchingFitShown = fit;
+        int shown = 0;
+        for (Stremio.Item item : items) {
+            if (shown >= fit) break;
+            View card = watchingCard(item);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(dp(WATCH_CARD_W), dp(WATCH_CARD_H));
+            params.rightMargin = dp(14);
+            watchingStrip.addView(card, params);
+            shown++;
+        }
+        watchingStrip.setVisibility(shown > 0 ? View.VISIBLE : View.GONE);
+        if (focusIndex >= 0 && focusIndex < watchingStrip.getChildCount()) watchingStrip.getChildAt(focusIndex).requestFocus();
+    }
+
+    /** As many cards as fit next to today's games without crowding the hero area. */
+    private int watchingFit() {
+        int screenDp = Math.round(getResources().getDisplayMetrics().widthPixels / getResources().getDisplayMetrics().density);
+        int used = 40 + 20 + (homeLiveStrip != null && homeLiveStrip.getVisibility() == View.VISIBLE
+                ? homeLiveStrip.getChildCount() * (292 + 14) : 0);
+        return Math.max(0, (screenDp - used) / (WATCH_CARD_W + 14));
+    }
+
+    private static final int WATCH_CARD_W = 196, WATCH_CARD_H = 110;
+
+    /** A 16:9 still with the title, "T2 · E5" and a progress bar, in a glass frame. */
+    private View watchingCard(Stremio.Item item) {
+        FrameLayout card = new FrameLayout(this);
+        card.setFocusable(true);
+        card.setClickable(true);
+        card.setFocusableInTouchMode(false);
+        card.setBackground(glassTileStates(16));
+        card.setPadding(dp(3), dp(3), dp(3), dp(3));
+        card.setOnFocusChangeListener(LiquidTheme::animateFocus);
+        card.setContentDescription(item.name);
+        ImageView still = new ImageView(this);
+        still.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        still.setClipToOutline(true);
+        still.setOutlineProvider(new android.view.ViewOutlineProvider() {
+            @Override public void getOutline(View view, android.graphics.Outline outline) {
+                outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), dp(13));
+            }
+        });
+        card.addView(still, new FrameLayout.LayoutParams(-1, -1));
+        loadStill(still, item.still != null && !item.still.isEmpty() ? item.still : item.poster);
+        // Legibility veil at the bottom, then the texts and the progress bar.
+        View veil = new View(this);
+        veil.setBackground(new android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM, new int[]{0x00000000, 0xCC000000}));
+        veil.setClipToOutline(true);
+        veil.setOutlineProvider(still.getOutlineProvider());
+        card.addView(veil, new FrameLayout.LayoutParams(-1, -1));
+        LinearLayout texts = new LinearLayout(this);
+        texts.setOrientation(LinearLayout.VERTICAL);
+        texts.setPadding(dp(10), 0, dp(10), dp(9));
+        TextView title = label(item.name, 13, Color.WHITE, true);
+        title.setTextColor(Color.WHITE);
+        title.setSingleLine(true);
+        title.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        texts.addView(title);
+        String sub = item.episodeLabel() + (item.episodeTitle != null && !item.episodeTitle.isEmpty()
+                ? (item.episodeLabel().isEmpty() ? "" : " · ") + item.episodeTitle : "");
+        if (!sub.isEmpty()) {
+            TextView detail = label(sub, 11, 0xD9FFFFFF, false);
+            detail.setTextColor(0xD9FFFFFF);
+            detail.setSingleLine(true);
+            detail.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            texts.addView(detail);
+        }
+        double progress = item.progress();
+        if (progress >= 0) {
+            FrameLayout bar = new FrameLayout(this);
+            bar.setBackground(roundedRect(0x4DFFFFFF, dp(2)));
+            View fill = new View(this);
+            fill.setBackground(roundedRect(Color.WHITE, dp(2)));
+            bar.addView(fill, new FrameLayout.LayoutParams(Math.max(dp(4),
+                    (int) Math.round((dp(WATCH_CARD_W) - dp(26)) * progress)), -1));
+            LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(-1, dp(4));
+            barParams.topMargin = dp(5);
+            texts.addView(bar, barParams);
+        }
+        card.addView(texts, new FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM));
+        card.setOnClickListener(v -> {
+            if (!Stremio.open(this, item)) Tr.toast(this, "Instala Stremio para abrirlo desde aquí.", Toast.LENGTH_LONG).show();
+        });
+        return card;
+    }
+
+    private Drawable roundedRect(int color, int radiusPx) {
+        android.graphics.drawable.GradientDrawable shape = new android.graphics.drawable.GradientDrawable();
+        shape.setColor(color);
+        shape.setCornerRadius(radiusPx);
+        return shape;
+    }
+
+    private void loadStill(ImageView view, String url) {
+        if (url == null || url.isEmpty()) return;
+        view.setTag(url);
+        android.graphics.Bitmap cached = stillCache.get(url);
+        if (cached != null) { view.setImageBitmap(cached); return; }
+        ioWorker.execute(() -> {
+            try {
+                java.net.HttpURLConnection connection = (java.net.HttpURLConnection) new java.net.URL(url).openConnection();
+                connection.setConnectTimeout(8000);
+                connection.setReadTimeout(12000);
+                try (java.io.InputStream input = connection.getInputStream()) {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inSampleSize = 2;
+                    android.graphics.Bitmap bitmap = BitmapFactory.decodeStream(input, null, options);
+                    if (bitmap == null) return;
+                    stillCache.put(url, bitmap);
+                    handler.post(() -> { if (url.equals(view.getTag())) view.setImageBitmap(bitmap); });
+                } finally {
+                    connection.disconnect();
+                }
+            } catch (Exception ignored) { }
+        });
     }
 
     /** Last tile of the row: opens the app picker so apps can be added straight from Home. */
@@ -6053,7 +6216,46 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             channelAdapter.setQuery("");
         }
 
+        /** Stremio account for "Estoy viendo": only the session key is stored, never the password. */
+        private void renderStremioAccount(LinearLayout page) {
+            addFormSectionHeader(page, "Estoy viendo · Stremio");
+            if (Stremio.signedIn(preferences)) {
+                addFormHint(page, "Conectado como " + preferences.getString(Stremio.PREF_EMAIL, "") + ". Lo que estás viendo en Stremio aparece en el inicio.");
+                addFormButton(page, "Cerrar sesión de Stremio", v -> {
+                    Stremio.signOut(preferences);
+                    renderWatching(new ArrayList<>());
+                    renderSection();
+                });
+                return;
+            }
+            addFormHint(page, "Entra con tu cuenta de Stremio para ver en el inicio lo que tienes a medias. Sva solo guarda la sesión, no la contraseña.");
+            EditText email = addInput(page, "Correo de Stremio", "tu@correo.com", preferences.getString(Stremio.PREF_EMAIL, ""), false);
+            EditText password = addInput(page, "Contraseña", "", "", false);
+            password.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            addFormButton(page, "Conectar Stremio", v -> {
+                String user = email.getText().toString().trim(), pass = password.getText().toString();
+                if (user.isEmpty() || pass.isEmpty()) { Tr.toast(MainActivity.this, "Escribe correo y contraseña.", Toast.LENGTH_SHORT).show(); return; }
+                Tr.toast(MainActivity.this, "Conectando con Stremio…", Toast.LENGTH_SHORT).show();
+                ioWorker.execute(() -> {
+                    String error = null;
+                    try { Stremio.signIn(preferences, user, pass); } catch (Exception e) { error = e.getMessage(); }
+                    final String failure = error;
+                    handler.post(() -> {
+                        password.setText("");
+                        if (failure != null) {
+                            Tr.toast(MainActivity.this, "No se pudo conectar: " + failure, Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                        Tr.toast(MainActivity.this, "Stremio conectado", Toast.LENGTH_SHORT).show();
+                        maybeRefreshWatching(true);
+                        renderSection();
+                    });
+                });
+            });
+        }
+
         private void renderAppSettings(LinearLayout page) {
+            renderStremioAccount(page);
             addFormHint(page, "Elige las apps del inicio y su orden con las flechas. En el inicio también puedes mantener OK sobre una app para moverla.");
             if (!TvInputs.list(MainActivity.this).isEmpty()) {
                 addChoice(page, "Entradas de la tele en el inicio", new String[]{"Mostrar", "Ocultar"},
