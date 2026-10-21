@@ -18,4 +18,20 @@ final class AppOrder {
         out.add(to, pkg);
         return out;
     }
+
+    /**
+     * Makes sure every app in {@code pinned} (Movistar+, Disney+, DAZN, Prime Video when installed)
+     * is in the row: missing ones go to the front, in pinned order; the rest keeps its order, so a
+     * pinned app the viewer has moved stays where they put it.
+     */
+    static List<String> withPinned(List<String> order, List<String> pinned) {
+        List<String> out = new ArrayList<>(order);
+        int at = 0;
+        for (String pkg : pinned) {
+            if (out.contains(pkg)) continue;
+            out.add(Math.min(at, out.size()), pkg);
+            at++;
+        }
+        return out;
+    }
 }

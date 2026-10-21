@@ -153,6 +153,8 @@ public final class MainActivity extends Activity {
     /** Packages whose Home tile shows a TV banner (the rest show their icon). */
     /** Each shown app's own colour (from its icon), tinting its glass tile. */
     private final Map<String, Integer> appColors = new HashMap<>();
+    /** Each shown app's bare logo and glow, cut from its own icon (see {@link AppLogo}). */
+    private final Map<String, AppLogo.Art> appArt = new HashMap<>();
     private GridLayout gameGrid, calendarMonthGrid;
     private TextView calendarHeaderDate, calendarHeaderEvents;
     private Button previousMonthButton, nextMonthButton;
@@ -3025,19 +3027,24 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             PackageManager packageManager = getPackageManager();
             ArrayList<AppEntry> withIcons = new ArrayList<>(loaded.size());
             HashMap<String, Integer> colors = new HashMap<>();
+            HashMap<String, AppLogo.Art> arts = new HashMap<>();
             for (AppEntry entry : loaded) {
                 Drawable icon = null;
                 if (selectedSet.contains(entry.packageName)) {
                     // Square glass tiles show the app's own icon; the 16:9 banner only when there is no icon.
                     try { icon = packageManager.getApplicationIcon(entry.info); } catch (Exception ignored) { }
                     if (icon == null) try { icon = packageManager.getApplicationBanner(entry.info); } catch (Exception ignored) { }
-                    colors.put(entry.packageName, ShelfTile.dominantColor(icon));
+                    AppLogo.Art art = AppLogo.of(icon);
+                    if (art != null) arts.put(entry.packageName, art);
+                    colors.put(entry.packageName, art != null ? art.color : ShelfTile.dominantColor(icon));
                 }
                 withIcons.add(new AppEntry(entry.info, entry.packageName, entry.label, icon));
             }
             handler.post(() -> {
                 appColors.clear();
                 appColors.putAll(colors);
+                appArt.clear();
+                appArt.putAll(arts);
                 tvInputs = inputs;
                 showApps(withIcons);
             });
@@ -3074,7 +3081,10 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             boolean moving = entry.packageName.equals(movingPackage);
             Integer color = appColors.get(entry.packageName);
             FrameLayout glass = ShelfTile.glass(this, color != null ? color : ShelfTile.dominantColor(entry.icon), moving);
-            if (entry.icon != null) {
+            AppLogo.Art art = appArt.get(entry.packageName);
+            if (art != null) {
+                addLogo(glass, art);
+            } else if (entry.icon != null) {
                 // The app's icon, rounded like an iOS icon, in the middle of the glass.
                 ImageView icon = new ImageView(this);
                 icon.setImageDrawable(entry.icon);
@@ -3305,6 +3315,34 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                 }
             } catch (Exception ignored) { }
         });
+    }
+
+    /**
+     * The app's bare logo floating on the glass, over a blurred copy of itself that lights the
+     * glass in the app's colour (like iOS clear icons and the webOS Liquid Glass launcher).
+     */
+    private void addLogo(FrameLayout glass, AppLogo.Art art) {
+        ImageView light = new ImageView(this);
+        light.setImageBitmap(art.glow);
+        light.setScaleType(ImageView.ScaleType.FIT_XY);
+        light.setAlpha(.55f);
+        int lightSize = dp(Math.round(ShelfTile.GLASS_DP * .78f));
+        FrameLayout.LayoutParams lightParams = new FrameLayout.LayoutParams(lightSize, lightSize, Gravity.CENTER);
+        lightParams.topMargin = dp(8);
+        glass.addView(light, lightParams);
+        ImageView logo = new ImageView(this);
+        logo.setImageBitmap(art.logo);
+        logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        if (!art.bare) {
+            logo.setClipToOutline(true);
+            logo.setOutlineProvider(new android.view.ViewOutlineProvider() {
+                @Override public void getOutline(View view, android.graphics.Outline outline) {
+                    outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), dp(14));
+                }
+            });
+        }
+        int size = dp(Math.round(ShelfTile.GLASS_DP * (art.bare ? .5f : .62f)));
+        glass.addView(logo, new FrameLayout.LayoutParams(size, size, Gravity.CENTER));
     }
 
     /** Last tile of the row: opens the app picker so apps can be added straight from Home. */
@@ -4169,7 +4207,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         String raw = preferences.getString("selectedApps", "");
         ArrayList<String> selected = new ArrayList<>();
         if (!raw.isEmpty()) for (String pkg : raw.split("\\n")) if (findApp(available, pkg) != null && !selected.contains(pkg)) selected.add(pkg);
-        return selected;
+        // Movistar+, Disney+, DAZN and Prime Video are always on Home when installed.
+        return new ArrayList<>(AppOrder.withPinned(selected, defaultApps(available)));
     }
 
     private AppEntry findApp(List<AppEntry> all, String pkg) {

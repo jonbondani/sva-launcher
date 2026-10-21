@@ -23,4 +23,19 @@ public final class AppOrderTest {
     @Test public void unknownAppChangesNothing() {
         assertEquals(ROW, AppOrder.move(ROW, "netflix", 1));
     }
+
+    @Test public void pinnedAppsMissingFromTheRowGoFirstInOrder() {
+        assertEquals(Arrays.asList("movistar", "dazn", "netflix", "youtube"),
+                AppOrder.withPinned(Arrays.asList("netflix", "youtube"), Arrays.asList("movistar", "dazn")));
+    }
+
+    @Test public void pinnedAppAlreadyMovedStaysWhereItIs() {
+        assertEquals(Arrays.asList("movistar", "netflix", "dazn"),
+                AppOrder.withPinned(Arrays.asList("netflix", "dazn"), Arrays.asList("movistar", "dazn")));
+    }
+
+    @Test public void nothingPinnedChangesNothing() {
+        assertEquals(ROW, AppOrder.withPinned(ROW, Arrays.asList()));
+        assertEquals(ROW, AppOrder.withPinned(ROW, ROW));
+    }
 }
