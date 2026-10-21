@@ -1021,7 +1021,9 @@ public final class MainActivity extends Activity {
         appScroll.setClipChildren(true);
         appScroll.setClipToPadding(false);
         appScroll.setHorizontalFadingEdgeEnabled(true);
-        appScroll.setFadingEdgeLength(dp(20));
+        // The fade covers exactly the strip outside the five whole tiles (scroll + row insets, 14 + 18),
+        // so a sixth tile only hints at more apps instead of showing up half cut.
+        appScroll.setFadingEdgeLength(dp(14 + 18));
         appRow = new LinearLayout(this);
         appRow.setOrientation(LinearLayout.HORIZONTAL);
         appRow.setClipChildren(false);
