@@ -1,0 +1,1 @@
+    mResumedActivity: ActivityRecord{2e92c70 u0 com.sva.launcher/.MainActivity t9}
