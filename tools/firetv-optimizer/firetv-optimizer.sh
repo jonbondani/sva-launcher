@@ -13,7 +13,7 @@
 # =============================================================================
 set -u
 
-VERSION="1.8.0"
+VERSION="1.8.1"
 BASE_DIR="${FTVO_HOME:-$HOME/firetv-optimizer}"
 BACKUP_DIR="$BASE_DIR/copias"
 ADB="${ADB:-adb}"
@@ -248,8 +248,8 @@ KNOWN_FILE="$BASE_DIR/teles.txt"
 
 model_name() {   # nombre comercial de los códigos de modelo de Amazon más comunes
   case "$1" in
-    AFTKA)   echo "Fire TV Stick 4K Max (2.ª gen.)" ;;
-    AFTKRT)  echo "Fire TV Stick 4K Max (1.ª gen.)" ;;
+    AFTKA)   echo "Fire TV Stick 4K Max (1.ª gen., 2021)" ;;
+    AFTKRT)  echo "Fire TV Stick 4K Max (2.ª gen., 2023)" ;;
     AFTKM)   echo "Fire TV Stick 4K (2.ª gen.)" ;;
     AFTMM)   echo "Fire TV Stick 4K (1.ª gen.)" ;;
     AFTSSS)  echo "Fire TV Stick (3.ª gen.)" ;;
@@ -463,6 +463,13 @@ cmd_estado() {
   done
   local last; last=$(latest_backup)
   echo "  Última copia:           ${last:-ninguna}"
+  if fireos8; then
+    for k in window_animation_scale transition_animation_scale animator_duration_scale; do
+      case "$(dsh settings get global $k)" in null|1|1.0|"") ;; *)
+        anim_warning; warn "Arréglalo con:  ./firetv-optimizer.sh animaciones 1"; break ;;
+      esac
+    done
+  fi
   safety_check
 }
 
@@ -594,10 +601,27 @@ cmd_desactivar() {   # desactivar un paquete concreto a mano
   safety_check
 }
 
+# Fire OS 8 (Android 11, SDK 30) cierra el menú lateral sin abrir nada con las animaciones por
+# debajo de 1x. Documentado por CleanYourTV (Fire TV Stick 4K 2023 con Fire OS 8.1.8.5 y teles
+# Hisense con Fire OS 8, probado alternando 1.0 y 0.5).
+fireos8() {
+  local sdk; sdk=$(dsh getprop ro.build.version.sdk | tr -dc '0-9')
+  [ "${sdk:-0}" -ge 30 ]
+}
+anim_warning() {
+  err "En Fire OS 8 las animaciones por debajo de 1x rompen el menú lateral (☰):"
+  err "Ajustes, Entradas y el perfil se cierran sin abrir nada."
+  err "Lo han comprobado otros en un Fire TV Stick 4K de 2023 y en teles con Fire OS 8."
+}
+
 cmd_animaciones() {
   local v="${1:-0.5}"
   case "$v" in 0|0.5|1|1.0|0.25) ;; *) die "Valor no válido: usa 0, 0.25, 0.5 o 1" ;; esac
   resolve_target; check_fireos
+  case "$v" in
+    1|1.0) ;;
+    *) if fireos8; then anim_warning; die "No se cambia nada. Para volver a la normalidad:  ./firetv-optimizer.sh animaciones 1"; fi ;;
+  esac
   if [ "$DRY_RUN" -eq 1 ]; then info "Simulación: pondría las animaciones a $v"; return; fi
   local bk; bk=$(new_backup_file animaciones)
   local k old
@@ -1090,7 +1114,7 @@ ${C_BOLD}Comandos${C_0}
   desactivar <paquete> Desactiva uno concreto (nunca un protegido)
   privacidad           Limita seguimiento publicitario, métricas de uso y vídeo automático
   blindar              Quita el segundo plano a la telemetría que Amazon no deja desactivar
-  animaciones [v]      Velocidad de animaciones: 0, 0.25, 0.5 (defecto) o 1
+  animaciones [v]      Velocidad de animaciones: 0, 0.25, 0.5 (defecto) o 1. En Fire OS 8 solo 1
   explorar             Informe de flags/ajustes ocultos y capacidades (solo lectura)
   rendimiento [vivo]   Memoria, procesador, almacenamiento y temperatura (vivo = cada 5 s)
   limpiar              Cierra procesos en segundo plano
@@ -1151,7 +1175,8 @@ ${C_BOLD}Qué hace cada opción${C_0}
                   y el vídeo automático de los destacados. Guarda los valores anteriores.
   Blindar         Las apps de telemetría que Amazon no deja desactivar siguen instaladas,
                   pero sin permiso para funcionar en segundo plano. No toca actualizaciones.
-  Animaciones     Pone las animaciones a 0.5x: los menús responden antes.
+  Animaciones     Pone las animaciones a 0.5x: los menús responden antes. Solo Fire OS 7:
+                  en Fire OS 8 rompe el menú lateral y el script se niega.
   Reiniciar       Necesario para notar del todo lo anterior.
   Nivel moderado  Además desactiva partes de Alexa, Silk, Amazon Kids, perfiles y Fling.
                   El botón de voz del mando puede fallar.
@@ -1184,7 +1209,7 @@ cmd_menu() {
     menu_line 4 "Nivel seguro"    "Telemetría, anuncios, compras y promos. Sin efectos visibles"
     menu_line 5 "Privacidad"      "EXPERIMENTAL. Seguimiento publicitario, métricas, vídeo automático"
     menu_line 6 "Blindar"         "RETIRADO: alto riesgo, no hace nada"
-    menu_line 7 "Animaciones"     "Menús más ágiles (0.5x)"
+    menu_line 7 "Animaciones"     "Menús más ágiles (0.5x). Solo Fire OS 7"
     menu_line 8 "Reiniciar"       "Para notar el efecto completo"
     menu_head "PASO 3 · OPCIONAL" "(tras usar la tele un par de días)"
     menu_line t2 "Probar una app" "Teles: una app cada vez, comprobando y reiniciando (lo seguro)"

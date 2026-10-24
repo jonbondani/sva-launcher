@@ -30,7 +30,7 @@ La primera vez que conectes, la tele mostrará «¿Permitir depuración?». Acep
 ./firetv-optimizer.sh auditar                 # informe de qué hay en tu tele
 ./firetv-optimizer.sh plan seguro             # vista previa, no cambia nada
 ./firetv-optimizer.sh aplicar seguro          # telemetría, anuncios, compras, promos
-./firetv-optimizer.sh animaciones 0.5         # interfaz más ágil
+./firetv-optimizer.sh animaciones 0.5         # interfaz más ágil (solo Fire OS 7; en Fire OS 8 rompe el menú lateral y se niega)
 ./firetv-optimizer.sh privacidad              # anuncios personalizados, métricas, vídeo automático
 ./firetv-optimizer.sh blindar                 # telemetría que Amazon no deja desactivar
 ./firetv-optimizer.sh reiniciar
