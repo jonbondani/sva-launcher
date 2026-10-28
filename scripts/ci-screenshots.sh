@@ -80,6 +80,10 @@ key KEYCODE_DPAD_CENTER 2; shot 11d-tv-fuentes-list
 key KEYCODE_BACK 1.5
 key KEYCODE_DPAD_UP 1.5; key KEYCODE_DPAD_UP 1.5; key KEYCODE_DPAD_UP 1.5; shot 11e-tv-full-top-pill
 adb shell cmd uimode night no
+# Private setup over ADB: a playlist link arrives and Sva asks before saving it (cancelled here).
+adb shell am start -n com.sva.launcher/.MainActivity --es set_playlist "'https://iptv-org.github.io/iptv/countries/es.m3u?token=secreto'" > /dev/null
+sleep 4; shot 12-setup-playlist
+key KEYCODE_BACK 1.5
 adb shell dumpsys tv_input > "$OUT/tv_input.txt" 2>&1
 adb logcat -d | grep -vE "RuntimeInit|commands.input|Shutting down VM|default boot image|lock profiling" | tail -400 > "$OUT/log.txt"
 if grep -q "FATAL EXCEPTION" "$OUT/log.txt"; then echo "CRASH" > "$OUT/CRASHED"; fi

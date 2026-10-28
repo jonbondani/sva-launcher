@@ -304,6 +304,7 @@ public final class MainActivity extends Activity {
         else if (!album.isEmpty()) backgroundPhotos.addAll(cachedBackgroundAlbum(album));
         buildHome();
         renderChannels();
+        handler.post(() -> acceptConfigIntent(getIntent()));
         loadCachedChannels();
         if (!folder.isEmpty()) loadBackgroundFolder(Uri.parse(folder), false);
         else if (!album.isEmpty()) maybeRefreshGooglePhotos(true);
@@ -372,6 +373,7 @@ public final class MainActivity extends Activity {
         super.onNewIntent(intent);
         setIntent(intent);
         acceptReminderIntent(intent);
+        acceptConfigIntent(intent);
         if (!ACTION_WATCH_REMINDER.equals(intent.getAction())) selectTab(TAB_HOME, true);
         if (!channels.isEmpty()) openPendingReminder();
     }
@@ -385,6 +387,76 @@ public final class MainActivity extends Activity {
         if (settingsScreen != null) { settingsScreen.requestClose(); return; }
         if (activeTab != TAB_HOME) { selectTab(TAB_HOME, true); return; }
         super.onBackPressed();
+    }
+
+    static final String EXTRA_SET_PLAYLIST = "set_playlist", EXTRA_SET_GUIDE = "set_guide",
+            EXTRA_SET_CALENDAR = "set_calendar";
+
+    /**
+     * Private setup over ADB, so links never have to be typed with the remote or stored anywhere
+     * else (firetv-optimizer.sh sva-lista / sva-calendario). Nothing is saved until the viewer
+     * confirms on screen, so no other app can change them silently.
+     */
+    private void acceptConfigIntent(Intent intent) {
+        if (intent == null) return;
+        String playlist = intent.getStringExtra(EXTRA_SET_PLAYLIST);
+        String guide = intent.getStringExtra(EXTRA_SET_GUIDE);
+        String calendar = intent.getStringExtra(EXTRA_SET_CALENDAR);
+        intent.removeExtra(EXTRA_SET_PLAYLIST);
+        intent.removeExtra(EXTRA_SET_GUIDE);
+        intent.removeExtra(EXTRA_SET_CALENDAR);
+        if (playlist != null && !playlist.trim().isEmpty()) confirmPlaylist(playlist.trim(), guide == null ? null : guide.trim());
+        else if (calendar != null && !calendar.trim().isEmpty()) confirmCalendar(calendar.trim());
+    }
+
+    private void confirmPlaylist(String playlist, String guide) {
+        if (!SetupLinks.isWebLink(playlist) || (guide != null && !guide.isEmpty() && !SetupLinks.isWebLink(guide))) {
+            Tr.toast(this, "El enlace de la lista no es válido (tiene que empezar por http:// o https://).", Toast.LENGTH_LONG).show();
+            return;
+        }
+        AlertDialog dialog = new AlertDialog.Builder(new android.view.ContextThemeWrapper(this,
+                LiquidTheme.alertDialogTheme(this)))
+                .setTitle("¿Guardar esta lista de canales?")
+                .setMessage("Lista M3U de " + SetupLinks.host(playlist)
+                        + (guide == null || guide.isEmpty() ? "" : "\nGuía de " + SetupLinks.host(guide))
+                        + "\n\nSustituye a la que hubiera. Se guarda solo en esta tele.")
+                .setPositiveButton("Guardar", (d, w) -> {
+                    iptv.saveUrls(playlist, guide == null ? iptv.guideUrl() : guide);
+                    channels.clear();
+                    channels.addAll(iptv.cachedChannels());
+                    renderChannels();
+                    maybeRefreshLiveData();
+                    Tr.toast(this, "Lista guardada. Los canales aparecerán en TV en directo.", Toast.LENGTH_LONG).show();
+                })
+                .setNegativeButton("Cancelar", null)
+                .create();
+        dialog.show();
+        styleDialog(dialog);
+    }
+
+    private void confirmCalendar(String raw) {
+        String url = PublicCalendarRepository.normalizeUrl(raw);
+        if (url == null) {
+            Tr.toast(this, "Ese enlace no es de un calendario de Google en formato iCal.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        AlertDialog dialog = new AlertDialog.Builder(new android.view.ContextThemeWrapper(this,
+                LiquidTheme.alertDialogTheme(this)))
+                .setTitle("¿Guardar este calendario?")
+                .setMessage("Calendario de Google (iCal).\n\nSustituye al que hubiera. Se guarda solo en esta tele.")
+                .setPositiveButton("Guardar", (d, w) -> {
+                    preferences.edit().putString("publicCalendarUrl", url)
+                            .putString("publicCalendarEvents", "[]").remove("publicCalendarUpdatedAt")
+                            .remove("publicCalendarAttemptedAt").remove("publicCalendarCacheVersion")
+                            .remove("publicCalendarAttemptedVersion").apply();
+                    updateCalendarEventDisplay();
+                    refreshPublicCalendar(url, true);
+                    Tr.toast(this, "Calendario guardado.", Toast.LENGTH_LONG).show();
+                })
+                .setNegativeButton("Cancelar", null)
+                .create();
+        dialog.show();
+        styleDialog(dialog);
     }
 
     private void acceptReminderIntent(Intent intent) {

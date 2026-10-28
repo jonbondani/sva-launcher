@@ -527,8 +527,9 @@ Replace	Reemplazar
 Could not create a file here.	No se pudo crear un archivo aquí.
 No other file provider is available.	No hay otro proveedor de archivos disponible.
 Forecast did not include upcoming days.	La previsión no incluye los próximos días.
-Partly cloudy	Parcialmente nublado
-Overcast	Cubierto
+Clear	Despejado
+Partly cloudy	Poco nuboso
+Overcast	Nuboso
 Fog	Niebla
 Drizzle	Llovizna
 Rain	Lluvia

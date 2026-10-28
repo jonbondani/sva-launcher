@@ -13,7 +13,7 @@
 # =============================================================================
 set -u
 
-VERSION="1.9.0"
+VERSION="1.10.0"
 BASE_DIR="${FTVO_HOME:-$HOME/firetv-optimizer}"
 BACKUP_DIR="$BASE_DIR/copias"
 ADB="${ADB:-adb}"
@@ -1091,6 +1091,28 @@ cmd_sva_inicio() {
   fi
 }
 
+# Enlaces privados (lista M3U, calendario): van directos a Sva en la tele y se confirman en pantalla.
+# No se guardan en este Mac ni en ningún repositorio.
+sva_enviar() {   # $1 = extra, $2 = enlace, [$3 = extra, $4 = enlace]
+  case "$2${4:-}" in *"'"*) die "El enlace no puede llevar comillas simples." ;; esac
+  case "$2" in http://*|https://*|webcal://*) ;; *) die "El enlace tiene que empezar por https://" ;; esac
+  resolve_target; need_sva
+  if [ -n "${3:-}" ]; then
+    dsh am start -n "$SVA_PKG/.MainActivity" --es "$1" "'$2'" --es "$3" "'$4'" >/dev/null
+  else
+    dsh am start -n "$SVA_PKG/.MainActivity" --es "$1" "'$2'" >/dev/null
+  fi
+  ok "Enviado a la tele. Confirma con «Guardar» en la pantalla."
+}
+cmd_sva_lista() {
+  [ -n "${1:-}" ] || die "Uso: sva-lista <enlace M3U> [enlace guía EPG]"
+  if [ -n "${2:-}" ]; then sva_enviar set_playlist "$1" set_guide "$2"; else sva_enviar set_playlist "$1"; fi
+}
+cmd_sva_calendario() {
+  [ -n "${1:-}" ] || die "Uso: sva-calendario <enlace iCal de Google Calendar>"
+  sva_enviar set_calendar "$1"
+}
+
 cmd_sva_equipo() {
   local name="${1:-}" url="${2:-}"
   [ -n "$name" ] && [ -n "$url" ] || die "Uso: sva-equipo \"Nombre\" <enlace-ical>"
@@ -1161,6 +1183,8 @@ ${C_BOLD}Sva Launcher${C_0}
   sva-inicio [off]               El botón Home abre Sva al instante (off = vuelve el de Amazon)
   sva-equipo "Nombre" <enlace>   Añade o cambia el calendario iCal de un equipo
   sva-quitar-equipo "Nombre"     Quita un equipo de los partidos
+  sva-lista <m3u> [guía]         Manda a Sva una lista de canales M3U (y su guía); se confirma en la tele
+  sva-calendario <ical>          Manda a Sva tu calendario de Google (dirección iCal); se confirma en la tele
 
 ${C_BOLD}Opciones${C_0}
   -d, --dispositivo <IP>  Tele a usar (también: variable FIRETV)
@@ -1322,6 +1346,8 @@ case "${CMD:-menu}" in
   rescate)         cmd_rescate ;;
   probar)          cmd_probar "$@" ;;
   reiniciar)       cmd_reiniciar ;;
+  sva-lista)       cmd_sva_lista "$@" ;;
+  sva-calendario)  cmd_sva_calendario "$@" ;;
   instalar)        cmd_instalar "$@" ;;
   sva-inicio)      cmd_sva_inicio "$@" ;;
   sva-equipo)      cmd_sva_equipo "$@" ;;

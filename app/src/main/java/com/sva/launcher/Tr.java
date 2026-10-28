@@ -48,10 +48,29 @@ final class Tr {
     static void setLanguage(Context context, String value) {
         prefs(context).edit().putString(PREF_LANGUAGE, value).apply();
         enabledCache = null;
+        Locale.setDefault(SPANISH.equals(value) ? SPAIN : DEVICE);
     }
 
     private static SharedPreferences prefs(Context context) {
         return context.getApplicationContext().getSharedPreferences("launcher", Context.MODE_PRIVATE);
+    }
+
+    /** Spain's Spanish. */
+    static final Locale SPAIN = new Locale("es", "ES");
+    /** The TV's own language, kept to go back to it. */
+    private static final Locale DEVICE = Locale.getDefault();
+
+    /**
+     * Spanish from Spain unless the viewer picked another language: set once on a fresh install,
+     * and dates and numbers follow it ("miércoles, 28 de octubre") even on an English TV.
+     */
+    static void applyLocale(Context context) {
+        SharedPreferences prefs = prefs(context);
+        if (!prefs.contains(PREF_LANGUAGE)) {
+            prefs.edit().putString(PREF_LANGUAGE, SPANISH).apply();
+            enabledCache = null;
+        }
+        if (SPANISH.equals(language(context))) Locale.setDefault(SPAIN);
     }
 
     static boolean enabled(Context context) {
