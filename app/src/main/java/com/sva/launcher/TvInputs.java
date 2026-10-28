@@ -77,12 +77,16 @@ final class TvInputs {
             } catch (RuntimeException ignored) { }
         }
         Collections.sort(ports, (a, b) -> a.getId().compareTo(b.getId()));
+        int connectedPorts = 0;
+        for (TvInputInfo info : ports) if (state(manager, info.getId()) == TvInputManager.INPUT_STATE_CONNECTED) connectedPorts++;
+        // Some TVs report every port as connected, plugged in or not: then the state means nothing.
+        boolean stateUseless = bogusConnected(ports.size(), connectedPorts);
         List<Input> hdmi = new ArrayList<>();
         for (int i = 0; i < ports.size(); i++) {
             TvInputInfo info = ports.get(i);
             String systemLabel = safeLabel(info, context);
             int number = portNumber(systemLabel, i + 1);
-            boolean connected = state(manager, info.getId()) == TvInputManager.INPUT_STATE_CONNECTED;
+            boolean connected = stateUseless || state(manager, info.getId()) == TvInputManager.INPUT_STATE_CONNECTED;
             String custom = customLabel(info, context);
             String label = hdmiLabel(custom, connected ? cecNames.get(info.getId()) : null, number);
             hdmi.add(new Input(info.getId(), label, HDMI, number, connected));
@@ -100,6 +104,15 @@ final class TvInputs {
         out.add(new Input("demo/hdmi2", "HDMI 2", HDMI, 2, false));
         out.add(new Input("demo/tuner", "TDT", TUNER, 0, true));
         return out;
+    }
+
+    /**
+     * Pure: true when a TV with more than one HDMI port says every one of them is connected, which
+     * some sets do whether or not anything is plugged in (seen on Sony, per OmarchyTV and CleanYourTV).
+     * A TV with all ports really in use loses only the dimming of empty ports.
+     */
+    static boolean bogusConnected(int ports, int connected) {
+        return ports > 1 && connected == ports;
     }
 
     /** Port number from the label the TV gives the port ("HDMI 2", "HDMI2 (ARC)"); otherwise its position. */
@@ -121,9 +134,21 @@ final class TvInputs {
 
     /** Switches the TV to the input. Returns false when nothing on this device could show it. */
     static boolean open(Context context, Input input) {
-        Intent view = new Intent(Intent.ACTION_VIEW, input.kind == HDMI
+        if (input.kind == HDMI && HdmiActivity.canShow(input.id)) {
+            // Fire OS 8 televisions on MediaTek: show the input inside Sva (see HdmiActivity).
+            try {
+                context.startActivity(new Intent(context, HdmiActivity.class)
+                        .putExtra(HdmiActivity.EXTRA_INPUT_ID, input.id)
+                        .putExtra(HdmiActivity.EXTRA_LABEL, input.label)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                return true;
+            } catch (RuntimeException fallThrough) { }
+        }
+        // The channel MIME type too: some Live TV apps only answer the intent when it carries it.
+        Intent view = new Intent(Intent.ACTION_VIEW).setDataAndType(input.kind == HDMI
                 ? TvContract.buildChannelUriForPassthroughInput(input.id)
-                : TvContract.buildChannelsUriForInput(input.id))
+                : TvContract.buildChannelsUriForInput(input.id), input.kind == HDMI
+                ? "vnd.android.cursor.item/channel" : "vnd.android.cursor.dir/channel")
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         try {
             context.startActivity(view);
@@ -135,7 +160,7 @@ final class TvInputs {
                 if (launch == null) launch = context.getPackageManager().getLeanbackLaunchIntentForPackage(pkg);
                 if (launch == null) continue;
                 try {
-                    launch.setData(view.getData());
+                    launch.setDataAndType(view.getData(), view.getType());
                     context.startActivity(launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                     return true;
                 } catch (RuntimeException ignored) { }

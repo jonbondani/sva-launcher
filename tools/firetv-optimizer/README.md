@@ -31,7 +31,7 @@ La primera vez que conectes, la tele mostrará «¿Permitir depuración?». Acep
 ./firetv-optimizer.sh plan seguro             # vista previa, no cambia nada
 ./firetv-optimizer.sh aplicar seguro          # telemetría, anuncios, compras, promos
 ./firetv-optimizer.sh animaciones 0.5         # interfaz más ágil (solo Fire OS 7; en Fire OS 8 rompe el menú lateral y se niega)
-./firetv-optimizer.sh privacidad              # anuncios personalizados, métricas, vídeo automático
+./firetv-optimizer.sh privacidad              # explica qué cambiar en los menús (no toca nada)
 ./firetv-optimizer.sh blindar                 # telemetría que Amazon no deja desactivar
 ./firetv-optimizer.sh reiniciar
 ```
@@ -59,7 +59,7 @@ Sin argumentos (`./firetv-optimizer.sh`), el script abre un **menú** ordenado p
 
 ### Privacidad y «blindar»
 
-- `privacidad` escribe los ajustes de Amazon de seguimiento publicitario, anuncios por intereses, métricas de uso y vídeo automático de los destacados. Guarda el valor anterior de cada uno. Las claves están comprobadas en Fire OS 7; en Fire OS 8 algunas pueden no tener efecto, así que conviene revisar también el apartado 5.
+- `privacidad` ya no cambia nada por ADB: esos ajustes se sincronizan con la cuenta de Amazon y se cambian en los menús de la tele (lo documenta CleanYourTV). El comando explica dónde. Si aplicaste la versión antigua, `restaurar privacidad` la deshace.
 - `blindar` es para las apps de telemetría que Amazon no deja desactivar (`metrics`, `crashmanager`, `rdmapplication`, `ftvads.deeplinking`, `csapp`): siguen instaladas, pero se les quita el permiso de funcionar en segundo plano. No toca las actualizaciones del sistema.
 
 ### Explorar flags ocultos
@@ -104,7 +104,7 @@ Antes de nada de esto, lo que más acelera la tele sin riesgo: quitar el vídeo 
 
 ## 5. Ajustes que conviene cambiar a mano en la tele
 
-`privacidad` intenta aplicar los dos primeros por ADB, pero en Fire OS 8 no está garantizado. Compruébalos aquí:
+Estos ajustes van con tu cuenta de Amazon, así que se cambian aquí, en los menús:
 
 - **Preferencias › Contenido destacado**: desactiva la reproducción automática de vídeo y audio.
 - **Preferencias › Configuración de privacidad**: desactiva Datos de uso del dispositivo, Recopilar datos de uso de apps y Anuncios basados en intereses.

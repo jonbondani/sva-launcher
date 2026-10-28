@@ -34,6 +34,12 @@
             android:exported="false" />
         <!-- Exported without an intent filter so teams can be added over ADB (am start -n ...). -->
         <activity
+            android:name=".HdmiActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:screenOrientation="landscape" />
+        <activity
             android:name=".MatchesActivity"
             android:exported="true"
             android:launchMode="singleTop"

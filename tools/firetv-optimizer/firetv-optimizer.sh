@@ -13,7 +13,7 @@
 # =============================================================================
 set -u
 
-VERSION="1.8.2"
+VERSION="1.9.0"
 BASE_DIR="${FTVO_HOME:-$HOME/firetv-optimizer}"
 BACKUP_DIR="$BASE_DIR/copias"
 ADB="${ADB:-adb}"
@@ -463,6 +463,10 @@ cmd_estado() {
   done
   local last; last=$(latest_backup)
   echo "  Última copia:           ${last:-ninguna}"
+  if [ "$(dsh settings get secure user_setup_complete)" = "0" ]; then
+    warn "user_setup_complete está a 0: con eso Inicio y el botón de Alexa no responden."
+    warn "Arréglalo con:  adb -s $TARGET shell settings put secure user_setup_complete 1"
+  fi
   if fireos8; then
     for k in window_animation_scale transition_animation_scale animator_duration_scale; do
       case "$(dsh settings get global $k)" in null|1|1.0|"") ;; *)
@@ -742,6 +746,16 @@ EOF
 }
 
 cmd_privacidad() {
+  title "Privacidad: se hace desde los menús de la tele"
+  info "Estos ajustes se sincronizan con tu cuenta de Amazon: cambiarlos por ADB no sirve o se"
+  info "deshace solo (lo documenta CleanYourTV). Hazlo con el mando:"
+  info "  Configuración › Preferencias › Configuración de privacidad: desactiva Datos de uso del"
+  info "  dispositivo, Recopilar datos de uso de apps y Anuncios basados en intereses."
+  info "  Configuración › Preferencias › Contenido destacado: sin vídeo ni audio automáticos."
+  info "Si aplicaste la versión antigua de este comando:  ./firetv-optimizer.sh restaurar privacidad"
+}
+
+cmd_privacidad_retirado() {
   resolve_target; check_fireos
   title "Ajustes de privacidad"
   local ns key val desc cur todo=""
@@ -1016,10 +1030,22 @@ cmd_instalar() {
   fi
   [ -f "$apk" ] || die "No existe el archivo: $apk"
   resolve_target; check_fireos
+  # Reinstalar borra el servicio de accesibilidad de la lista de activos: si estaba, se repone.
+  local had_home=0
+  dsh settings get secure enabled_accessibility_services | grep -q "$SVA_SERVICE" && had_home=1
   info "Instalando $(basename "$apk")…"
   local out; out=$(adb_s install -r "$apk" 2>&1 | tr -d '\r')
   case "$out" in
-    *Success*) ok "Instalado." ;;
+    *Success*) ok "Instalado."
+      if [ "$had_home" = 1 ]; then
+        if dsh settings get secure enabled_accessibility_services | grep -q "$SVA_SERVICE"; then
+          ok "El botón Home sigue abriendo Sva."
+        else
+          info "La actualización quitó el permiso de accesibilidad de Sva: lo repongo."
+          cmd_sva_inicio on
+        fi
+        return
+      fi ;;
     *INSTALL_FAILED_UPDATE_INCOMPATIBLE*)
       die "Ya hay una versión de Sva firmada con otra clave. Desinstálala primero:  adb -s $TARGET uninstall $SVA_PKG" ;;
     *INSTALL_FAILED_OLDER_SDK*)
@@ -1117,7 +1143,7 @@ ${C_BOLD}Comandos${C_0}
                          moderado → seguro + Alexa, Silk, Kids, perfiles…
                          ota      → bloqueo de actualizaciones (aparte, opcional)
   desactivar <paquete> Desactiva uno concreto (nunca un protegido)
-  privacidad           Limita seguimiento publicitario, métricas de uso y vídeo automático
+  privacidad           Dice qué cambiar en los menús (por ADB no sirve: va con tu cuenta)
   blindar              Quita el segundo plano a la telemetría que Amazon no deja desactivar
   animaciones [v]      Velocidad de animaciones: 0, 0.25, 0.5 (defecto) o 1. En Fire OS 8 solo 1
   explorar             Informe de flags/ajustes ocultos y capacidades (solo lectura)
@@ -1176,8 +1202,8 @@ ${C_BOLD}Qué hace cada opción${C_0}
   Nivel seguro    Desactiva telemetría, informes de fallos, el reconocimiento de pantalla (ACR),
                   el ID publicitario, compras, promos, Freevee y miniTV.
                   No tiene efectos visibles. Se desactivan (pm disable-user), nunca se borran.
-  Privacidad      Limita el seguimiento publicitario, anuncios por intereses, métricas de uso
-                  y el vídeo automático de los destacados. Guarda los valores anteriores.
+  Privacidad      Explica qué desactivar en los menús de privacidad de la tele. No cambia nada:
+                  esos ajustes van con tu cuenta de Amazon y por ADB no sirven.
   Blindar         Las apps de telemetría que Amazon no deja desactivar siguen instaladas,
                   pero sin permiso para funcionar en segundo plano. No toca actualizaciones.
   Animaciones     Pone las animaciones a 0.5x: los menús responden antes. Solo Fire OS 7:
@@ -1212,7 +1238,7 @@ cmd_menu() {
     menu_line 3 "Vista previa"    "Qué desactivaría el nivel seguro, sin tocar nada"
     menu_head "PASO 2 · LIMPIAR" "(recomendado, en este orden)"
     menu_line 4 "Nivel seguro"    "Telemetría, anuncios, compras y promos. Sin efectos visibles"
-    menu_line 5 "Privacidad"      "EXPERIMENTAL. Seguimiento publicitario, métricas, vídeo automático"
+    menu_line 5 "Privacidad"      "Qué cambiar en los menús de la tele (por ADB no sirve)"
     menu_line 6 "Blindar"         "RETIRADO: alto riesgo, no hace nada"
     menu_line 7 "Animaciones"     "Menús más ágiles (0.5x). Solo Fire OS 7"
     menu_line 8 "Reiniciar"       "Para notar el efecto completo"

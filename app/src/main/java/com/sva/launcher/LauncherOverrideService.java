@@ -36,11 +36,13 @@ public final class LauncherOverrideService extends AccessibilityService {
             "com.google.android.tvlauncher",
             "com.google.android.apps.tv.launcherx",
             "com.google.android.leanbacklauncher",
-            "com.google.android.leanbacklauncher.recommendations",
-            // Fire OS (Fire TV Stick, Cube and Fire TV Edition televisions). Fire OS
-            // ignores third-party HOME activities, so this override is the only route.
-            "com.amazon.tv.launcher"
+            "com.google.android.leanbacklauncher.recommendations"
     };
+    /**
+     * Fire OS (Fire TV Stick, Cube and Fire TV Edition televisions). Fire OS ignores third-party
+     * HOME activities, so this override is the only route. Its home is HomeActivity_vNext.
+     */
+    static final String AMAZON_LAUNCHER = "com.amazon.tv.launcher";
     private long lastReopenAt;
     /** The running service, so Sva can ask the system for its power menu (restart / power off). */
     private static volatile LauncherOverrideService running;
@@ -105,7 +107,8 @@ public final class LauncherOverrideService extends AccessibilityService {
         if (packageName == null) return;
         String pkg = packageName.toString();
 
-        if (!isStockLauncher(pkg)) {
+        CharSequence className = event.getClassName();
+        if (!isStockHome(pkg, className == null ? null : className.toString())) {
             if ("com.android.systemui".equals(pkg) || "android".equals(pkg)) return;
             if (getPackageName().equals(pkg)) {
                 // Sva is on screen: drop the cover once its first frame has had time to draw.
@@ -175,7 +178,17 @@ public final class LauncherOverrideService extends AccessibilityService {
         if (cover != null) cover.setVisibility(View.GONE);
     }
 
-    private boolean isStockLauncher(String packageName) {
+    /**
+     * True only for the stock home screen itself. On Fire OS 8 televisions Amazon's launcher
+     * package also holds the side menu (NavigationActivity) and the whole Settings grid
+     * (MainSettingsActivity): reacting to the package alone would bounce every one of them back to
+     * Sva and leave Settings unreachable. So for Amazon only HomeActivity counts; a window with no
+     * class name is left alone (at worst Amazon's home shows, never a locked-out Settings).
+     */
+    static boolean isStockHome(String packageName, String className) {
+        if (AMAZON_LAUNCHER.equals(packageName)) {
+            return className != null && className.startsWith(AMAZON_LAUNCHER + ".ui.HomeActivity");
+        }
         for (String candidate : STOCK_LAUNCHERS) {
             if (candidate.equals(packageName)) return true;
         }

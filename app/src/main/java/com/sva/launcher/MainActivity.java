@@ -3978,8 +3978,17 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
     }
 
     private void openAndroidSettings() {
-        try { startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS)); }
-        catch (Exception ignored) { }
+        // Fire OS 8 (Android 11): Amazon's Settings grid. Fire OS 7 keeps what already worked there.
+        boolean fireOs8 = android.os.Build.VERSION.SDK_INT >= 30 && isPackageInstalled(LauncherOverrideService.AMAZON_LAUNCHER);
+        for (Intent intent : FireSettings.candidates(fireOs8)) {
+            try { startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); return; }
+            catch (Exception tryNext) { }
+        }
+    }
+
+    private boolean isPackageInstalled(String pkg) {
+        try { getPackageManager().getPackageInfo(pkg, 0); return true; }
+        catch (Exception missing) { return false; }
     }
 
     /**
