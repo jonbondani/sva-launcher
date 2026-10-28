@@ -312,7 +312,7 @@ public final class PlaybackActivity extends Activity {
         long elapsed = Math.max(0L, Math.min(duration, System.currentTimeMillis() - programmeStartMs));
         programmeProgress.setProgress((int) Math.min(1000L, elapsed * 1000L / duration));
         long minutesLeft = Math.max(0L, (programmeEndMs - System.currentTimeMillis() + 59999L) / 60000L);
-        java.text.DateFormat time = java.text.DateFormat.getTimeInstance(java.text.DateFormat.SHORT, Locale.getDefault());
+        java.text.DateFormat time = java.text.DateFormat.getTimeInstance(java.text.DateFormat.SHORT, Tr.formatLocale());
         programmeTimes.setText(time.format(new Date(programmeStartMs)) + " – " + time.format(new Date(programmeEndMs))
                 + " · " + minutesLeft + " min left");
     }

@@ -36,7 +36,7 @@ final class WeatherForecastDialog {
         this.forecast = forecast;
         this.fahrenheit = fahrenheit;
         this.mph = mph;
-        this.locale = Tr.enabled(activity) ? new Locale("es", "ES") : Locale.getDefault();
+        this.locale = Tr.enabled(activity) ? new Locale("es", "ES") : Tr.formatLocale();
     }
 
     static void show(Activity activity, WeatherRepository.Forecast forecast, boolean fahrenheit, boolean mph) {

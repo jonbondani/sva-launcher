@@ -259,8 +259,8 @@ final class ScreensaverView extends View {
         if (minute != clockMinute) {
             clockMinute = minute;
             clockLabel = new SimpleDateFormat(android.text.format.DateFormat.is24HourFormat(getContext())
-                    ? "HH:mm" : "h:mm a", Locale.getDefault()).format(new Date(now));
-            dateLabel = new SimpleDateFormat("EEE, d MMM", Locale.getDefault()).format(new Date(now));
+                    ? "HH:mm" : "h:mm a", Tr.formatLocale()).format(new Date(now));
+            dateLabel = new SimpleDateFormat("EEE, d MMM", Tr.formatLocale()).format(new Date(now));
             updateInformation(now);
         }
         float drift = (float) Math.sin(time / 35) * w * .008f;
@@ -331,7 +331,7 @@ final class ScreensaverView extends View {
                 eventLabel = nextEvent.optString("title", "Calendar event").replaceAll("\\s+", " ");
                 boolean allDay = nextEvent.optBoolean("allDay", false);
                 eventDetail = (earliest <= now ? "Now · " : "Up next · ")
-                        + new SimpleDateFormat(allDay ? "EEE, d MMM" : "EEE · h:mm a", Locale.getDefault())
+                        + new SimpleDateFormat(allDay ? "EEE, d MMM" : "EEE · h:mm a", Tr.formatLocale())
                         .format(new Date(earliest)) + (allDay ? " · All day" : "");
             }
         } catch (Exception ignored) { }

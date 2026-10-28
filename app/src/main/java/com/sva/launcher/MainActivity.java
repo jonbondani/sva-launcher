@@ -1750,7 +1750,7 @@ public final class MainActivity extends Activity {
         renderedMonth = displayedMonth;
         renderedToday = LocalDate.now();
         renderedCalendarStamp = preferences.getLong("publicCalendarUpdatedAt", 0L);
-        String monthName = displayedMonth.format(java.time.format.DateTimeFormatter.ofPattern("MMMM", Locale.getDefault()));
+        String monthName = displayedMonth.format(java.time.format.DateTimeFormatter.ofPattern("MMMM", Tr.formatLocale()));
         SpannableString headingText = new SpannableString(monthName + " " + displayedMonth.getYear());
         headingText.setSpan(new ForegroundColorSpan(light ? LiquidTheme.secondaryText(this) : 0xFFAFC6D2), monthName.length() + 1,
                 headingText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -1763,7 +1763,7 @@ public final class MainActivity extends Activity {
         int cellWidth = Math.max(58, (widthDp - 56) / 7);
         for (int i = 0; i < 7; i++) {
             DayOfWeek weekday = DayOfWeek.SUNDAY.plus(i);
-            TextView heading = label(weekday.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
+            TextView heading = label(weekday.getDisplayName(TextStyle.SHORT, Tr.formatLocale()),
                     13, light ? LiquidTheme.secondaryText(this) : 0xFFC6D6DB, false);
             heading.setGravity(Gravity.CENTER);
             heading.setLetterSpacing(.1f);
@@ -1804,7 +1804,7 @@ public final class MainActivity extends Activity {
                 dateButton.setId(View.generateViewId());
                 dateButton.setTag(day);
                 StringBuilder dayDescription = new StringBuilder(day.format(
-                        java.time.format.DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Locale.getDefault())))
+                        java.time.format.DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Tr.formatLocale())))
                         .append(". ");
                 for (PublicCalendarRepository.Event event : dayEvents)
                     dayDescription.append(". ").append(event.title);
@@ -1841,7 +1841,7 @@ public final class MainActivity extends Activity {
     private void updateCalendarHeader(LocalDate day) {
         if (calendarHeaderDate == null) return;
         calendarHeaderDate.setText(day.format(java.time.format.DateTimeFormatter.ofPattern(
-                "EEEE, d MMM", Locale.getDefault())).toUpperCase(Locale.getDefault()));
+                "EEEE, d MMM", Tr.formatLocale())).toUpperCase(Tr.formatLocale()));
         ArrayList<String> titles = new ArrayList<>();
         ZoneId zone = ZoneId.systemDefault();
         for (PublicCalendarRepository.Event event : cachedCalendarEvents()) {
@@ -1955,12 +1955,12 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
     calendarDetailDay.setText(
             selectedCalendarDay.getDayOfWeek().getDisplayName(
                     TextStyle.FULL,
-                    Locale.getDefault()
+                    Tr.formatLocale()
             )
             + "  ·  "
             + selectedCalendarDay.getMonth().getDisplayName(
                     TextStyle.FULL,
-                    Locale.getDefault()
+                    Tr.formatLocale()
             )
     );
 
@@ -2012,8 +2012,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         card.setBackground(roundedShape(LiquidTheme.surface(this), LiquidTheme.border(this), 1, 15));
         card.addView(label(event.title, 17, LiquidTheme.text(this), true));
         DateFormat format = preferences.getBoolean("24h", false)
-                ? new java.text.SimpleDateFormat("HH:mm", Locale.getDefault())
-                : new java.text.SimpleDateFormat("h:mm a", Locale.getDefault());
+                ? new java.text.SimpleDateFormat("HH:mm", Tr.formatLocale())
+                : new java.text.SimpleDateFormat("h:mm a", Tr.formatLocale());
         String timing = event.allDay ? "All day" : format.format(new Date(event.startMs))
                 + " – " + format.format(new Date(event.endMs));
         card.addView(label(timing, 13, LiquidTheme.secondaryText(this), false));
@@ -2393,13 +2393,13 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         boolean twentyFour = preferences.getBoolean("24h", false);
         Date now = new Date();
         DateFormat time = android.text.format.DateFormat.getTimeFormat(this);
-        if (twentyFour) time = new java.text.SimpleDateFormat("HH:mm", Locale.getDefault());
-        else time = new java.text.SimpleDateFormat("h:mm a", Locale.getDefault());
+        if (twentyFour) time = new java.text.SimpleDateFormat("HH:mm", Tr.formatLocale());
+        else time = new java.text.SimpleDateFormat("h:mm a", Tr.formatLocale());
         String formattedTime = time.format(now);
         String period = "";
         int suffixStart = twentyFour ? -1 : formattedTime.lastIndexOf(' ');
         if (suffixStart >= 0) {
-            period = formattedTime.substring(suffixStart + 1).toUpperCase(Locale.getDefault());
+            period = formattedTime.substring(suffixStart + 1).toUpperCase(Tr.formatLocale());
             formattedTime = formattedTime.substring(0, suffixStart);
         }
         SpannableString styledTime = new SpannableString(formattedTime);
@@ -2416,11 +2416,11 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         date.setVisibility(preferences.getBoolean("showDate", true)
                 ? View.VISIBLE : View.GONE);
         // "miércoles, 21 de octubre" in Spanish; the locale's own long form elsewhere.
-        Locale locale = Locale.getDefault();
+        Locale locale = Tr.formatLocale();
         String pattern = "es".equals(locale.getLanguage()) ? "EEEE, d 'de' MMMM"
                 : android.text.format.DateFormat.getBestDateTimePattern(locale, "EEEEdMMMM");
         String day = new java.text.SimpleDateFormat(pattern, locale).format(now);
-        date.setText(day.isEmpty() ? day : day.substring(0, 1).toUpperCase(Locale.getDefault()) + day.substring(1));
+        date.setText(day.isEmpty() ? day : day.substring(0, 1).toUpperCase(Tr.formatLocale()) + day.substring(1));
         if (greeting != null) {
             int hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY);
             greeting.setText(Greeting.line(hour, preferences.getString("userName", Greeting.DEFAULT_NAME)));
@@ -2571,7 +2571,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         StringBuilder details = new StringBuilder();
         for (WeatherRepository.Day day : weatherForecast.days) {
             String weekday = day.date;
-            try { weekday = new java.text.SimpleDateFormat("EEE", Locale.getDefault()).format(
+            try { weekday = new java.text.SimpleDateFormat("EEE", Tr.formatLocale()).format(
                     new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(day.date)); } catch (Exception ignored) { }
             double low = fahrenheit ? WeatherRepository.fahrenheit(day.low) : day.low;
             double high = fahrenheit ? WeatherRepository.fahrenheit(day.high) : day.high;
@@ -2703,7 +2703,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         ioWorker.execute(() -> {
             String label = "Current location";
             try {
-                List<Address> addresses = new Geocoder(this, Locale.getDefault()).getFromLocation(latitude, longitude, 1);
+                List<Address> addresses = new Geocoder(this, Tr.formatLocale()).getFromLocation(latitude, longitude, 1);
                 if (addresses != null && !addresses.isEmpty()) {
                     Address address = addresses.get(0);
                     String locality = address.getLocality() == null ? address.getSubAdminArea() : address.getLocality();
@@ -2944,11 +2944,11 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             homeCalendarEyebrow.setText("TODAY");
             homeCalendarTitle.setText(todayEvent.title);
             homeCalendarSubtitle.setText(todayEvent.allDay ? "All day"
-                    : new java.text.SimpleDateFormat("h:mm a", Locale.getDefault()).format(new Date(todayEvent.startMs)));
+                    : new java.text.SimpleDateFormat("h:mm a", Tr.formatLocale()).format(new Date(todayEvent.startMs)));
         } else if (nextEvent != null) {
             homeCalendarEyebrow.setText("UP NEXT");
             homeCalendarTitle.setText(nextEvent.title);
-            homeCalendarSubtitle.setText(new java.text.SimpleDateFormat("EEE · h:mm a", Locale.getDefault())
+            homeCalendarSubtitle.setText(new java.text.SimpleDateFormat("EEE · h:mm a", Tr.formatLocale())
                     .format(new Date(nextEvent.startMs)));
         } else {
             homeCalendarEyebrow.setText("TODAY");
@@ -4379,8 +4379,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                 channel.streamUrl, channel.name, programme.title, programme.startMs, programme.endMs);
         boolean saved = reminders.has(reminder);
         DateFormat format = preferences.getBoolean("24h", false)
-                ? new java.text.SimpleDateFormat("EEE, d MMM · HH:mm", Locale.getDefault())
-                : new java.text.SimpleDateFormat("EEE, d MMM · h:mm a", Locale.getDefault());
+                ? new java.text.SimpleDateFormat("EEE, d MMM · HH:mm", Tr.formatLocale())
+                : new java.text.SimpleDateFormat("EEE, d MMM · h:mm a", Tr.formatLocale());
         String when = format.format(new Date(programme.startMs)) + " – " + format.format(new Date(programme.endMs));
         AlertDialog dialog = new AlertDialog.Builder(new android.view.ContextThemeWrapper(this,
                 LiquidTheme.alertDialogTheme(this)))
@@ -5461,7 +5461,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                 setWeatherFeedback("Searching locations…"); weatherSearchResults.removeAllViews();
                 ioWorker.execute(() -> {
                     List<WeatherRepository.Location> results = null; String error = null;
-                    try { results = WeatherRepository.search(query, Locale.getDefault()); }
+                    try { results = WeatherRepository.search(query, Tr.formatLocale()); }
                     catch (Exception failure) { error = failure.getMessage() == null ? "Location search failed." : failure.getMessage(); }
                     List<WeatherRepository.Location> found = results; String failure = error;
                     handler.post(() -> {
@@ -6442,10 +6442,10 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             ChannelSettingsAdapter(TextView count) { this.count = count; }
 
             void setQuery(String value) {
-                query = value.trim().toLowerCase(Locale.getDefault());
+                query = value.trim().toLowerCase(Tr.formatLocale());
                 visible.clear();
                 for (IptvRepository.Channel channel : channels) {
-                    if (query.isEmpty() || channel.name.toLowerCase(Locale.getDefault()).contains(query)) visible.add(channel);
+                    if (query.isEmpty() || channel.name.toLowerCase(Tr.formatLocale()).contains(query)) visible.add(channel);
                 }
                 count.setText(visible.size() + " of " + channels.size() + " channels · "
                         + shownChannelCount() + " shown");

@@ -81,7 +81,7 @@ final class LiveScores {
                 return clock.isEmpty() ? "En juego" : clock;
             }
             if (finished()) return "Final";
-            return new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date(startMs));
+            return new SimpleDateFormat("HH:mm", Tr.formatLocale()).format(new Date(startMs));
         }
 
         boolean involves(String team) {

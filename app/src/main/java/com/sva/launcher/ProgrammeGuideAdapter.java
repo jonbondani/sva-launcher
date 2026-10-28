@@ -137,7 +137,7 @@ final class ProgrammeGuideAdapter extends RecyclerView.Adapter<ProgrammeGuideAda
         long time = System.currentTimeMillis();
         holder.channel.setText(channel.name);
         holder.fallback.setText(channel.name.isEmpty() ? "TV"
-                : channel.name.substring(0, 1).toUpperCase(Locale.getDefault()));
+                : channel.name.substring(0, 1).toUpperCase(Tr.formatLocale()));
         logos.load(channel.logoUrl, holder.logo, holder.fallback);
         holder.channelCell.setContentDescription("Watch " + channel.name);
         holder.channelCell.setOnClickListener(view -> actions.watch(channel));
@@ -201,9 +201,9 @@ final class ProgrammeGuideAdapter extends RecyclerView.Adapter<ProgrammeGuideAda
     private String range(IptvRepository.Programme programme) {
         SharedPreferences preferences = activity.getSharedPreferences("launcher", Context.MODE_PRIVATE);
         DateFormat format = preferences.getBoolean("24h", false)
-                ? new SimpleDateFormat("HH:mm", Locale.getDefault())
-                : new SimpleDateFormat("h:mm a", Locale.getDefault());
-        DateFormat date = new SimpleDateFormat("EEE, d MMM", Locale.getDefault());
+                ? new SimpleDateFormat("HH:mm", Tr.formatLocale())
+                : new SimpleDateFormat("h:mm a", Tr.formatLocale());
+        DateFormat date = new SimpleDateFormat("EEE, d MMM", Tr.formatLocale());
         return date.format(new Date(programme.startMs)) + "  "
                 + format.format(new Date(programme.startMs)) + "–" + format.format(new Date(programme.endMs));
     }

@@ -25,7 +25,7 @@ key KEYCODE_DPAD_UP 1.5; shot 04-home-up
 key KEYCODE_DPAD_UP 1.5; shot 05-home-top
 key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_RIGHT; shot 06-top-right
 # Dock tabs, the shortcut preview panel and Sva's settings.
-key KEYCODE_DPAD_DOWN 1.5; shot 06b-dock-home
+key KEYCODE_DPAD_DOWN 1.5; key KEYCODE_DPAD_DOWN 1.5; shot 06b-dock-home
 key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_CENTER 3; shot 06c-tab-livetv
 key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_CENTER 3; shot 06d-tab-games
 key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_CENTER 3; shot 06e-tab-events

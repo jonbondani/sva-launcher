@@ -48,7 +48,8 @@ final class Tr {
     static void setLanguage(Context context, String value) {
         prefs(context).edit().putString(PREF_LANGUAGE, value).apply();
         enabledCache = null;
-        Locale.setDefault(SPANISH.equals(value) ? SPAIN : DEVICE);
+        spanishFormats = SPANISH.equals(value);
+        Locale.setDefault(spanishFormats ? SPAIN : DEVICE);
     }
 
     private static SharedPreferences prefs(Context context) {
@@ -70,7 +71,18 @@ final class Tr {
             prefs.edit().putString(PREF_LANGUAGE, SPANISH).apply();
             enabledCache = null;
         }
-        if (SPANISH.equals(language(context))) Locale.setDefault(SPAIN);
+        spanishFormats = SPANISH.equals(language(context));
+        if (spanishFormats) Locale.setDefault(SPAIN);
+    }
+
+    private static volatile boolean spanishFormats;
+
+    /**
+     * Locale for dates and numbers. Android puts the TV's own locale back as the default whenever
+     * the configuration is applied, so Spanish is asked for here rather than trusted to stick.
+     */
+    static Locale formatLocale() {
+        return spanishFormats ? SPAIN : Locale.getDefault();
     }
 
     static boolean enabled(Context context) {

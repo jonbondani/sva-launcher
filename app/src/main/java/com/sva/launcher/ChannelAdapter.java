@@ -177,7 +177,7 @@ final class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.Holder> {
         holder.name.setText(channel.name);
         holder.now.setText(channel.now.isEmpty() ? channel.group : "ON NOW  ·  " + channel.now);
         holder.next.setText(channel.next.isEmpty() ? "Select to watch" : "Next · " + channel.next);
-        holder.fallback.setText(channel.name.isEmpty() ? "TV" : channel.name.substring(0, 1).toUpperCase(Locale.getDefault()));
+        holder.fallback.setText(channel.name.isEmpty() ? "TV" : channel.name.substring(0, 1).toUpperCase(Tr.formatLocale()));
         logos.load(channel.logoUrl, holder.logo, holder.fallback);
         holder.itemView.setOnClickListener(view -> listener.onClick(channel));
     }
