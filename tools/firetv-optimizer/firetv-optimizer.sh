@@ -13,7 +13,7 @@
 # =============================================================================
 set -u
 
-VERSION="1.8.1"
+VERSION="1.8.2"
 BASE_DIR="${FTVO_HOME:-$HOME/firetv-optimizer}"
 BACKUP_DIR="$BASE_DIR/copias"
 ADB="${ADB:-adb}"
@@ -985,6 +985,11 @@ cmd_limpiar() {
 cmd_reiniciar() {
   resolve_target
   confirm "¿Reiniciar la tele ahora?" || return
+  # Android guarda el estado de las apps en disco unos 10 s después de cada cambio: si se reinicia
+  # antes, la tele arranca con el estado anterior y parece que reactivó apps que nunca reactivó.
+  info "Guardando cambios en disco antes de reiniciar (15 s)…"
+  dsh sync >/dev/null 2>&1 || true
+  [ "${FIRETV_NO_WAIT:-0}" = 1 ] || sleep 15
   adb_s reboot && ok "Reiniciando. Vuelve a conectar en ~1 minuto."
 }
 
