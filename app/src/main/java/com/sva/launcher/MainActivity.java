@@ -208,6 +208,8 @@ public final class MainActivity extends Activity {
     private LinearLayout homeLiveStrip;
     /** HDMI ports and the tuner of a TV (empty on sticks and boxes), shown first in the app row. */
     private List<TvInputs.Input> tvInputs = new ArrayList<>();
+    /** Dock button that lists the TV inputs; hidden on sticks and boxes, which have none. */
+    private View sourcesButton;
     private boolean demoTvInputs, demoWatching;
     /** App being moved in the home row (hold OK on a tile), or null. */
     private String movingPackage;
@@ -809,6 +811,10 @@ public final class MainActivity extends Activity {
         systemShortcuts.setGravity(Gravity.CENTER_VERTICAL);
         systemShortcuts.setPadding(dp(3), dp(3), dp(3), dp(3));
         navbar.addView(systemShortcuts, new LinearLayout.LayoutParams(-2, dp(52)));
+        // TV inputs (HDMI, TDT): only on televisions, as a single "Fuentes" button.
+        addTopIcon(systemShortcuts, "Fuentes", R.drawable.ic_hdmi, this::showSources);
+        sourcesButton = systemShortcuts.getChildAt(systemShortcuts.getChildCount() - 1);
+        sourcesButton.setVisibility(View.GONE);
         addTopIcon(systemShortcuts, "Partidos", R.drawable.ic_matches,
                 () -> startActivity(MatchesActivity.intent(this)));
         addTopIcon(systemShortcuts, "Network", R.drawable.ic_network, this::openNetworkSettings);
@@ -3065,8 +3071,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             selected.addAll(defaultApps(all));
             if (selected.isEmpty()) for (AppEntry entry : all) selected.add(entry.packageName);
         }
-        for (TvInputs.Input input : tvInputs) addInputTile(input, light);
-        if (!tvInputs.isEmpty()) addShelfDivider((FrameLayout) appRow.getChildAt(appRow.getChildCount() - 1));
+        // The TV's inputs live behind the "Fuentes" button in the dock, not on the shelf.
+        if (sourcesButton != null) sourcesButton.setVisibility(tvInputs.isEmpty() ? View.GONE : View.VISIBLE);
         int displayed = 0;
         for (String packageName : selected) {
             AppEntry entry = findApp(all, packageName);
@@ -3386,20 +3392,27 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         appRow.addView(tile, new LinearLayout.LayoutParams(slotWidthPx(), -1));
     }
 
-    /**
-     * Thin vertical line, bright in the middle, between the TV's inputs and the apps. It sits on the
-     * edge of the last input's slot and takes no width, so every slot stays the same size.
-     */
-    private void addShelfDivider(FrameLayout lastInputSlot) {
-        View line = new View(this);
-        line.setTag("divider");
-        line.setFocusable(false);
-        line.setBackground(new android.graphics.drawable.GradientDrawable(
-                android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
-                LiquidTheme.isLight(this) ? new int[]{0x00000000, 0x33000000, 0x33000000, 0x00000000}
-                        : new int[]{0x00FFFFFF, 0x52FFFFFF, 0x52FFFFFF, 0x00FFFFFF}));
-        lastInputSlot.addView(line, new FrameLayout.LayoutParams(Math.max(1, dp(1)), dp(ShelfTile.GLASS_DP),
-                Gravity.END | Gravity.CENTER_VERTICAL));
+    /** "Fuentes": the TV's inputs in a list; choosing one switches to it (see TvInputs.open). */
+    private void showSources() {
+        if (tvInputs.isEmpty()) {
+            Tr.toast(this, "Este aparato no tiene entradas HDMI ni TDT.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        final List<TvInputs.Input> inputs = new ArrayList<>(tvInputs);
+        String[] names = new String[inputs.size()];
+        for (int i = 0; i < inputs.size(); i++) names[i] = TvInputs.menuLabel(inputs.get(i));
+        AlertDialog dialog = new AlertDialog.Builder(new android.view.ContextThemeWrapper(this,
+                LiquidTheme.alertDialogTheme(this)))
+                .setTitle("Fuentes")
+                .setItems(names, (d, which) -> {
+                    TvInputs.Input input = inputs.get(which);
+                    if (!TvInputs.open(this, input)) Tr.toast(this, "Esta tele no deja abrir " + input.label + " desde aquí.",
+                            Toast.LENGTH_LONG).show();
+                })
+                .setNegativeButton("Cancelar", null)
+                .create();
+        dialog.show();
+        styleDialog(dialog);
     }
 
     private void openAppSettings() {
@@ -3419,43 +3432,6 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         movingPackage = null;
         swallowNextClick = false;
         if (lastShownApps != null) showApps(lastShownApps);
-    }
-
-    /** A tile that switches the TV to one of its inputs (HDMI port or the antenna tuner). */
-    private void addInputTile(TvInputs.Input input, boolean light) {
-        FrameLayout tile = new FrameLayout(this);
-        tile.setId(View.generateViewId());
-        tile.setFocusable(true);
-        tile.setClickable(true);
-        tile.setFocusableInTouchMode(false);
-        tile.setTag("input:" + input.id);
-        tile.setContentDescription(input.label);
-        // HDMI glows soft blue, the antenna green, like the reference launcher's input tiles.
-        FrameLayout glass = ShelfTile.glass(this, input.kind == TvInputs.TUNER ? 0xFF6FD08C : 0xFF8FB8FF, false);
-        int ink = light ? LiquidTheme.text(this) : Color.WHITE;
-        LinearLayout copy = new LinearLayout(this);
-        copy.setOrientation(LinearLayout.VERTICAL);
-        copy.setGravity(Gravity.CENTER);
-        copy.setPadding(dp(8), 0, dp(8), 0);
-        ImageView icon = new ImageView(this);
-        icon.setImageResource(input.kind == TvInputs.TUNER ? R.drawable.ic_antenna : R.drawable.ic_hdmi);
-        icon.setColorFilter(input.connected ? ink : (ink & 0x00FFFFFF) | 0x80000000);
-        copy.addView(icon, new LinearLayout.LayoutParams(dp(36), dp(36)));
-        TextView name = label(input.label, 12, input.connected ? ink : (light ? LiquidTheme.secondaryText(this) : 0xB3FFFFFF), true);
-        name.setGravity(Gravity.CENTER);
-        name.setSingleLine(true);
-        name.setEllipsize(android.text.TextUtils.TruncateAt.END);
-        LinearLayout.LayoutParams nameParams = new LinearLayout.LayoutParams(-1, -2);
-        nameParams.topMargin = dp(6);
-        copy.addView(name, nameParams);
-        glass.addView(copy, new FrameLayout.LayoutParams(-1, -1));
-        ShelfTile.mount(tile, glass);
-        tile.setOnLongClickListener(v -> true);   // inputs stay first; holding OK does nothing
-        tile.setOnClickListener(v -> {
-            if (!TvInputs.open(this, input)) Tr.toast(this, "Esta tele no deja abrir " + input.label + " desde aquí.",
-                    Toast.LENGTH_LONG).show();
-        });
-        appRow.addView(tile, new LinearLayout.LayoutParams(slotWidthPx(), -1));
     }
 
     private List<YouTubeCard> savedYouTubeCards() {
@@ -3846,6 +3822,8 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
     /** Title, description and background colours for each dock shortcut. */
     private static String[] shortcutInfo(String title) {
         switch (title) {
+            case "Fuentes": return new String[]{"Fuentes",
+                    "Las entradas de la tele: HDMI y TDT. Pulsa para elegir una.", "FF0F3D5E", "FF2B8CC4"};
             case "Partidos": return new String[]{"Partidos",
                     "Resultados en directo, horarios y calendario de tus equipos. Pulsa un partido para abrir la app donde se ve.",
                     "FF0B6B37", "FF22A55B"};
@@ -4210,19 +4188,10 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         return width / slots;
     }
 
-    private static final String[] DEFAULT_APP_LABELS = {"movistar", "disney", "dazn", "prime video"};
-
     private List<String> defaultApps(List<AppEntry> available) {
-        ArrayList<String> result = new ArrayList<>();
-        for (String wanted : DEFAULT_APP_LABELS) {
-            for (AppEntry entry : available) {
-                if (MatchRepository.fold(entry.label).contains(wanted) && !result.contains(entry.packageName)) {
-                    result.add(entry.packageName);
-                    break;
-                }
-            }
-        }
-        return result;
+        List<String[]> apps = new ArrayList<>();
+        for (AppEntry entry : available) apps.add(new String[]{entry.packageName, entry.label});
+        return PinnedApps.pick(apps);
     }
 
     private List<String> selectedPackages(List<AppEntry> available) {

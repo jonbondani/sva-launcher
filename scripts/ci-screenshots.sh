@@ -40,14 +40,13 @@ sleep 8
 shot 07-matches
 key KEYCODE_BACK 2
 shot 08-back-home
-# The input tiles (HDMI, TDT) with sample inputs, since the emulator has none.
+# With sample inputs (the emulator has none): the shelf has only apps, inputs are behind "Fuentes".
 adb shell am force-stop com.sva.launcher
 adb shell am start -W -n com.sva.launcher/.MainActivity --ez demo_tv_inputs true > /dev/null
 sleep 12
 shot 08b-inputs
-key KEYCODE_DPAD_LEFT; key KEYCODE_DPAD_LEFT; key KEYCODE_DPAD_LEFT; key KEYCODE_DPAD_LEFT; shot 08c-inputs-focus
 # Reorder: hold OK on an app, move it right, drop it.
-key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_RIGHT
+key KEYCODE_DPAD_RIGHT
 adb shell input keyevent --longpress KEYCODE_DPAD_CENTER; sleep 1.5; shot 08d-move-start
 key KEYCODE_DPAD_RIGHT 1.5; shot 08e-moved-right
 key KEYCODE_DPAD_CENTER 1.5; shot 08f-dropped
@@ -74,8 +73,12 @@ adb shell am force-stop com.sva.launcher
 adb shell am start -W -n com.sva.launcher/.MainActivity --ez demo_tv_inputs true --ez demo_watching true > /dev/null
 sleep 15
 shot 11-tv-full
-key KEYCODE_DPAD_LEFT; shot 11b-tv-full-input-focus
-key KEYCODE_DPAD_UP 1.5; key KEYCODE_DPAD_UP 1.5; shot 11c-tv-full-top-pill
+# "Fuentes" in the dock: down to the dock, right past the five tabs, then open it.
+key KEYCODE_DPAD_DOWN 1.5; shot 11b-tv-dock
+for i in 1 2 3 4 5; do key KEYCODE_DPAD_RIGHT 1; done; shot 11c-tv-fuentes-focus
+key KEYCODE_DPAD_CENTER 2; shot 11d-tv-fuentes-list
+key KEYCODE_BACK 1.5
+key KEYCODE_DPAD_UP 1.5; key KEYCODE_DPAD_UP 1.5; key KEYCODE_DPAD_UP 1.5; shot 11e-tv-full-top-pill
 adb shell cmd uimode night no
 adb shell dumpsys tv_input > "$OUT/tv_input.txt" 2>&1
 adb logcat -d | grep -vE "RuntimeInit|commands.input|Shutting down VM|default boot image|lock profiling" | tail -400 > "$OUT/log.txt"

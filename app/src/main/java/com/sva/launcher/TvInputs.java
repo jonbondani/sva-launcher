@@ -115,6 +115,11 @@ final class TvInputs {
         return ports > 1 && connected == ports;
     }
 
+    /** The name in the "Fuentes" list: "HDMI 2 · sin señal" for an empty port. */
+    static String menuLabel(Input input) {
+        return input.kind == HDMI && !input.connected ? input.label + " · sin señal" : input.label;
+    }
+
     /** Port number from the label the TV gives the port ("HDMI 2", "HDMI2 (ARC)"); otherwise its position. */
     static int portNumber(String systemLabel, int fallback) {
         if (systemLabel == null) return fallback;
