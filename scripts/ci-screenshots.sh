@@ -94,7 +94,8 @@ sleep 6
 adb shell dumpsys package com.sva.launcher | grep -i "WRITE_SECURE\|stopped=" >> "$OUT/home-repair-debug.txt"
 # An update kills the process without the service being unbound (no "off" from the viewer);
 # kill -9 does the same here (force-stop would also mark the app stopped, which an update does not).
-adb shell run-as com.sva.launcher sh -c 'kill -9 $(pidof com.sva.launcher)'
+adb shell "run-as com.sva.launcher sh -c 'kill -9 \$(pidof com.sva.launcher)'"
+adb shell pidof com.sva.launcher >> "$OUT/home-repair-debug.txt" || echo "process gone" >> "$OUT/home-repair-debug.txt"
 sleep 2
 adb shell settings put secure enabled_accessibility_services "''"
 adb install -r app/build/outputs/apk/debug/app-debug.apk > /dev/null 2>&1
