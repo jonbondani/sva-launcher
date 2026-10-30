@@ -92,7 +92,10 @@ adb shell settings put secure enabled_accessibility_services "$SVC"
 adb shell settings put secure accessibility_enabled 1
 sleep 6
 adb shell dumpsys package com.sva.launcher | grep -i "WRITE_SECURE\|stopped=" >> "$OUT/home-repair-debug.txt"
-adb shell am force-stop com.sva.launcher
+# An update kills the process without the service being unbound (no "off" from the viewer);
+# kill -9 does the same here (force-stop would also mark the app stopped, which an update does not).
+adb shell run-as com.sva.launcher sh -c 'kill -9 $(pidof com.sva.launcher)'
+sleep 2
 adb shell settings put secure enabled_accessibility_services "''"
 adb install -r app/build/outputs/apk/debug/app-debug.apk > /dev/null 2>&1
 sleep 8
