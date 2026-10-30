@@ -53,7 +53,7 @@ jobs:
           cp app/build/outputs/apk/debug/app-debug.apk sva-firetv.apk
           # Read by the in-app updater (must match versionCode in app/build.gradle).
           printf '{"versionCode": %d, "versionName": "4.0.1-firetv.%d", "sha": "%s"}\n' \
-            "$((100 + GITHUB_RUN_NUMBER))" "$GITHUB_RUN_NUMBER" "$GITHUB_SHA" > version.json
+            "$((100 + 2 * GITHUB_RUN_NUMBER))" "$GITHUB_RUN_NUMBER" "$GITHUB_SHA" > version.json
           gh release delete firetv-latest --yes --cleanup-tag || true
           gh release create firetv-latest sva-firetv.apk version.json \
             --prerelease --target "$GITHUB_SHA" \
