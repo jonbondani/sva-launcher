@@ -50,6 +50,9 @@ final class TvInputs {
     /** HDMI ports in port order, then the tuner. Empty when the device has no TV inputs (sticks, boxes). */
     static List<Input> list(Context context) {
         List<Input> out = new ArrayList<>();
+        // Fire TV sticks and Cubes have no inputs of their own, yet Fire OS still lists Amazon's
+        // software tuner (the Live tab's channels) there: only TVs get the "Fuentes" button.
+        if (!hasTvHardware(context)) return out;
         TvInputManager manager;
         List<TvInputInfo> all;
         try {
@@ -71,7 +74,10 @@ final class TvInputs {
                 if (info.getType() == TvInputInfo.TYPE_HDMI) {
                     if (info.getParentId() == null) ports.add(info);
                     else cecNames.put(info.getParentId(), String.valueOf(info.loadLabel(context)).trim());
-                } else if (info.getType() == TvInputInfo.TYPE_TUNER && tuner == null && !info.isPassthroughInput()) {
+                } else if (info.getType() == TvInputInfo.TYPE_TUNER && tuner == null && !info.isPassthroughInput()
+                        && isSystemInput(info)) {
+                    // The antenna tuner belongs to the TV's firmware; app-provided "tuners"
+                    // (channel apps, AirPlay) are not an aerial input.
                     tuner = info;
                 }
             } catch (RuntimeException ignored) { }
@@ -170,6 +176,31 @@ final class TvInputs {
                     return true;
                 } catch (RuntimeException ignored) { }
             }
+            return false;
+        }
+    }
+
+    /** Packages only Fire TV televisions have (inputs settings, channel scan, MediaTek Live TV). */
+    static final String[] FIRE_TV_TELEVISION_PACKAGES = {
+            "com.amazon.tv.inputpreference.service", "com.amazon.tv.channelscan", "com.amazon.mediatek.livetv"
+    };
+
+    /** False on Fire TV sticks and boxes; true on Fire TV televisions and on other Android TVs. */
+    static boolean hasTvHardware(Context context) {
+        android.content.pm.PackageManager pm = context.getPackageManager();
+        if (!installed(pm, "com.amazon.tv.launcher")) return true;
+        for (String pkg : FIRE_TV_TELEVISION_PACKAGES) if (installed(pm, pkg)) return true;
+        return false;
+    }
+
+    private static boolean installed(android.content.pm.PackageManager pm, String pkg) {
+        try { pm.getPackageInfo(pkg, 0); return true; } catch (Exception missing) { return false; }
+    }
+
+    private static boolean isSystemInput(TvInputInfo info) {
+        try {
+            return (info.getServiceInfo().applicationInfo.flags & android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0;
+        } catch (RuntimeException e) {
             return false;
         }
     }

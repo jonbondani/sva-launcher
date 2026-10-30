@@ -596,6 +596,8 @@ public final class MainActivity extends Activity {
 
     @Override protected void onResume() {
         super.onResume();
+        // Puts the Home override back if a force-stop dropped it (only if the viewer had it on).
+        HomeRepair.repair(this);
         screenActive = true;
         scheduleScreensaverIdle();
         maybeRefreshLiveData();

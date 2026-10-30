@@ -13,7 +13,7 @@
 # =============================================================================
 set -u
 
-VERSION="1.10.0"
+VERSION="1.11.0"
 BASE_DIR="${FTVO_HOME:-$HOME/firetv-optimizer}"
 BACKUP_DIR="$BASE_DIR/copias"
 ADB="${ADB:-adb}"
@@ -1074,6 +1074,8 @@ cmd_sva_inicio() {
   local others; others=$(printf '%s' "$current" | tr ':' '\n' | grep -v "^$SVA_SERVICE$" | grep . | paste -sd: -)
   if [ "$mode" = "off" ]; then
     set_min_futurity off
+    # Sin este permiso Sva no puede volver a activarse sola.
+    dsh pm revoke "$SVA_PKG" android.permission.WRITE_SECURE_SETTINGS >/dev/null 2>&1 || true
     if [ -n "$others" ]; then dsh settings put secure enabled_accessibility_services "$others" >/dev/null
     else dsh settings delete secure enabled_accessibility_services >/dev/null; fi
     ok "El botón Home vuelve a abrir el inicio de Amazon."
@@ -1083,6 +1085,11 @@ cmd_sva_inicio() {
   dsh settings put secure enabled_accessibility_services "$value" >/dev/null
   dsh settings put secure accessibility_enabled 1 >/dev/null
   set_min_futurity on
+  # Permite a Sva reponer el botón Home si una actualización o un cierre forzado lo quita
+  # (solo si lo tenías activado; si lo desactivas tú, se queda desactivado).
+  if dsh pm grant "$SVA_PKG" android.permission.WRITE_SECURE_SETTINGS 2>&1 | grep -qi "exception\|error"; then
+    warn "Esta versión de Sva no puede repararse sola (actualízala). El botón Home funciona igual."
+  fi
   if dsh settings get secure enabled_accessibility_services | grep -q "$SVA_SERVICE"; then
     ok "Activado: al pulsar Home se abrirá Sva (el inicio de Amazon sigue instalado y activo)."
     info "Para deshacerlo:  ./firetv-optimizer.sh sva-inicio off"

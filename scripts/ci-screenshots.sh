@@ -84,6 +84,29 @@ adb shell cmd uimode night no
 adb shell am start -n com.sva.launcher/.MainActivity --es set_playlist "'https://iptv-org.github.io/iptv/countries/es.m3u?token=secreto'" > /dev/null
 sleep 4; shot 12-setup-playlist
 key KEYCODE_BACK 1.5
+# Home override self-repair (HomeRepair). Fire OS drops the accessibility service on an update;
+# stock Android does not, so the drop is simulated with the process dead, then Sva is reinstalled.
+SVC=com.sva.launcher/com.sva.launcher.LauncherOverrideService
+adb shell pm grant com.sva.launcher android.permission.WRITE_SECURE_SETTINGS
+adb shell settings put secure enabled_accessibility_services "$SVC"
+adb shell settings put secure accessibility_enabled 1
+sleep 6
+adb shell am force-stop com.sva.launcher
+adb shell settings put secure enabled_accessibility_services "''"
+adb install -r app/build/outputs/apk/debug/app-debug.apk > /dev/null 2>&1
+sleep 8
+after=$(adb shell settings get secure enabled_accessibility_services | tr -d '\r')
+echo "repair after update: $after" | tee "$OUT/home-repair.txt"
+case "$after" in *LauncherOverrideService*) echo "REPAIR_OK" >> "$OUT/home-repair.txt" ;; *) echo "REPAIR_FAILED" >> "$OUT/home-repair.txt" ;; esac
+# A deliberate "off" while Sva runs must stick, even across an update.
+sleep 4
+adb shell settings put secure enabled_accessibility_services "''"
+sleep 4
+adb install -r app/build/outputs/apk/debug/app-debug.apk > /dev/null 2>&1
+sleep 8
+off=$(adb shell settings get secure enabled_accessibility_services | tr -d '\r')
+echo "after deliberate off + update: $off" | tee -a "$OUT/home-repair.txt"
+case "$off" in *LauncherOverrideService*) echo "OFF_IGNORED" >> "$OUT/home-repair.txt" ;; *) echo "OFF_RESPECTED" >> "$OUT/home-repair.txt" ;; esac
 adb shell dumpsys tv_input > "$OUT/tv_input.txt" 2>&1
 adb logcat -d | grep -vE "RuntimeInit|commands.input|Shutting down VM|default boot image|lock profiling" | tail -400 > "$OUT/log.txt"
 if grep -q "FATAL EXCEPTION" "$OUT/log.txt"; then echo "CRASH" > "$OUT/CRASHED"; fi

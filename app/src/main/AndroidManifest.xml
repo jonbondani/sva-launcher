@@ -12,6 +12,11 @@
     <!-- A home launcher must enumerate launchable apps so users can choose shortcuts. -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
+    <!-- Granted once over ADB (firetv-optimizer.sh sva-inicio), only to put the Home override back
+         after an update or a force-stop clears it (HomeRepair). -->
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name=".SvaApplication"
@@ -99,6 +104,16 @@
             </intent-filter>
             <meta-data android:name="android.service.dream" android:resource="@xml/screensaver" />
         </service>
+        <receiver
+            android:name=".HomeRepair"
+            android:directBootAware="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
         <service
             android:name=".LauncherOverrideService"
             android:description="@string/launcher_override_service_description"

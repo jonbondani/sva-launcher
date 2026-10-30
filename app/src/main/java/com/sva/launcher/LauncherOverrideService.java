@@ -56,6 +56,8 @@ public final class LauncherOverrideService extends AccessibilityService {
         running = this;
         // Turned on again on purpose: a fresh start for the crash safety net.
         CrashWatch.clear(this);
+        // The viewer wants Sva on Home: put it back if an update or a force-stop drops it.
+        HomeRepair.markWanted(this, true);
         try {
             View view = new View(this);
             view.setBackgroundColor(COVER_COLOR);
@@ -73,6 +75,12 @@ public final class LauncherOverrideService extends AccessibilityService {
         } catch (Exception noOverlay) {
             cover = null;   // Still works, the stock home is just visible for a moment.
         }
+    }
+
+    /** Switched off from Settings or the script: a deliberate "off", so HomeRepair leaves it off. */
+    @Override public boolean onUnbind(Intent intent) {
+        HomeRepair.markWanted(this, false);
+        return super.onUnbind(intent);
     }
 
     @Override public void onDestroy() {
