@@ -14,21 +14,47 @@ import android.provider.Settings;
  *
  * Only ever restores what the viewer had on: the service records it while bound and clears it
  * when it is switched off from Settings or the script (onUnbind), so a deliberate "off" sticks.
+ * An update may unbind the service just before replacing the app, so an unbind followed within
+ * {@link #UPDATE_WINDOW_MS} by Sva's own update counts as the update, not as the viewer.
  * It needs WRITE_SECURE_SETTINGS, granted once over ADB by firetv-optimizer.sh sva-inicio;
  * without it nothing happens.
  */
 public final class HomeRepair extends BroadcastReceiver {
     static final String PREF_WANTED = "homeOverrideWanted";
+    static final String PREF_UNBOUND_AT = "homeOverrideUnboundAt";
+    static final String PREF_WANTED_BEFORE_UNBIND = "homeOverrideWantedBeforeUnbind";
+    static final long UPDATE_WINDOW_MS = 120_000L;
     static final String SERVICE = "com.sva.launcher/com.sva.launcher.LauncherOverrideService";
     private static final String TAG = "SvaHomeRepair";
 
     @Override public void onReceive(Context context, Intent intent) {
         String action = intent == null ? null : intent.getAction();
         android.util.Log.i(TAG, "received " + action);
-        if (Intent.ACTION_MY_PACKAGE_REPLACED.equals(action) || Intent.ACTION_BOOT_COMPLETED.equals(action)
+        if (Intent.ACTION_MY_PACKAGE_REPLACED.equals(action)) {
+            SharedPreferences p = prefs(context);
+            if (!p.getBoolean(PREF_WANTED, false) && unboundByUpdate(p.getBoolean(PREF_WANTED_BEFORE_UNBIND, false),
+                    p.getLong(PREF_UNBOUND_AT, 0L), System.currentTimeMillis())) {
+                android.util.Log.i(TAG, "unbound by the update: restoring");
+                p.edit().putBoolean(PREF_WANTED, true).commit();
+            }
+            repair(context);
+        } else if (Intent.ACTION_BOOT_COMPLETED.equals(action)
                 || "android.intent.action.LOCKED_BOOT_COMPLETED".equals(action)) {
             repair(context);
         }
+    }
+
+    /** Pure: an unbind of a wanted service shortly before our own update was the update's doing. */
+    static boolean unboundByUpdate(boolean wantedBefore, long unboundAt, long now) {
+        return wantedBefore && unboundAt > 0 && now >= unboundAt && now - unboundAt <= UPDATE_WINDOW_MS;
+    }
+
+    /** The service was unbound: remember whether it was wanted, and when, before clearing it. */
+    static void markUnbound(Context context) {
+        SharedPreferences p = prefs(context);
+        p.edit().putBoolean(PREF_WANTED_BEFORE_UNBIND, p.getBoolean(PREF_WANTED, false))
+                .putLong(PREF_UNBOUND_AT, System.currentTimeMillis()).putBoolean(PREF_WANTED, false).commit();
+        android.util.Log.i(TAG, "unbound");
     }
 
     static void markWanted(Context context, boolean wanted) {

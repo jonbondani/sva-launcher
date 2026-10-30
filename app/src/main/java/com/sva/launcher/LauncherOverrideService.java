@@ -79,7 +79,7 @@ public final class LauncherOverrideService extends AccessibilityService {
 
     /** Switched off from Settings or the script: a deliberate "off", so HomeRepair leaves it off. */
     @Override public boolean onUnbind(Intent intent) {
-        HomeRepair.markWanted(this, false);
+        HomeRepair.markUnbound(this);
         return super.onUnbind(intent);
     }
 

@@ -92,13 +92,8 @@ adb shell settings put secure enabled_accessibility_services "$SVC"
 adb shell settings put secure accessibility_enabled 1
 sleep 6
 adb shell dumpsys package com.sva.launcher | grep -i "WRITE_SECURE\|stopped=" >> "$OUT/home-repair-debug.txt"
-# An update kills the process without the service being unbound (no "off" from the viewer);
-# kill -9 does the same here (force-stop would also mark the app stopped, which an update does not).
-pid=$(adb shell pidof com.sva.launcher | tr -d '\r')
-echo "pid before: $pid" >> "$OUT/home-repair-debug.txt"
-# Kill and drop the service in one go, before the system can restart the process.
-adb shell "run-as com.sva.launcher kill -9 $pid; settings put secure enabled_accessibility_services ''"
-echo "pid after: $(adb shell pidof com.sva.launcher | tr -d '\r')" >> "$OUT/home-repair-debug.txt"
+# Fire OS drops the service around Sva's update (stock Android keeps it): drop it, then update.
+adb shell settings put secure enabled_accessibility_services "''"
 adb install -r app/build/outputs/apk/debug/app-debug.apk > /dev/null 2>&1
 sleep 8
 after=$(adb shell settings get secure enabled_accessibility_services | tr -d '\r')
@@ -106,10 +101,10 @@ echo "repair after update: $after" | tee "$OUT/home-repair.txt"
 adb shell dumpsys package com.sva.launcher | grep -i "WRITE_SECURE\|stopped=" >> "$OUT/home-repair-debug.txt"
 adb logcat -d | grep -i "SvaHomeRepair\|LauncherOverride\|MY_PACKAGE_REPLACED" | tail -60 >> "$OUT/home-repair-debug.txt"
 case "$after" in *LauncherOverrideService*) echo "REPAIR_OK" >> "$OUT/home-repair.txt" ;; *) echo "REPAIR_FAILED" >> "$OUT/home-repair.txt" ;; esac
-# A deliberate "off" while Sva runs must stick, even across an update.
+# A deliberate "off" while Sva runs must stick, even across a later update (outside the window).
 sleep 4
 adb shell settings put secure enabled_accessibility_services "''"
-sleep 4
+sleep 130
 adb install -r app/build/outputs/apk/debug/app-debug.apk > /dev/null 2>&1
 sleep 8
 off=$(adb shell settings get secure enabled_accessibility_services | tr -d '\r')
