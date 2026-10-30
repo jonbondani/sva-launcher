@@ -20,9 +20,11 @@ import android.provider.Settings;
 public final class HomeRepair extends BroadcastReceiver {
     static final String PREF_WANTED = "homeOverrideWanted";
     static final String SERVICE = "com.sva.launcher/com.sva.launcher.LauncherOverrideService";
+    private static final String TAG = "SvaHomeRepair";
 
     @Override public void onReceive(Context context, Intent intent) {
         String action = intent == null ? null : intent.getAction();
+        android.util.Log.i(TAG, "received " + action);
         if (Intent.ACTION_MY_PACKAGE_REPLACED.equals(action) || Intent.ACTION_BOOT_COMPLETED.equals(action)
                 || "android.intent.action.LOCKED_BOOT_COMPLETED".equals(action)) {
             repair(context);
@@ -31,12 +33,14 @@ public final class HomeRepair extends BroadcastReceiver {
 
     static void markWanted(Context context, boolean wanted) {
         prefs(context).edit().putBoolean(PREF_WANTED, wanted).commit();
+        android.util.Log.i(TAG, "wanted=" + wanted);
     }
 
     /** Re-adds the service if the viewer wanted it and it is missing. Returns true if it wrote. */
     static boolean repair(Context context) {
-        if (!prefs(context).getBoolean(PREF_WANTED, false)) return false;
+        if (!prefs(context).getBoolean(PREF_WANTED, false)) { android.util.Log.i(TAG, "not wanted"); return false; }
         if (context.checkSelfPermission("android.permission.WRITE_SECURE_SETTINGS") != PackageManager.PERMISSION_GRANTED) {
+            android.util.Log.i(TAG, "no WRITE_SECURE_SETTINGS");
             return false;
         }
         try {
@@ -45,11 +49,13 @@ public final class HomeRepair extends BroadcastReceiver {
             String wanted = withService(current, SERVICE);
             boolean listChanged = !wanted.equals(current == null ? "" : current);
             boolean switchOff = !"1".equals(enabled);
+            android.util.Log.i(TAG, "list=" + current + " enabled=" + enabled);
             if (!listChanged && !switchOff) return false;
             if (listChanged) Settings.Secure.putString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, wanted);
             if (switchOff) Settings.Secure.putString(context.getContentResolver(), Settings.Secure.ACCESSIBILITY_ENABLED, "1");
             return true;
         } catch (RuntimeException notAllowed) {
+            android.util.Log.w(TAG, "could not write", notAllowed);
             return false;
         }
     }

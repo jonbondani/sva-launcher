@@ -91,12 +91,15 @@ adb shell pm grant com.sva.launcher android.permission.WRITE_SECURE_SETTINGS
 adb shell settings put secure enabled_accessibility_services "$SVC"
 adb shell settings put secure accessibility_enabled 1
 sleep 6
+adb shell dumpsys package com.sva.launcher | grep -i "WRITE_SECURE\|stopped=" >> "$OUT/home-repair-debug.txt"
 adb shell am force-stop com.sva.launcher
 adb shell settings put secure enabled_accessibility_services "''"
 adb install -r app/build/outputs/apk/debug/app-debug.apk > /dev/null 2>&1
 sleep 8
 after=$(adb shell settings get secure enabled_accessibility_services | tr -d '\r')
 echo "repair after update: $after" | tee "$OUT/home-repair.txt"
+adb shell dumpsys package com.sva.launcher | grep -i "WRITE_SECURE\|stopped=" >> "$OUT/home-repair-debug.txt"
+adb logcat -d | grep -i "SvaHomeRepair\|LauncherOverride\|MY_PACKAGE_REPLACED" | tail -60 >> "$OUT/home-repair-debug.txt"
 case "$after" in *LauncherOverrideService*) echo "REPAIR_OK" >> "$OUT/home-repair.txt" ;; *) echo "REPAIR_FAILED" >> "$OUT/home-repair.txt" ;; esac
 # A deliberate "off" while Sva runs must stick, even across an update.
 sleep 4
