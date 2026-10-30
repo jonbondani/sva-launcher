@@ -13,7 +13,7 @@
 # =============================================================================
 set -u
 
-VERSION="1.11.0"
+VERSION="1.11.1"
 BASE_DIR="${FTVO_HOME:-$HOME/firetv-optimizer}"
 BACKUP_DIR="$BASE_DIR/copias"
 ADB="${ADB:-adb}"
@@ -1042,8 +1042,9 @@ cmd_instalar() {
           ok "El botón Home sigue abriendo Sva."
         else
           info "La actualización quitó el permiso de accesibilidad de Sva: lo repongo."
-          cmd_sva_inicio on
         fi
+        # Siempre: repone lo que falte y da a Sva el permiso para repararse sola en adelante.
+        cmd_sva_inicio on
         return
       fi ;;
     *INSTALL_FAILED_UPDATE_INCOMPATIBLE*)
