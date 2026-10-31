@@ -108,8 +108,12 @@ final class AppLogo {
     /** Pure: drops the backdrop colour (sampled around the edge) and keeps the mark, with soft edges. */
     static Cut cut(int[] argb, int w, int h) {
         int backdrop = edgeColor(argb, w, h);
-        // Every colour along the icon's outer edge counts as backdrop, not just the commonest:
-        // gradients (Movistar+ grey to black, Prime Video's blues) then come out whole.
+        // A shaped icon (round, squircle: clear corners) is already an icon in its own right, and
+        // its rim is often part of the design (a clock's white bezel): it is shown whole, rounded.
+        if (!fullBleed(argb, w, h)) return new Cut(new int[argb.length], backdrop, 0);
+        // A full-bleed icon (square, banner): every colour along its outer edge counts as backdrop,
+        // not just the commonest, so gradients (Movistar+ grey to black, Prime Video's blues) come
+        // out whole.
         int[] palette = edgePalette(argb, w, h);
         int[] out = new int[argb.length];
         double opaque = 0, kept = 0;
@@ -142,6 +146,21 @@ final class AppLogo {
             out[i] = (alpha << 24) | (r << 16) | (g << 8) | b;
         }
         return new Cut(out, backdrop, opaque == 0 ? 0 : kept / opaque);
+    }
+
+    /**
+     * Pure: true when the icon fills its whole rectangle: its four corners, a hair inside to allow
+     * for anti-aliasing, are opaque. Round and squircle icons are clear there.
+     */
+    static boolean fullBleed(int[] argb, int w, int h) {
+        int[] box = bounds(argb, w, h);
+        if (box == null) return false;
+        int in = Math.max(1, Math.min(box[2] - box[0], box[3] - box[1]) / 50);
+        int l = box[0] + in, t = box[1] + in, r = box[2] - in, b = box[3] - in;
+        if (l >= r || t >= b) return false;
+        int[] corners = {t * w + l, t * w + r, b * w + l, b * w + r};
+        for (int i : corners) if ((argb[i] >>> 24) < 200) return false;
+        return true;
     }
 
     private static int unmix(int value, int backdrop, double t) {

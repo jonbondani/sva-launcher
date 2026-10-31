@@ -22,6 +22,13 @@ public final class AppLogoTest {
         return px;
     }
 
+    @Test public void antiAliasedCornersStillCountAsFullBleed() {
+        int[] px = flatIcon(BLUE, WHITE);
+        px[0] = 0x80000000 | (BLUE & 0xFFFFFF);
+        px[N - 1] = px[0]; px[N * N - 1] = px[0]; px[(N - 1) * N] = px[0];
+        assertTrue(AppLogo.fullBleed(px, N, N));
+    }
+
     @Test public void cutsTheMarkOutOfAFlatIcon() {
         AppLogo.Cut cut = AppLogo.cut(flatIcon(BLUE, WHITE), N, N);
         assertEquals(BLUE, cut.backdrop);
@@ -43,15 +50,16 @@ public final class AppLogoTest {
         assertEquals(RED, AppLogo.glowColor(cut.backdrop, cut.pixels));
     }
 
-    @Test public void roundIconWithClearCornersStillFindsItsBackdrop() {
+    @Test public void roundIconWithClearCornersIsShownWhole() {
         int[] px = flatIcon(BLUE, WHITE);
         for (int y = 0; y < N; y++) for (int x = 0; x < N; x++) {
             double dx = x - 9.5, dy = y - 9.5;
             if (dx * dx + dy * dy > 10 * 10) px[y * N + x] = 0;
         }
+        assertFalse(AppLogo.fullBleed(px, N, N));
         AppLogo.Cut cut = AppLogo.cut(px, N, N);
         assertEquals(BLUE, cut.backdrop);
-        assertTrue(cut.usable());
+        assertFalse(cut.usable());
     }
 
     @Test public void busyArtworkIsNotTrustedAsAMark() {
@@ -115,5 +123,18 @@ public final class AppLogoTest {
         for (int y = 8; y < 11; y++) for (int x = 4; x < 16; x++) px[y * N + x] = WHITE;
         AppLogo.Cut cut = AppLogo.cut(px, N, N);
         assertArrayEquals(new int[]{4, 8, 15, 10}, AppLogo.bounds(cut.pixels, N, N));
+    }
+
+    @Test public void roundIconKeepsItsWhiteRim() {
+        // A clock-like icon: clear corners, a white rim, a dark face, a red hand.
+        int[] px = new int[N * N];
+        for (int y = 0; y < N; y++) for (int x = 0; x < N; x++) {
+            double d = Math.hypot(x - 9.5, y - 9.5);
+            if (d <= 10) px[y * N + x] = d > 8.5 ? WHITE : 0xFF303030;
+        }
+        for (int y = 4; y < 10; y++) px[y * N + 10] = RED;
+        assertFalse(AppLogo.fullBleed(px, N, N));
+        // Shown whole, rim included.
+        assertFalse(AppLogo.cut(px, N, N).usable());
     }
 }
