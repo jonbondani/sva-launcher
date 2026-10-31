@@ -3434,8 +3434,10 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                 }
             });
         }
-        int size = dp(Math.round(ShelfTile.GLASS_DP * (art.bare ? .5f : .62f)));
-        glass.addView(logo, new FrameLayout.LayoutParams(size, size, Gravity.CENTER));
+        // Bare marks: up to 72 % wide and 50 % tall, so square logos and wide wordmarks look alike.
+        int width = dp(Math.round(ShelfTile.GLASS_DP * (art.bare ? .72f : .62f)));
+        int height = dp(Math.round(ShelfTile.GLASS_DP * (art.bare ? .5f : .62f)));
+        glass.addView(logo, new FrameLayout.LayoutParams(width, height, Gravity.CENTER));
     }
 
     /** Last tile of the row: opens the app picker so apps can be added straight from Home. */

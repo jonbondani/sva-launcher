@@ -108,24 +108,80 @@ final class AppLogo {
     /** Pure: drops the backdrop colour (sampled around the edge) and keeps the mark, with soft edges. */
     static Cut cut(int[] argb, int w, int h) {
         int backdrop = edgeColor(argb, w, h);
+        // Every colour along the icon's outer edge counts as backdrop, not just the commonest:
+        // gradients (Movistar+ grey to black, Prime Video's blues) then come out whole.
+        int[] palette = edgePalette(argb, w, h);
         int[] out = new int[argb.length];
         double opaque = 0, kept = 0;
-        int br = (backdrop >> 16) & 0xFF, bg = (backdrop >> 8) & 0xFF, bb = backdrop & 0xFF;
         for (int i = 0; i < argb.length; i++) {
             int p = argb[i];
             int a = p >>> 24;
             if (a < 16) continue;
             opaque++;
             int r = (p >> 16) & 0xFF, g = (p >> 8) & 0xFF, b = p & 0xFF;
-            double d = Math.sqrt((r - br) * (r - br) + (g - bg) * (g - bg) + (b - bb) * (b - bb));
-            // Within 40 of the backdrop is backdrop; beyond 90 is mark; in between fades.
-            double t = Math.max(0, Math.min(1, (d - 40) / 50d));
+            double best = Double.MAX_VALUE;
+            int bg = 0;
+            for (int c : palette) {
+                int cr = (c >> 16) & 0xFF, cg = (c >> 8) & 0xFF, cb = c & 0xFF;
+                double d = (r - cr) * (r - cr) + (g - cg) * (g - cg) + (b - cb) * (b - cb);
+                if (d < best) { best = d; bg = c; }
+            }
+            double d = palette.length == 0 ? 255 : Math.sqrt(best);
+            // Within 30 of a backdrop colour is backdrop; beyond 70 is mark; in between fades.
+            double t = Math.max(0, Math.min(1, (d - 30) / 40d));
             int alpha = (int) Math.round(a * t);
             if (alpha == 0) continue;
             if (alpha > 128) kept++;
-            out[i] = (alpha << 24) | (p & 0x00FFFFFF);
+            if (t < 1) {
+                // Edge pixels are part mark, part backdrop: take the backdrop out of their colour
+                // so a white logo stays white instead of keeping a blue or grey fringe.
+                r = unmix(r, (bg >> 16) & 0xFF, t);
+                g = unmix(g, (bg >> 8) & 0xFF, t);
+                b = unmix(b, bg & 0xFF, t);
+            }
+            out[i] = (alpha << 24) | (r << 16) | (g << 8) | b;
         }
         return new Cut(out, backdrop, opaque == 0 ? 0 : kept / opaque);
+    }
+
+    private static int unmix(int value, int backdrop, double t) {
+        return (int) Math.max(0, Math.min(255, Math.round((value - (1 - t) * backdrop) / t)));
+    }
+
+    /**
+     * Pure: the colours (to 32 levels a channel) of the outermost opaque pixels of every row and
+     * column, two deep. That ring is backdrop on app icons, whatever their shape or gradient.
+     */
+    static int[] edgePalette(int[] argb, int w, int h) {
+        java.util.LinkedHashSet<Integer> seen = new java.util.LinkedHashSet<>();
+        for (int y = 0; y < h; y++) {
+            int first = -1, last = -1;
+            for (int x = 0; x < w; x++) if ((argb[y * w + x] >>> 24) >= 200) { if (first < 0) first = x; last = x; }
+            if (first < 0) continue;
+            for (int k = 0; k < 2; k++) {
+                addQuantized(seen, argb[y * w + Math.min(first + k, w - 1)]);
+                addQuantized(seen, argb[y * w + Math.max(last - k, 0)]);
+            }
+        }
+        for (int x = 0; x < w; x++) {
+            int first = -1, last = -1;
+            for (int y = 0; y < h; y++) if ((argb[y * w + x] >>> 24) >= 200) { if (first < 0) first = y; last = y; }
+            if (first < 0) continue;
+            for (int k = 0; k < 2; k++) {
+                addQuantized(seen, argb[Math.min(first + k, h - 1) * w + x]);
+                addQuantized(seen, argb[Math.max(last - k, 0) * w + x]);
+            }
+        }
+        int[] out = new int[seen.size()];
+        int i = 0;
+        for (int c : seen) out[i++] = c;
+        return out;
+    }
+
+    private static void addQuantized(java.util.Set<Integer> set, int p) {
+        if ((p >>> 24) < 200) return;
+        int r = ((p >> 16) & 0xF8) + 4, g = ((p >> 8) & 0xF8) + 4, b = (p & 0xF8) + 4;
+        set.add(0xFF000000 | r << 16 | g << 8 | b);
     }
 
     /**
@@ -167,8 +223,16 @@ final class AppLogo {
         Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         Drawable copy = drawable.getConstantState() != null ? drawable.getConstantState().newDrawable().mutate() : drawable;
-        int full = Math.round(size * zoom), offset = (size - full) / 2;
-        copy.setBounds(offset, offset, offset + full, offset + full);
+        // Keep the drawing's own shape: some Fire TV apps (Prime Video) use their 16:9 banner
+        // as the icon, which squeezed into a square came out distorted.
+        int iw = copy.getIntrinsicWidth(), ih = copy.getIntrinsicHeight();
+        float full = size * zoom;
+        float fw = full, fh = full;
+        if (iw > 0 && ih > 0 && iw != ih) {
+            if (iw > ih) fh = full * ih / iw; else fw = full * iw / ih;
+        }
+        int left = Math.round((size - fw) / 2f), top = Math.round((size - fh) / 2f);
+        copy.setBounds(left, top, left + Math.round(fw), top + Math.round(fh));
         copy.draw(canvas);
         return bitmap;
     }
@@ -185,10 +249,9 @@ final class AppLogo {
         int[] px = pixels(source);
         int[] box = bounds(px, w, h);
         if (box == null) return source;
-        int bw = box[2] - box[0] + 1, bh = box[3] - box[1] + 1, side = Math.max(bw, bh);
-        Bitmap out = Bitmap.createBitmap(side, side, Bitmap.Config.ARGB_8888);
-        new Canvas(out).drawBitmap(Bitmap.createBitmap(source, box[0], box[1], bw, bh), (side - bw) / 2f, (side - bh) / 2f, null);
-        return out;
+        int bw = box[2] - box[0] + 1, bh = box[3] - box[1] + 1;
+        // Keep the mark's own proportions: wide wordmarks ("prime video") can use the tile's width.
+        return Bitmap.createBitmap(source, box[0], box[1], bw, bh);
     }
 
     /** Pure: {left, top, right, bottom} of pixels with some opacity, or null when empty. */

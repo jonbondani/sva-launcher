@@ -91,4 +91,29 @@ public final class AppLogoTest {
         assertEquals(0xE50914, out[3] & 0xFFFFFF);
         assertTrue((out[3] >>> 24) > 0x80 && (out[3] >>> 24) < 0xC0);
     }
+
+    @Test public void gradientBackdropComesOffWhole() {
+        // Movistar+ style: dark grey at the top fading to black, a white mark in the middle.
+        int[] px = new int[N * N];
+        for (int y = 0; y < N; y++) {
+            int v = 0x25 - y * 0x25 / (N - 1);
+            for (int x = 0; x < N; x++) px[y * N + x] = 0xFF000000 | v << 16 | v << 8 | v;
+        }
+        for (int y = 7; y < 13; y++) for (int x = 7; x < 13; x++) px[y * N + x] = WHITE;
+        AppLogo.Cut cut = AppLogo.cut(px, N, N);
+        assertTrue(cut.usable());
+        assertArrayEquals(new int[]{7, 7, 12, 12}, AppLogo.bounds(cut.pixels, N, N));
+    }
+
+    @Test public void horizontalGradientBannerToo() {
+        // Prime Video style: a blue that brightens left to right, a white wordmark.
+        int[] px = new int[N * N];
+        for (int y = 0; y < N; y++) for (int x = 0; x < N; x++) {
+            int g = 0x74 + x * (0xA8 - 0x74) / (N - 1), b = 0xAB + x * (0xE0 - 0xAB) / (N - 1);
+            px[y * N + x] = 0xFF000000 | g << 8 | b;
+        }
+        for (int y = 8; y < 11; y++) for (int x = 4; x < 16; x++) px[y * N + x] = WHITE;
+        AppLogo.Cut cut = AppLogo.cut(px, N, N);
+        assertArrayEquals(new int[]{4, 8, 15, 10}, AppLogo.bounds(cut.pixels, N, N));
+    }
 }
