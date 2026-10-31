@@ -1,0 +1,400 @@
+10-31 12:16:34.268  3480  3710 W IptvRepository: 	at java.io.FileInputStream.<init>(FileInputStream.java:160)
+10-31 12:16:34.268  3480  3710 W IptvRepository: 	at android.util.AtomicFile.openRead(AtomicFile.java:234)
+10-31 12:16:34.268  3480  3710 W IptvRepository: 	at com.sva.launcher.IptvRepository.readCache(IptvRepository.java:269)
+10-31 12:16:34.268  3480  3710 W IptvRepository: 	at com.sva.launcher.IptvRepository.cachedChannels(IptvRepository.java:222)
+10-31 12:16:34.268  3480  3710 W IptvRepository: 	at com.sva.launcher.MainActivity.lambda$loadCachedChannels$11$com-sva-launcher-MainActivity(MainActivity.java:677)
+10-31 12:16:34.268  3480  3710 W IptvRepository: 	at com.sva.launcher.MainActivity$$ExternalSyntheticLambda84.run(D8$$SyntheticClass:0)
+10-31 12:16:34.268  3480  3710 W IptvRepository: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+10-31 12:16:34.268  3480  3710 W IptvRepository: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+10-31 12:16:34.268  3480  3710 W IptvRepository: 	at java.lang.Thread.run(Thread.java:923)
+10-31 12:16:34.268  3480  3710 W IptvRepository: Caused by: android.system.ErrnoException: open failed: ENOENT (No such file or directory)
+10-31 12:16:34.268  3480  3710 W IptvRepository: 	at libcore.io.Linux.open(Native Method)
+10-31 12:16:34.268  3480  3710 W IptvRepository: 	at libcore.io.ForwardingOs.open(ForwardingOs.java:166)
+10-31 12:16:34.268  3480  3710 W IptvRepository: 	at libcore.io.BlockGuardOs.open(BlockGuardOs.java:254)
+10-31 12:16:34.268  3480  3710 W IptvRepository: 	at libcore.io.ForwardingOs.open(ForwardingOs.java:166)
+10-31 12:16:34.268  3480  3710 W IptvRepository: 	at android.app.ActivityThread$AndroidOs.open(ActivityThread.java:7542)
+10-31 12:16:34.268  3480  3710 W IptvRepository: 	at libcore.io.IoBridge.open(IoBridge.java:478)
+10-31 12:16:34.268  3480  3710 W IptvRepository: 	... 9 more
+10-31 12:16:34.323  3480  3480 W PhoneWindow: Previously focused view reported id 11 during save, but can't be found during restore.
+10-31 12:16:34.323  3480  3480 I SvaHomeRepair: not wanted
+10-31 12:16:34.429   301   315 D goldfish-address-space: claimShared: Ask to claim region [0x3f7143000 0x3f792c000]
+10-31 12:16:34.446   301   315 D goldfish-address-space: claimShared: Ask to claim region [0x3f519f000 0x3f5988000]
+10-31 12:16:34.451   301   315 D goldfish-address-space: claimShared: Ask to claim region [0x3f5988000 0x3f6171000]
+10-31 12:16:34.597   507   543 I WindowManager: Screen frozen for +610ms due to Window{569b1 u0 com.sva.launcher/com.sva.launcher.MainActivity}
+10-31 12:16:34.606   301   315 D goldfish-address-space: claimShared: Ask to claim region [0x3f6171000 0x3f695a000]
+10-31 12:16:34.644  3480  3492 I om.sva.launche: NativeAlloc concurrent copying GC freed 113674(4218KB) AllocSpace objects, 10(456KB) LOS objects, 49% free, 7869KB/15MB, paused 17us total 130.674ms
+10-31 12:16:34.655  3480  3494 W System  : A resource failed to call release. 
+10-31 12:16:34.677  3480  3494 W System  : A resource failed to call release. 
+10-31 12:16:34.677  3480  3494 W System  : A resource failed to call dispose. 
+10-31 12:16:34.680   507   543 W ImageReader_JNI: Unable to acquire a buffer item, very likely client tried to acquire more than maxImages buffers
+10-31 12:16:34.769  3480  3480 I SvaHomeRepair: not wanted
+10-31 12:16:34.798   301   315 D goldfish-address-space: claimShared: Ask to claim region [0x3f792c000 0x3f7b4b000]
+10-31 12:16:34.873   301   315 D goldfish-address-space: claimShared: Ask to claim region [0x3f7b4b000 0x3f7d6a000]
+10-31 12:16:34.946   301   315 D goldfish-address-space: claimShared: Ask to claim region [0x3f4000000 0x3f421f000]
+10-31 12:16:35.297  3480  3502 I OpenGLRenderer: Davey! duration=903ms; Flags=1, IntendedVsync=268826515302, Vsync=269209848620, OldestInputEvent=9223372036854775807, NewestInputEvent=0, HandleInputStart=269223644642, AnimationStart=269223645804, PerformTraversalsStart=269224930863, DrawStart=269605753098, SyncQueued=269608139092, SyncStart=269608792992, IssueDrawCommandsStart=269609723159, SwapBuffers=269712518071, FrameCompleted=269730525904, DequeueBufferDuration=29074, QueueBufferDuration=149419, GpuCompleted=120259084308, 
+10-31 12:16:35.345  3480  3480 I Choreographer: Skipped 33 frames!  The application may be doing too much work on its main thread.
+10-31 12:16:35.577  3480  3502 I OpenGLRenderer: Davey! duration=719ms; Flags=0, IntendedVsync=269226539401, Vsync=269776539379, OldestInputEvent=9223372036854775807, NewestInputEvent=0, HandleInputStart=269778566176, AnimationStart=269778567478, PerformTraversalsStart=269780071927, DrawStart=269823997149, SyncQueued=269825442387, SyncStart=269890503269, IssueDrawCommandsStart=269891526358, SwapBuffers=270005423284, FrameCompleted=270010967878, DequeueBufferDuration=375130, QueueBufferDuration=1266067, GpuCompleted=8050499584524288, 
+10-31 12:16:36.788   507   542 I system_server: Explicit concurrent copying GC freed 122594(5182KB) AllocSpace objects, 16(520KB) LOS objects, 49% free, 8967KB/17MB, paused 29us total 44.819ms
+10-31 12:16:36.789   507   518 W JavaBinder: BinderProxy is being destroyed but the application did not call unlinkToDeath to unlink all of its death recipients beforehand.  Releasing leaked death recipient: com.android.server.wm.-$$Lambda$ju_KnYxEFekr6LzoWamCeaO5FHQ
+10-31 12:16:36.789   507   518 I BpBinder: onLastStrongRef automatically unlinking death recipients: <uncached descriptor>
+10-31 12:16:38.268   301   315 D goldfish-address-space: claimShared: Ask to claim region [0x3f6171000 0x3f695a000]
+10-31 12:16:38.277   159   159 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@4.0::IMapper/default in either framework or device manifest.
+10-31 12:16:38.278  3716  3716 I Gralloc4: mapper 4.x is not supported
+10-31 12:16:38.283  3716  3716 D HostConnection: createUnique: call
+10-31 12:16:38.284  3716  3716 D HostConnection: HostConnection::get() New Host Connection established 0x746e6578d3d0, tid 3716
+10-31 12:16:38.284  3716  3716 D goldfish-address-space: allocate: Ask for block of size 0x100
+10-31 12:16:38.284  3716  3716 D goldfish-address-space: allocate: ioctl allocate returned offset 0x3f3ffe000 size 0x2000
+10-31 12:16:38.293  3716  3716 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+10-31 12:16:38.725  3718  3718 E libc    : Access denied finding property "persist.device_config.runtime_native_boot.profilebootclasspath"
+10-31 12:16:38.725  3718  3718 E libc    : Access denied finding property "persist.device_config.runtime_native_boot.enable_apex_image"
+10-31 12:16:38.725  3718  3718 E libc    : Access denied finding property "persist.device_config.runtime_native_boot.disable_lock_profiling"
+10-31 12:16:38.725  3718  3718 E libc    : Access denied finding property "persist.device_config.runtime_native_boot.enable_generational_cc"
+10-31 12:16:38.726  3718  3718 I app_process: Core platform API reporting enabled, enforcing=false
+10-31 12:16:38.720  3718  3718 W app_process: type=1400 audit(0.0:284): avc: denied { read } for name="u:object_r:device_config_runtime_native_boot_prop:s0" dev="tmpfs" ino=1197 scontext=u:r:shell:s0 tcontext=u:object_r:device_config_runtime_native_boot_prop:s0 tclass=file permissive=0
+10-31 12:16:38.720  3718  3718 I chatty  : uid=2000(shell) app_process identical 2 lines
+10-31 12:16:38.720  3718  3718 W app_process: type=1400 audit(0.0:287): avc: denied { read } for name="u:object_r:device_config_runtime_native_boot_prop:s0" dev="tmpfs" ino=1197 scontext=u:r:shell:s0 tcontext=u:object_r:device_config_runtime_native_boot_prop:s0 tclass=file permissive=0
+10-31 12:16:38.771  3718  3718 D app_process: Time zone APEX ICU file found: /apex/com.android.tzdata/etc/icu/icu_tzdata.dat
+10-31 12:16:38.771  3718  3718 D app_process: I18n APEX ICU file found: /apex/com.android.i18n/etc/icu/icudt66l.dat
+10-31 12:16:38.774  3718  3718 W app_process: Unexpected CPU variant for X86 using defaults: x86_64
+10-31 12:16:38.774  3718  3718 I app_process: The ClassLoaderContext is a special shared library.
+10-31 12:16:38.780  3718  3718 W app_process: JNI RegisterNativeMethods: attempt to register 0 native methods for android.media.AudioAttributes
+10-31 12:16:38.785   507   540 D AutofillManagerService: onBackKeyPressed()
+10-31 12:16:38.789  3480  3480 W InputEventReceiver: Attempted to finish an input event but the input event receiver has already been disposed.
+10-31 12:16:40.712  3733  3735 I cmd     : oneway function results will be dropped but finished with status OK and parcel size 4
+10-31 12:16:40.724  3738  3740 I cmd     : oneway function results will be dropped but finished with status OK and parcel size 4
+10-31 12:16:40.739  3480  3480 I SvaHomeRepair: wanted=true
+10-31 12:16:46.760   158   158 I servicemanager: Since 'apexservice' could not be found, trying to start it as a lazy AIDL service
+10-31 12:16:46.946     0     0 I init    : starting service 'apexd'...
+10-31 12:16:46.948     0     0 I init    : Control message: Processed ctl.interface_start for 'aidl/apexservice' from pid: 158 (/system/bin/servicemanager)
+10-31 12:16:46.968     0     0 I apexd   : Scanning /system/apex for preinstalled data
+10-31 12:16:46.986     0     0 I apexd   : Scanning /system_ext/apex for preinstalled data
+10-31 12:16:46.988     0     0 I apexd   : ... does not exist. Skipping
+10-31 12:16:46.989     0     0 I apexd   : Scanning /product/apex for preinstalled data
+10-31 12:16:46.991     0     0 I apexd   : ... does not exist. Skipping
+10-31 12:16:46.992     0     0 I apexd   : Scanning /vendor/apex for preinstalled data
+10-31 12:16:46.993     0     0 I apexd   : ... does not exist. Skipping
+10-31 12:16:46.994     0     0 I apexd   : Populating APEX database from mounts...
+10-31 12:16:46.996     0     0 I apexd   : Found "/apex/com.android.neuralnetworks@300000000" backed by file /system/apex/com.android.neuralnetworks.apex
+10-31 12:16:46.999     0     0 I apexd   : Found "/apex/com.android.runtime@1" backed by file /system/apex/com.android.runtime.apex
+10-31 12:16:47.002     0     0 I apexd   : Found "/apex/com.android.resolv@300000000" backed by file /system/apex/com.android.resolv.apex
+10-31 12:16:47.004     0     0 I apexd   : Found "/apex/com.android.extservices@300000000" backed by file /system/apex/com.android.extservices.apex
+10-31 12:16:47.007     0     0 I apexd   : Found "/apex/com.android.tethering@300000000" backed by file /system/apex/com.android.tethering.apex
+10-31 12:16:47.010     0     0 I apexd   : Found "/apex/com.android.cellbroadcast@300000000" backed by file /system/apex/com.android.cellbroadcast.apex
+10-31 12:16:47.013     0     0 I apexd   : Found "/apex/com.android.vndk.v30@1" backed by file /system/apex/com.android.vndk.current.apex
+10-31 12:16:47.015     0     0 I apexd   : Found "/apex/com.android.art@1" backed by file /system/apex/com.android.art.debug.apex
+10-31 12:16:47.018     0     0 I apexd   : Found "/apex/com.android.conscrypt@300000000" backed by file /system/apex/com.android.conscrypt.apex
+10-31 12:16:47.020     0     0 I apexd   : Found "/apex/com.android.apex.cts.shim@1" backed by file /system/apex/com.android.apex.cts.shim.apex
+10-31 12:16:47.023     0     0 I apexd   : Found "/apex/com.android.i18n@1" backed by file /system/apex/com.android.i18n.apex
+10-31 12:16:47.025     0     0 I apexd   : Found "/apex/com.android.permission@300000000" backed by file /system/apex/com.android.permission.apex
+10-31 12:16:47.028     0     0 I apexd   : Found "/apex/com.android.media@300000000" backed by file /system/apex/com.android.media.apex
+10-31 12:16:47.031     0     0 I apexd   : Found "/apex/com.android.adbd@300000000" backed by file /system/apex/com.android.adbd.apex
+10-31 12:16:47.033     0     0 I apexd   : Found "/apex/com.android.mediaprovider@300000000" backed by file /system/apex/com.android.mediaprovider.apex
+10-31 12:16:47.036     0     0 I apexd   : Found "/apex/com.android.ipsec@300000000" backed by file /system/apex/com.android.ipsec.apex
+10-31 12:16:47.039     0     0 I apexd   : Found "/apex/com.android.tzdata@300000000" backed by file /system/apex/com.android.tzdata.apex
+10-31 12:16:47.041     0     0 I apexd   : Found "/apex/com.android.media.swcodec@300000000" backed by file /system/apex/com.android.media.swcodec.apex
+10-31 12:16:47.044     0     0 I apexd   : Found "/apex/com.android.os.statsd@300000000" backed by file /system/apex/com.android.os.statsd.apex
+10-31 12:16:47.047     0     0 I apexd   : Found "/apex/com.android.wifi@300000000" backed by file /system/apex/com.android.wifi.apex
+10-31 12:16:47.049     0     0 I apexd   : Found "/apex/com.android.sdkext@300000000" backed by file /system/apex/com.android.sdkext.apex
+10-31 12:16:47.052     0     0 I apexd   : 21 packages restored.
+10-31 12:16:47.053     0     0 I AidlLazyServiceRegistrar: Registering service apexservice
+10-31 12:16:46.869   158   158 I BpBinder: onLastStrongRef automatically unlinking death recipients: <uncached descriptor>
+10-31 12:16:46.872   158   158 I servicemanager: Tried to unregister apexservice, but there is about to be a client.
+10-31 12:16:47.055     0     0 I AidlLazyServiceRegistrar: Trying to shut down the service. No clients in use for any service in process.
+10-31 12:16:47.058     0     0 I AidlLazyServiceRegistrar: Failed to unregister service apexservice
+10-31 12:16:46.886  3757  3759 I cmd     : oneway function results will be dropped but finished with status OK and parcel size 4
+10-31 12:16:46.889   507   507 W WindowManager: removeWindowToken: Attempted to remove non-existing token: android.os.Binder@b51b07e
+10-31 12:16:46.900  3480  3480 I SvaHomeRepair: unbound
+10-31 12:16:46.900  2297  2297 I abb     : StartCommandInProcess(73657474696e67730067657400676c6f settings.get.glo [truncated])
+10-31 12:16:46.902  2297  2302 I abb     : oneway function results will be dropped but finished with status OK and parcel size 4
+10-31 12:16:46.903   507  1096 W WindowManager: Cannot find window which accessibility connection is added to
+10-31 12:16:46.908  2297  2297 I abb     : StartCommandInProcess(7061636b61676500696e7374616c6c00 package.install. [truncated])
+10-31 12:16:46.909   507  1096 W WindowManager: Failed looking up window session=Session{75df297 3480:u0a10130} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5425 com.android.server.wm.WindowManagerService.removeWindow:1892 com.android.server.wm.Session.remove:193 
+10-31 12:16:46.896   507   507 W Binder:507_14: type=1400 audit(0.0:288): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+10-31 12:16:47.114   507   609 W RuleEvaluation: Integrity rule files are not available.
+10-31 12:16:47.114   507   565 I PackageManager: Integrity check passed for file:///data/app/vmdl461350379.tmp
+10-31 12:16:47.116   507   548 I ActivityManager: Force stopping com.sva.launcher appid=10130 user=-1: installPackageLI
+10-31 12:16:47.117   507   548 I ActivityManager: Killing 3480:com.sva.launcher/u0a130 (adj 0): stop com.sva.launcher due to installPackageLI
+10-31 12:16:47.117   507   548 W ActivityTaskManager: Force removing ActivityRecord{cb4ffe1 u0 com.sva.launcher/.MainActivity t15 f}}: app died, no saved state
+10-31 12:16:47.119   507   565 I PackageManager: Update package com.sva.launcher code path from /data/app/~~miS5IHsESeh7hlRYMRuVbA==/com.sva.launcher-EHU60PDSSYfkH6BrPFf43Q== to /data/app/~~Olj9zVU0tcHZUYCqH6aP7A==/com.sva.launcher-rB0ga8ehAiQn2c5KMgFTTQ==; Retain data and using new
+10-31 12:16:47.119   507   565 I PackageManager: Update package com.sva.launcher resource path from /data/app/~~miS5IHsESeh7hlRYMRuVbA==/com.sva.launcher-EHU60PDSSYfkH6BrPFf43Q== to /data/app/~~Olj9zVU0tcHZUYCqH6aP7A==/com.sva.launcher-rB0ga8ehAiQn2c5KMgFTTQ==; Retain data and using new
+10-31 12:16:47.120   507   565 D CompatibilityChangeReporter: Compat change id reported: 135549675; UID 10130; state: ENABLED
+10-31 12:16:47.121   507   565 I PackageManager: Permission ownership changed. Updating all permissions.
+10-31 12:16:46.896   507   507 I chatty  : uid=1000(system) Binder:507_3 identical 2 lines
+10-31 12:16:47.008   507   507 W Binder:507_14: type=1400 audit(0.0:291): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+10-31 12:16:47.127   302   367 W EmuHWC2 : No layers, exit, buffer 0x0
+10-31 12:16:47.319     0     0 I binder  : undelivered transaction 174304, process died.
+10-31 12:16:47.136   281   281 I Zygote  : Process 3480 exited due to signal 9 (Killed)
+10-31 12:16:47.141   507   565 D PackageManager: Instant App installer not found with android.intent.action.INSTALL_INSTANT_APP_PACKAGE
+10-31 12:16:47.141   507   565 D PackageManager: Clear ephemeral installer activity
+10-31 12:16:47.141   507   548 W InputReader: Device virtio_input_multi_touch_10 is associated with display ADISPLAY_ID_NONE.
+10-31 12:16:47.141   507   548 W InputReader: Device virtio_input_multi_touch_7 is associated with display ADISPLAY_ID_NONE.
+10-31 12:16:47.141   507   548 W InputReader: Device virtio_input_multi_touch_4 is associated with display ADISPLAY_ID_NONE.
+10-31 12:16:47.141   507   548 W InputReader: Device virtio_input_multi_touch_5 is associated with display ADISPLAY_ID_NONE.
+10-31 12:16:47.141   507   548 W InputReader: Device virtio_input_multi_touch_2 is associated with display ADISPLAY_ID_NONE.
+10-31 12:16:47.141   507   548 W InputReader: Device virtio_input_multi_touch_6 is associated with display ADISPLAY_ID_NONE.
+10-31 12:16:47.141   507   548 W InputReader: Device virtio_input_multi_touch_3 is associated with display ADISPLAY_ID_NONE.
+10-31 12:16:47.141   507   548 W InputReader: Device virtio_input_multi_touch_8 is associated with display ADISPLAY_ID_NONE.
+10-31 12:16:47.141   507   548 W InputReader: Device virtio_input_multi_touch_9 is associated with display ADISPLAY_ID_NONE.
+10-31 12:16:47.141   507   548 W InputReader: Device virtio_input_multi_touch_11 is associated with display ADISPLAY_ID_NONE.
+10-31 12:16:47.141   507   548 W InputReader: Device virtio_input_multi_touch_10 is associated with display ADISPLAY_ID_NONE.
+10-31 12:16:47.141   507   548 W InputReader: Device virtio_input_multi_touch_7 is associated with display ADISPLAY_ID_NONE.
+10-31 12:16:47.141   507   548 W InputReader: Device virtio_input_multi_touch_4 is associated with display ADISPLAY_ID_NONE.
+10-31 12:16:47.141   507   548 W InputReader: Device virtio_input_multi_touch_5 is associated with display ADISPLAY_ID_NONE.
+10-31 12:16:47.141   507   548 W InputReader: Device virtio_input_multi_touch_2 is associated with display ADISPLAY_ID_NONE.
+10-31 12:16:47.141   507   548 W InputReader: Device virtio_input_multi_touch_6 is associated with display ADISPLAY_ID_NONE.
+10-31 12:16:47.141   507   548 W InputReader: Device virtio_input_multi_touch_3 is associated with display ADISPLAY_ID_NONE.
+10-31 12:16:47.141   507   548 W InputReader: Device virtio_input_multi_touch_8 is associated with display ADISPLAY_ID_NONE.
+10-31 12:16:47.141   507   548 W InputReader: Device virtio_input_multi_touch_9 is associated with display ADISPLAY_ID_NONE.
+10-31 12:16:47.141   507   548 W InputReader: Device virtio_input_multi_touch_11 is associated with display ADISPLAY_ID_NONE.
+10-31 12:16:47.144   302   367 W EmuHWC2 : No layers, exit, buffer 0x0
+10-31 12:16:47.147   507   542 W ActivityManager: setHasOverlayUi called on unknown pid: 3480
+10-31 12:16:47.153   419   522 E installd: Couldn't opendir /data/app/vmdl461350379.tmp: No such file or directory
+10-31 12:16:47.153   419   522 E installd: Failed to delete /data/app/vmdl461350379.tmp: No such file or directory
+10-31 12:16:47.153   507   565 I ActivityManager: Force stopping com.sva.launcher appid=10130 user=0: pkg removed
+10-31 12:16:47.154  2297  2302 I abb     : oneway function results will be dropped but finished with status OK and parcel size 4
+10-31 12:16:47.160   507   550 I libprocessgroup: Successfully killed process cgroup uid 10130 pid 3480 in 42ms
+10-31 12:16:47.160   302   367 W EmuHWC2 : No layers, exit, buffer 0x0
+10-31 12:16:47.148   507   507 W Binder:507_14: type=1400 audit(0.0:292): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+10-31 12:16:47.148   507   507 W Binder:507_14: type=1400 audit(0.0:293): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+10-31 12:16:47.171  1410  1410 I MediaProvider: Invalidating LocalCallingIdentity cache for package com.sva.launcher. Reason: package android.intent.action.PACKAGE_REMOVED
+10-31 12:16:47.171   507   548 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.sva.launcher flg=0x4000010 (has extras) } to com.android.gallery3d/.app.PackagesMonitor
+10-31 12:16:47.172   701   701 V AvrcpMediaPlayerList: mPackageChangedBroadcastReceiver: action: android.intent.action.PACKAGE_REMOVED
+10-31 12:16:47.173   301   315 D goldfish-address-space: claimShared: Ask to claim region [0x3f519f000 0x3f5988000]
+10-31 12:16:47.174   507   603 I InputReader: Reconfiguring input devices, changes=KEYBOARD_LAYOUTS | 
+10-31 12:16:47.176   301   315 D goldfish-address-space: claimShared: Ask to claim region [0x3f5988000 0x3f6171000]
+10-31 12:16:47.177   302   367 W EmuHWC2 : No layers, exit, buffer 0x0
+10-31 12:16:47.179   507   507 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 1000; state: DISABLED
+10-31 12:16:47.192   301   315 D goldfish-address-space: claimShared: Ask to claim region [0x3f6171000 0x3f695a000]
+10-31 12:16:47.193   302   367 W EmuHWC2 : No layers, exit, buffer 0x0
+10-31 12:16:47.195  1410  1410 I MediaProvider: Invalidating LocalCallingIdentity cache for package com.sva.launcher. Reason: package android.intent.action.PACKAGE_ADDED
+10-31 12:16:47.196   701   701 V AvrcpMediaPlayerList: mPackageChangedBroadcastReceiver: action: android.intent.action.PACKAGE_ADDED
+10-31 12:16:47.196   701   701 D AvrcpMediaPlayerList: Name of package changed: com.sva.launcher
+10-31 12:16:47.193   507   548 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.sva.launcher flg=0x4000010 (has extras) } to com.android.packageinstaller/.PackageInstalledReceiver
+10-31 12:16:47.196   507   548 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.sva.launcher flg=0x4000010 (has extras) } to com.android.gallery3d/.app.PackagesMonitor
+10-31 12:16:47.196   507   507 I Telecom : DefaultDialerCache: Refreshing default dialer for user 0: now com.android.dialer: DDC.oR@AJI
+10-31 12:16:47.196   507   603 I InputReader: Reconfiguring input devices, changes=KEYBOARD_LAYOUTS | 
+10-31 12:16:47.201   937   937 E libprocessgroup: set_timerslack_ns write failed: Operation not permitted
+10-31 12:16:47.203   281   281 D Zygote  : Forked child process 3768
+10-31 12:16:47.148   507   507 W Binder:507_14: type=1400 audit(0.0:294): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+10-31 12:16:47.205   507   549 I ActivityManager: Start proc 3768:com.android.keychain/1000 for service {com.android.keychain/com.android.keychain.KeyChainService}
+10-31 12:16:47.247   301   315 D goldfish-address-space: claimShared: Ask to claim region [0x3f5988000 0x3f6171000]
+10-31 12:16:47.250  3768  3768 W ndroid.keychai: Unexpected CPU variant for X86 using defaults: x86_64
+10-31 12:16:47.252   507   603 I InputReader: Reconfiguring input devices, changes=KEYBOARD_LAYOUTS | 
+10-31 12:16:47.253   507   547 W VoiceInteractionManager: no available voice recognition services found for user 0
+10-31 12:16:47.318   387   403 I adbd    : jdwp connection from 3768
+10-31 12:16:47.322   507   548 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10130; state: DISABLED
+10-31 12:16:47.322   731  2278 I PermissionControllerServiceImpl: Updating user sensitive for uid 10130
+10-31 12:16:47.333   507   549 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10130; state: ENABLED
+10-31 12:16:47.368   281   281 D Zygote  : Forked child process 3787
+10-31 12:16:47.379  3787  3787 I om.sva.launche: Late-enabling -Xcheck:jni
+10-31 12:16:47.398   301   315 D goldfish-address-space: claimShared: Ask to claim region [0x3f6171000 0x3f695a000]
+10-31 12:16:47.401  1041  1041 D CarrierSvcBindHelper: No carrier app for: 0
+10-31 12:16:47.402  1041  1041 D CarrierSvcBindHelper: No carrier app for: 0
+10-31 12:16:47.414  3768  3768 I ndroid.keychai: The ClassLoaderContext is a special shared library.
+10-31 12:16:47.415  3787  3787 I om.sva.launche: Unquickening 12 vdex files!
+10-31 12:16:47.416  3787  3787 W om.sva.launche: Unexpected CPU variant for X86 using defaults: x86_64
+10-31 12:16:47.422   507   549 W ActivityManager: Slow operation: 100ms so far, now at startProcess: returned from zygote!
+10-31 12:16:47.422   507   549 W ActivityManager: Slow operation: 100ms so far, now at startProcess: done updating battery stats
+10-31 12:16:47.422   507   549 W ActivityManager: Slow operation: 100ms so far, now at startProcess: building log message
+10-31 12:16:47.422   507   549 I ActivityManager: Start proc 3787:com.sva.launcher/u0a130 for broadcast {com.sva.launcher/com.sva.launcher.HomeRepair}
+10-31 12:16:47.422   507   549 W ActivityManager: Slow operation: 100ms so far, now at startProcess: starting to update pids map
+10-31 12:16:47.422   507   549 W ActivityManager: Slow operation: 100ms so far, now at startProcess: done updating pids map
+10-31 12:16:47.429   387   403 I adbd    : jdwp connection from 3787
+10-31 12:16:47.466  1041  1041 D CarrierConfigLoader: mHandler: 9 phoneId: 0
+10-31 12:16:47.481   507   539 W Looper  : Slow dispatch took 124ms android.fg h=android.os.Handler c=<recycled PooledLambda@6177b5e> m=0
+10-31 12:16:47.564  3768  3768 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-31 12:16:47.572   507   539 W Looper  : Slow delivery took 216ms android.fg h=android.os.Handler c=<recycled PooledLambda@1303c0c> m=0
+10-31 12:16:47.564  3768  3768 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-31 12:16:47.587   301   315 D goldfish-address-space: claimShared: Ask to claim region [0x3f519f000 0x3f5988000]
+10-31 12:16:47.611   507   517 I system_server: Background concurrent copying GC freed 67686(3702KB) AllocSpace objects, 33(1672KB) LOS objects, 49% free, 10089KB/19MB, paused 3.544ms total 455.135ms
+10-31 12:16:47.619  3768  3806 W KeyChain: Creating new DB.
+10-31 12:16:47.720  3787  3787 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-31 12:16:47.721  3787  3787 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-31 12:16:47.730  3787  3787 I SvaHomeRepair: received android.intent.action.MY_PACKAGE_REPLACED
+10-31 12:16:47.730  3787  3787 I SvaHomeRepair: unbound by the update: restoring
+10-31 12:16:47.734  3787  3787 I SvaHomeRepair: list= enabled=0
+10-31 12:16:47.736   507   539 W Looper  : Drained
+10-31 12:16:47.739  3787  3787 I SvaHomeRepair: wanted=true
+10-31 12:16:49.926  1495  1988 I Dialer  : OmtpVvmCarrierCfgHlpr - OmtpEvent:CONFIG_STATUS_SMS_TIME_OUT
+10-31 12:16:49.927  1495  1495 I Dialer  : RetryPolicy - discarding deferred status: configuration_state=4
+10-31 12:16:49.927  1495  1495 I Dialer  : VvmTaskExecutor - no more tasks, stopping service if no task are added in 5000 millis
+10-31 12:16:49.927  1495  1495 I Dialer  : VvmTaskReceiver - task received
+10-31 12:16:49.928  1495  1495 I Dialer  : VvmTaskReceiver - TaskExecutor already running
+10-31 12:16:49.928  1495  1495 I Dialer  : Task.createTask - create task:com.android.voicemail.impl.ActivationTask
+10-31 12:16:49.928  1495  1495 I Dialer  : RetryPolicy - retry #4 for com.android.voicemail.impl.ActivationTask@a87966 queued, executing in 5000
+10-31 12:16:49.928  1495  1495 I Dialer  : VvmTaskExecutor - com.android.voicemail.impl.ActivationTask@a87966 added
+10-31 12:16:49.928  1495  1495 I Dialer  : VvmTaskExecutor - minimal wait time:5000
+10-31 12:16:49.928  1495  1495 I Dialer  : VvmTaskExecutor - sleep for 5000 millis
+10-31 12:16:50.161   507  1406 E TaskPersister: File error accessing recents directory (directory doesn't exist?).
+10-31 12:16:50.842   158   158 I servicemanager: Notifying apexservice they have clients: 1
+10-31 12:16:50.842   158   158 I servicemanager: Notifying apexservice they have clients: 0
+10-31 12:16:51.028     0     0 I AidlLazyServiceRegistrar: Process has 1 (of 1 available) client(s) in use after notification android.apex.IApexService has clients: 1
+10-31 12:16:51.032     0     0 I AidlLazyServiceRegistrar: Process has 0 (of 1 available) client(s) in use after notification android.apex.IApexService has clients: 0
+10-31 12:16:51.036     0     0 I AidlLazyServiceRegistrar: Trying to shut down the service. No clients in use for any service in process.
+10-31 12:16:50.853   158   158 I BpBinder: onLastStrongRef automatically unlinking death recipients: <uncached descriptor>
+10-31 12:16:51.039     0     0 I AidlLazyServiceRegistrar: Unregistered all clients and exiting
+10-31 12:16:51.042     0     0 I init    : Service 'apexd' (pid 3750) exited with status 0 oneshot service took 4.093000 seconds in background
+10-31 12:16:51.045     0     0 I init    : Sending signal 9 to service 'apexd' (pid 3750) process group...
+10-31 12:16:51.047     0     0 I libprocessgroup: Successfully killed process cgroup uid 0 pid 3750 in 0ms
+10-31 12:16:52.874  3787  3813 D ProfileInstaller: Installing profile for com.sva.launcher
+10-31 12:16:54.962  1495  1988 I Dialer  : VvmTaskExecutor - executing task com.android.voicemail.impl.ActivationTask@a87966
+10-31 12:16:54.962  1495  1988 I Dialer  : PreOMigrationHandler - ComponentInfo{com.android.phone/com.android.services.telephony.TelephonyConnectionService}, ***, UserHandle{0} already migrated
+10-31 12:16:54.971  1642  1982 I VoicemailNotifier: receivers for android.intent.action.PROVIDER_CHANGED :[]
+10-31 12:16:54.972  1495  1988 I Dialer  : VvmActivationTask - VVM content provider configured - vvm_type_cvvm
+10-31 12:16:54.972  1495  1988 I Dialer  : OmtpVvmCarrierCfgHlpr - OmtpEvent:CONFIG_ACTIVATING
+10-31 12:16:54.974  1642  1982 I VoicemailNotifier: receivers for android.intent.action.PROVIDER_CHANGED :[]
+10-31 12:16:54.978  1041  1086 D SmsNumberUtils: enter filterDestAddr. destAddr="[BajqU4K5_YhSYbs-7QUn0dOwcmI]"
+10-31 12:16:54.979  1041  1086 D SmsNumberUtils: destAddr is not formatted.
+10-31 12:16:54.979  1041  1086 D SmsNumberUtils: leave filterDestAddr, new destAddr="[BajqU4K5_YhSYbs-7QUn0dOwcmI]"
+10-31 12:16:55.182   158   158 I servicemanager: Since 'apexservice' could not be found, trying to start it as a lazy AIDL service
+10-31 12:16:55.369     0     0 I init    : starting service 'apexd'...
+10-31 12:16:55.371     0     0 I init    : Control message: Processed ctl.interface_start for 'aidl/apexservice' from pid: 158 (/system/bin/servicemanager)
+10-31 12:16:55.379     0     0 I apexd   : Scanning /system/apex for preinstalled data
+10-31 12:16:55.382     0     0 I apexd   : Scanning /system_ext/apex for preinstalled data
+10-31 12:16:55.384     0     0 I apexd   : ... does not exist. Skipping
+10-31 12:16:55.385     0     0 I apexd   : Scanning /product/apex for preinstalled data
+10-31 12:16:55.387     0     0 I apexd   : ... does not exist. Skipping
+10-31 12:16:55.389     0     0 I apexd   : Scanning /vendor/apex for preinstalled data
+10-31 12:16:55.390     0     0 I apexd   : ... does not exist. Skipping
+10-31 12:16:55.392     0     0 I apexd   : Populating APEX database from mounts...
+10-31 12:16:55.393     0     0 I apexd   : Found "/apex/com.android.neuralnetworks@300000000" backed by file /system/apex/com.android.neuralnetworks.apex
+10-31 12:16:55.397     0     0 I apexd   : Found "/apex/com.android.runtime@1" backed by file /system/apex/com.android.runtime.apex
+10-31 12:16:55.400     0     0 I apexd   : Found "/apex/com.android.resolv@300000000" backed by file /system/apex/com.android.resolv.apex
+10-31 12:16:55.403     0     0 I apexd   : Found "/apex/com.android.extservices@300000000" backed by file /system/apex/com.android.extservices.apex
+10-31 12:16:55.406     0     0 I apexd   : Found "/apex/com.android.tethering@300000000" backed by file /system/apex/com.android.tethering.apex
+10-31 12:16:55.409     0     0 I apexd   : Found "/apex/com.android.cellbroadcast@300000000" backed by file /system/apex/com.android.cellbroadcast.apex
+10-31 12:16:55.413     0     0 I apexd   : Found "/apex/com.android.vndk.v30@1" backed by file /system/apex/com.android.vndk.current.apex
+10-31 12:16:55.416     0     0 I apexd   : Found "/apex/com.android.art@1" backed by file /system/apex/com.android.art.debug.apex
+10-31 12:16:55.419     0     0 I apexd   : Found "/apex/com.android.conscrypt@300000000" backed by file /system/apex/com.android.conscrypt.apex
+10-31 12:16:55.422     0     0 I apexd   : Found "/apex/com.android.apex.cts.shim@1" backed by file /system/apex/com.android.apex.cts.shim.apex
+10-31 12:16:55.425     0     0 I apexd   : Found "/apex/com.android.i18n@1" backed by file /system/apex/com.android.i18n.apex
+10-31 12:16:55.428     0     0 I apexd   : Found "/apex/com.android.permission@300000000" backed by file /system/apex/com.android.permission.apex
+10-31 12:16:55.431     0     0 I apexd   : Found "/apex/com.android.media@300000000" backed by file /system/apex/com.android.media.apex
+10-31 12:16:55.434     0     0 I apexd   : Found "/apex/com.android.adbd@300000000" backed by file /system/apex/com.android.adbd.apex
+10-31 12:16:55.437     0     0 I apexd   : Found "/apex/com.android.mediaprovider@300000000" backed by file /system/apex/com.android.mediaprovider.apex
+10-31 12:16:55.440     0     0 I apexd   : Found "/apex/com.android.ipsec@300000000" backed by file /system/apex/com.android.ipsec.apex
+10-31 12:16:55.443     0     0 I apexd   : Found "/apex/com.android.tzdata@300000000" backed by file /system/apex/com.android.tzdata.apex
+10-31 12:16:55.446     0     0 I apexd   : Found "/apex/com.android.media.swcodec@300000000" backed by file /system/apex/com.android.media.swcodec.apex
+10-31 12:16:55.450     0     0 I apexd   : Found "/apex/com.android.os.statsd@300000000" backed by file /system/apex/com.android.os.statsd.apex
+10-31 12:16:55.453     0     0 I apexd   : Found "/apex/com.android.wifi@300000000" backed by file /system/apex/com.android.wifi.apex
+10-31 12:16:55.456     0     0 I apexd   : Found "/apex/com.android.sdkext@300000000" backed by file /system/apex/com.android.sdkext.apex
+10-31 12:16:55.459     0     0 I apexd   : 21 packages restored.
+10-31 12:16:55.460     0     0 I AidlLazyServiceRegistrar: Registering service apexservice
+10-31 12:16:55.276   158   158 I BpBinder: onLastStrongRef automatically unlinking death recipients: <uncached descriptor>
+10-31 12:16:55.280   158   158 I servicemanager: Tried to unregister apexservice, but there is about to be a client.
+10-31 12:16:55.463     0     0 I AidlLazyServiceRegistrar: Trying to shut down the service. No clients in use for any service in process.
+10-31 12:16:55.466     0     0 I AidlLazyServiceRegistrar: Failed to unregister service apexservice
+10-31 12:16:55.477     0     0 D logd    : logdr: UID=2000 GID=2000 PID=3826 n tail=0 logMask=99 pid=0 start=0ns timeout=0ns
+10-31 12:16:55.842   158   158 I servicemanager: Notifying apexservice they have clients: 1
+10-31 12:16:56.028     0     0 I AidlLazyServiceRegistrar: Process has 1 (of 1 available) client(s) in use after notification android.apex.IApexService has clients: 1
+10-31 12:16:59.340  3832  3834 I cmd     : oneway function results will be dropped but finished with status OK and parcel size 4
+10-31 12:16:59.343   507   507 W WindowManager: removeWindowToken: Attempted to remove non-existing token: android.os.Binder@6910bd3
+10-31 12:16:59.382   507   553 E libprocessgroup: AddTidToCgroup failed to write '3835'; fd=63: Invalid argument
+10-31 12:16:59.382   507   553 E libprocessgroup: Failed to add task into cgroup
+10-31 12:16:59.382   507   553 W libprocessgroup: ExecuteForTask failed for aggregate profile: Invalid argument
+10-31 12:16:59.384  3787  3787 I SvaHomeRepair: unbound
+10-31 12:16:59.387   507  1232 W WindowManager: Cannot find window which accessibility connection is added to
+10-31 12:16:59.387   507  2098 I ActivityManager: Killing 2058:com.android.contacts/u0a98 (adj 975): empty #17
+10-31 12:16:59.388   507  2098 W WindowManager: Failed looking up window session=Session{bd6922f 3787:u0a10130} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5425 com.android.server.wm.WindowManagerService.removeWindow:1892 com.android.server.wm.Session.remove:193 
+10-31 12:16:59.395   281   281 I Zygote  : Process 2058 exited due to signal 9 (Killed)
+10-31 12:16:59.426   507   550 I libprocessgroup: Successfully killed process cgroup uid 10098 pid 2058 in 34ms
+10-31 12:17:00.001   722   722 D KeyguardClockSwitch: Updating clock: 1217
+10-31 12:17:17.212   507   547 I ActivityManager: Killing 2080:com.android.deskclock/u0a104 (adj 985): empty #17
+10-31 12:17:17.216   281   281 I Zygote  : Process 2080 exited due to signal 9 (Killed)
+10-31 12:17:17.259   507   550 I libprocessgroup: Successfully killed process cgroup uid 10104 pid 2080 in 44ms
+10-31 12:17:18.686     0     0 W healthd : battery none chg=a
+10-31 12:17:19.976   458   458 E netmgr  : qemu_pipe_open_ns:62: Could not connect to the 'pipe:qemud:network' service: Invalid argument
+10-31 12:17:19.976   458   458 E netmgr  : Failed to open QEMU pipe 'qemud:network': Invalid argument
+10-31 12:17:20.032   462   462 E wifi_forwarder: qemu_pipe_open_ns:62: Could not connect to the 'pipe:qemud:wififorward' service: Invalid argument
+10-31 12:17:20.032   462   462 E wifi_forwarder: RemoteConnection failed to initialize: RemoteConnection failed to open pipe
+10-31 12:17:25.868   507   541 I DropBoxManagerService: add tag=system_server_strictmode isTagEnabled=true flags=0x2
+10-31 12:17:54.993  1495  1988 I Dialer  : OmtpVvmCarrierCfgHlpr - OmtpEvent:CONFIG_STATUS_SMS_TIME_OUT
+10-31 12:17:54.993  1495  1495 I Dialer  : RetryPolicy - Retry limit for com.android.voicemail.impl.ActivationTask@a87966 reached
+10-31 12:17:54.993  1495  1495 I Dialer  : RetryPolicy - committing deferred status: configuration_state=4
+10-31 12:17:55.000  1642  1982 I VoicemailNotifier: receivers for android.intent.action.PROVIDER_CHANGED :[]
+10-31 12:17:55.001  1495  1495 I Dialer  : VvmTaskExecutor - no more tasks, stopping service if no task are added in 5000 millis
+10-31 12:18:00.000   722   722 D KeyguardClockSwitch: Updating clock: 1218
+10-31 12:18:00.032  1495  1495 I Dialer  : VvmTaskExecutor - Stopping service
+10-31 12:18:00.032  1495  1495 I Dialer  : VvmTaskExecutor - finishing Job
+10-31 12:18:00.032  1495  1495 I Dialer  : TaskSchedulerJobService - finishing job
+10-31 12:18:00.043  1495  1495 I Dialer  : JobFinishedPoller.run - Job finished
+10-31 12:18:00.043  1495  1495 I Dialer  : VvmTaskExecutor - terminated
+10-31 12:18:05.688   507  3469 D WifiNl80211Manager: Scan result ready event
+10-31 12:18:05.688   507  3469 D WifiNative: Scan result ready event
+10-31 12:18:20.032   458   458 E netmgr  : qemu_pipe_open_ns:62: Could not connect to the 'pipe:qemud:network' service: Invalid argument
+10-31 12:18:20.032   458   458 E netmgr  : Failed to open QEMU pipe 'qemud:network': Invalid argument
+10-31 12:18:20.082   462   462 E wifi_forwarder: qemu_pipe_open_ns:62: Could not connect to the 'pipe:qemud:wififorward' service: Invalid argument
+10-31 12:18:20.082   462   462 E wifi_forwarder: RemoteConnection failed to initialize: RemoteConnection failed to open pipe
+10-31 12:19:00.000   722   722 D KeyguardClockSwitch: Updating clock: 1219
+10-31 12:19:09.389  2297  2297 I abb     : StartCommandInProcess(73657474696e67730067657400676c6f settings.get.glo [truncated])
+10-31 12:19:09.391  2297  3808 I abb     : oneway function results will be dropped but finished with status OK and parcel size 4
+10-31 12:19:09.396  2297  2297 I abb     : StartCommandInProcess(7061636b61676500696e7374616c6c00 package.install. [truncated])
+10-31 12:19:09.388   507   507 W Binder:507_F: type=1400 audit(0.0:295): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+10-31 12:17:25.870   507   541 I chatty  : uid=1000(system) android.io identical 2 lines
+10-31 12:17:25.871   507   541 I DropBoxManagerService: add tag=system_server_strictmode isTagEnabled=true flags=0x2
+10-31 12:19:09.574   507   565 I ActivityManager: Killing 2106:com.android.dynsystem/1000 (adj 985): empty #17
+10-31 12:19:09.388   507   507 I chatty  : uid=1000(system) Binder:507_3 identical 2 lines
+10-31 12:19:09.480   507   507 W Binder:507_F: type=1400 audit(0.0:298): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+10-31 12:19:09.578   281   281 I Zygote  : Process 2106 exited due to signal 9 (Killed)
+10-31 12:19:09.582   507   609 W RuleEvaluation: Integrity rule files are not available.
+10-31 12:19:09.583   507   565 I PackageManager: Integrity check passed for file:///data/app/vmdl1002958406.tmp
+10-31 12:19:09.585   507   548 I ActivityManager: Force stopping com.sva.launcher appid=10130 user=-1: installPackageLI
+10-31 12:19:09.585   507   548 I ActivityManager: Killing 3787:com.sva.launcher/u0a130 (adj 915): stop com.sva.launcher due to installPackageLI
+10-31 12:19:09.586   507   565 I PackageManager: Update package com.sva.launcher code path from /data/app/~~Olj9zVU0tcHZUYCqH6aP7A==/com.sva.launcher-rB0ga8ehAiQn2c5KMgFTTQ== to /data/app/~~iivgqMLsfK1i31nOtNO4jw==/com.sva.launcher-XR9DoewTqYGeDlVbQi9O8Q==; Retain data and using new
+10-31 12:19:09.586   507   565 I PackageManager: Update package com.sva.launcher resource path from /data/app/~~Olj9zVU0tcHZUYCqH6aP7A==/com.sva.launcher-rB0ga8ehAiQn2c5KMgFTTQ== to /data/app/~~iivgqMLsfK1i31nOtNO4jw==/com.sva.launcher-XR9DoewTqYGeDlVbQi9O8Q==; Retain data and using new
+10-31 12:19:09.587   507   565 D CompatibilityChangeReporter: Compat change id reported: 135549675; UID 10130; state: ENABLED
+10-31 12:19:09.587   507   565 I PackageManager: Permission ownership changed. Updating all permissions.
+10-31 12:19:09.590   507   542 W ActivityManager: setHasOverlayUi called on unknown pid: 3787
+10-31 12:19:09.591   281   281 I Zygote  : Process 3787 exited due to signal 9 (Killed)
+10-31 12:19:09.600   507   565 D PackageManager: Instant App installer not found with android.intent.action.INSTALL_INSTANT_APP_PACKAGE
+10-31 12:19:09.600   507   565 D PackageManager: Clear ephemeral installer activity
+10-31 12:19:09.607   419   522 E installd: Couldn't opendir /data/app/vmdl1002958406.tmp: No such file or directory
+10-31 12:19:09.607   419   522 E installd: Failed to delete /data/app/vmdl1002958406.tmp: No such file or directory
+10-31 12:19:09.607   507   565 I ActivityManager: Force stopping com.sva.launcher appid=10130 user=0: pkg removed
+10-31 12:19:09.608  2297  3808 I abb     : oneway function results will be dropped but finished with status OK and parcel size 4
+10-31 12:19:09.604   507   507 W Binder:507_F: type=1400 audit(0.0:299): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+10-31 12:18:18.685     0     0 W healthd : battery none chg=a
+10-31 12:19:09.794     0     0 W audit   : audit_lost=2 audit_rate_limit=5 audit_backlog_limit=64
+10-31 12:19:09.796     0     0 E audit   : rate limit exceeded
+10-31 12:19:09.616   507   548 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.sva.launcher flg=0x4000010 (has extras) } to com.android.gallery3d/.app.PackagesMonitor
+10-31 12:19:09.616   507   548 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.sva.launcher flg=0x4000010 (has extras) } to com.android.packageinstaller/.PackageInstalledReceiver
+10-31 12:19:09.616   507   548 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.sva.launcher flg=0x4000010 (has extras) } to com.android.gallery3d/.app.PackagesMonitor
+10-31 12:19:09.621   507   603 I InputReader: Reconfiguring input devices, changes=KEYBOARD_LAYOUTS | 
+10-31 12:19:09.621  1410  1410 I MediaProvider: Invalidating LocalCallingIdentity cache for package com.sva.launcher. Reason: package android.intent.action.PACKAGE_REMOVED
+10-31 12:19:09.622   701   701 V AvrcpMediaPlayerList: mPackageChangedBroadcastReceiver: action: android.intent.action.PACKAGE_REMOVED
+10-31 12:19:09.622   701   701 V AvrcpMediaPlayerList: mPackageChangedBroadcastReceiver: action: android.intent.action.PACKAGE_ADDED
+10-31 12:19:09.622   701   701 D AvrcpMediaPlayerList: Name of package changed: com.sva.launcher
+10-31 12:19:09.622  1410  1410 I MediaProvider: Invalidating LocalCallingIdentity cache for package com.sva.launcher. Reason: package android.intent.action.PACKAGE_ADDED
+10-31 12:19:09.624   507   550 I libprocessgroup: Successfully killed process cgroup uid 1000 pid 2106 in 48ms
+10-31 12:19:09.604   507   507 W Binder:507_F: type=1400 audit(0.0:300): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+10-31 12:19:09.626   507   507 I Telecom : DefaultDialerCache: Refreshing default dialer for user 0: now com.android.dialer: DDC.oR@AJw
+10-31 12:19:09.637   507   550 I libprocessgroup: Successfully killed process cgroup uid 10130 pid 3787 in 0ms
+10-31 12:19:09.638   507   603 I InputReader: Reconfiguring input devices, changes=KEYBOARD_LAYOUTS | 
+10-31 12:19:09.644   507   548 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10130; state: DISABLED
+10-31 12:19:09.644   507   549 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10130; state: ENABLED
+10-31 12:19:09.645   507   547 W VoiceInteractionManager: no available voice recognition services found for user 0
+10-31 12:19:09.648   281   281 D Zygote  : Forked child process 3843
+10-31 12:19:09.648   507   549 I ActivityManager: Start proc 3843:com.sva.launcher/u0a130 for broadcast {com.sva.launcher/com.sva.launcher.HomeRepair}
+10-31 12:19:09.657   731   989 I PermissionControllerServiceImpl: Updating user sensitive for uid 10130
+10-31 12:19:09.658  3843  3843 I om.sva.launche: Late-enabling -Xcheck:jni
+10-31 12:19:09.666  1041  1041 D CarrierSvcBindHelper: No carrier app for: 0
+10-31 12:19:09.667  3843  3843 I om.sva.launche: Unquickening 12 vdex files!
+10-31 12:19:09.667  1041  1041 D CarrierSvcBindHelper: No carrier app for: 0
+10-31 12:19:09.667  3843  3843 W om.sva.launche: Unexpected CPU variant for X86 using defaults: x86_64
+10-31 12:19:09.668   387   403 I adbd    : jdwp connection from 3843
+10-31 12:19:09.675  1041  1041 D CarrierConfigLoader: mHandler: 9 phoneId: 0
+10-31 12:19:09.860  3843  3843 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-31 12:19:09.860  3843  3843 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-31 12:19:09.869  3843  3843 I SvaHomeRepair: received android.intent.action.MY_PACKAGE_REPLACED
+10-31 12:19:09.870  3843  3843 I SvaHomeRepair: not wanted
+10-31 12:19:10.842   158   158 I servicemanager: Notifying apexservice they have clients: 0
+10-31 12:19:11.028     0     0 I AidlLazyServiceRegistrar: Process has 0 (of 1 available) client(s) in use after notification android.apex.IApexService has clients: 0
+10-31 12:19:11.032     0     0 I AidlLazyServiceRegistrar: Trying to shut down the service. No clients in use for any service in process.
+10-31 12:19:10.848   158   158 I BpBinder: onLastStrongRef automatically unlinking death recipients: <uncached descriptor>
+10-31 12:19:11.034     0     0 I AidlLazyServiceRegistrar: Unregistered all clients and exiting
+10-31 12:19:11.037     0     0 I init    : Service 'apexd' (pid 3823) exited with status 0 oneshot service took 135.666000 seconds in background
+10-31 12:19:11.040     0     0 I init    : Sending signal 9 to service 'apexd' (pid 3823) process group...
+10-31 12:19:11.042     0     0 I libprocessgroup: Successfully killed process cgroup uid 0 pid 3823 in 0ms
+10-31 12:19:15.346  3843  3867 D ProfileInstaller: Installing profile for com.sva.launcher
+10-31 12:19:17.645  3870  3872 I cmd     : oneway function results will be dropped but finished with status OK and parcel size 4
+10-31 12:19:17.852     0     0 D logd    : logdr: UID=2000 GID=2000 PID=3875 n tail=0 logMask=99 pid=0 start=0ns timeout=0ns
