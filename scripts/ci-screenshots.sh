@@ -124,7 +124,7 @@ key KEYCODE_DPAD_DOWN 1; key KEYCODE_DPAD_DOWN 1; key KEYCODE_DPAD_RIGHT; key KE
 key KEYCODE_DPAD_UP 1.5
 for i in $(seq 1 14); do
   adb shell uiautomator dump /sdcard/ui.xml > /dev/null 2>&1
-  adb shell cat /sdcard/ui.xml | grep -o 'text="[^"]*" [^>]*focused="true"' | grep -q 'text="General · 80"' && break
+  adb shell cat /sdcard/ui.xml | grep -o 'text="[^"]*" [^>]*focused="true"' | grep -qE 'text="General +· +80"' && break
   key KEYCODE_DPAD_RIGHT 1
 done
 echo "category tab: $(adb shell cat /sdcard/ui.xml | grep -o 'text="[^"]*" [^>]*focused="true"' | head -1 | cut -c1-40)" >> "$OUT/stress.txt"
