@@ -147,6 +147,21 @@ adb logcat -d > "$OUT/stress-log.txt"
 grep -E "FATAL|AndroidRuntime|OutOfMemory|lowmemorykiller|Process com.sva.launcher|ANR in|signal 11|backtrace" "$OUT/stress-log.txt" | head -80 >> "$OUT/stress.txt"
 adb logcat -d -b crash >> "$OUT/stress.txt" 2>&1
 adb shell dumpsys meminfo com.sva.launcher | head -40 >> "$OUT/stress.txt"
+# Favourites: hold OK on two channels, restart Sva (they must persist), see them in Guardados,
+# then hold OK on one there to remove it.
+adb shell input keyevent --longpress KEYCODE_DPAD_CENTER; sleep 1; shot 15a-fav-added
+key KEYCODE_DPAD_RIGHT 1; key KEYCODE_DPAD_RIGHT 1
+adb shell input keyevent --longpress KEYCODE_DPAD_CENTER; sleep 2; shot 15b-fav-added-2
+adb shell run-as com.sva.launcher cat shared_prefs/launcher.xml 2>/dev/null | grep -A4 'favoriteChannels' > "$OUT/favourites.txt"
+adb shell am force-stop com.sva.launcher
+adb shell am start -W -n com.sva.launcher/.MainActivity > /dev/null
+sleep 12
+key KEYCODE_DPAD_DOWN 1.5; key KEYCODE_DPAD_DOWN 1.5
+for i in 1 2 3 4; do key KEYCODE_DPAD_RIGHT 1; done
+key KEYCODE_DPAD_CENTER 3; shot 15c-saved
+key KEYCODE_DPAD_UP 1.5; shot 15d-saved-focus
+adb shell input keyevent --longpress KEYCODE_DPAD_CENTER; sleep 2; shot 15e-saved-removed
+adb shell run-as com.sva.launcher cat shared_prefs/launcher.xml 2>/dev/null | grep -A4 'favoriteChannels' >> "$OUT/favourites.txt"
 # Home override self-repair (HomeRepair). Fire OS drops the accessibility service on an update;
 # stock Android does not, so the drop is simulated with the process dead, then Sva is reinstalled.
 SVC=com.sva.launcher/com.sva.launcher.LauncherOverrideService

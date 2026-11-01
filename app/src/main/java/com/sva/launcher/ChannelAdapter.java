@@ -21,20 +21,27 @@ import java.util.Locale;
 
 final class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.Holder> {
     interface OnChannelClick { void onClick(IptvRepository.Channel channel); }
+    interface Favourites {
+        boolean isFavourite(IptvRepository.Channel channel);
+        void toggle(IptvRepository.Channel channel);
+    }
 
 
     private final Activity activity;
     private final GlassBackdrop backdrop;
     private final ChannelLogoLoader logos;
     private final OnChannelClick listener;
+    private final Favourites favourites;
     private final List<IptvRepository.Channel> items = new ArrayList<>();
     private int focusedPosition = RecyclerView.NO_POSITION;
 
-    ChannelAdapter(Activity activity, ChannelLogoLoader logos, GlassBackdrop backdrop, OnChannelClick listener) {
+    ChannelAdapter(Activity activity, ChannelLogoLoader logos, GlassBackdrop backdrop, OnChannelClick listener,
+                   Favourites favourites) {
         this.activity = activity;
         this.backdrop = backdrop;
         this.logos = logos;
         this.listener = listener;
+        this.favourites = favourites;
         setHasStableIds(false);
     }
 
@@ -67,6 +74,12 @@ final class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.Holder> {
         items.addAll(next);
         focusedPosition = RecyclerView.NO_POSITION;
         diff.dispatchUpdatesTo(this);
+    }
+
+    /** Redraws the stars after a favourite changed. */
+    void refreshFavourites() {
+        // With a payload the same tile is rebound in place, so the focused one keeps its focus.
+        if (!items.isEmpty()) notifyItemRangeChanged(0, items.size(), "favourite");
     }
 
     void refreshProgrammeLabels() {
@@ -149,6 +162,19 @@ final class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.Holder> {
         imageParams.setMargins(dp(4, density), dp(4, density), dp(4, density), dp(4, density));
         logoBox.addView(image, imageParams);
 
+        // Favourite mark: a small star in the logo's corner.
+        TextView star = new TextView(activity);
+        star.setText("★");
+        star.setTextSize(15);
+        star.setTextColor(0xFFFFC83D);
+        star.setShadowLayer(4, 0, 1, 0x99000000);
+        star.setGravity(Gravity.CENTER);
+        FrameLayout.LayoutParams starParams = new FrameLayout.LayoutParams(dp(26, density), dp(26, density),
+                Gravity.TOP | Gravity.END);
+        starParams.setMargins(0, dp(2, density), dp(4, density), 0);
+        logoBox.addView(star, starParams);
+        star.setVisibility(View.GONE);
+
         LinearLayout text = new LinearLayout(activity);
         text.setOrientation(LinearLayout.VERTICAL);
         text.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
@@ -177,7 +203,7 @@ final class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.Holder> {
         next.setEllipsize(android.text.TextUtils.TruncateAt.END);
         text.addView(next);
 
-        return new Holder(tile, fallback, image, name, now, next);
+        return new Holder(tile, fallback, image, name, now, next, star);
     }
 
     @Override public void onBindViewHolder(Holder holder, int position) {
@@ -190,6 +216,12 @@ final class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.Holder> {
         holder.fallback.setText(channel.name.isEmpty() ? "TV" : channel.name.substring(0, 1).toUpperCase(Tr.formatLocale()));
         logos.load(channel.logoUrl, holder.logo, holder.fallback);
         holder.itemView.setOnClickListener(view -> listener.onClick(channel));
+        boolean favourite = favourites != null && favourites.isFavourite(channel);
+        holder.star.setVisibility(favourite ? View.VISIBLE : View.GONE);
+        if (favourites != null) {
+            holder.itemView.setLongClickable(true);
+            holder.itemView.setOnLongClickListener(view -> { favourites.toggle(channel); return true; });
+        }
     }
 
     @Override public int getItemCount() { return items.size(); }
@@ -206,15 +238,17 @@ final class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.Holder> {
     private static int dp(int value, float density) { return Math.round(value * density); }
 
     static final class Holder extends RecyclerView.ViewHolder {
-        final TextView fallback, name, now, next;
+        final TextView fallback, name, now, next, star;
         final ImageView logo;
-        Holder(View itemView, TextView fallback, ImageView logo, TextView name, TextView now, TextView next) {
+        Holder(View itemView, TextView fallback, ImageView logo, TextView name, TextView now, TextView next,
+               TextView star) {
             super(itemView);
             this.fallback = fallback;
             this.logo = logo;
             this.name = name;
             this.now = now;
             this.next = next;
+            this.star = star;
         }
     }
 }

@@ -124,6 +124,11 @@ public final class MainActivity extends Activity {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final List<IptvRepository.Channel> channels = new ArrayList<>();
     private final Set<String> hiddenChannelKeys = new HashSet<>();
+    private final Set<String> favoriteChannelKeys = new HashSet<>();
+    private LinearLayout favoritesSection;
+    private ChannelRow favoritesRow;
+    private TextView favoritesEmpty;
+    private View savedTabFallbackEntry;
     private final Set<String> youtubeMetadataInFlight = new HashSet<>();
     private final ExecutorService youtubeWorker = Executors.newSingleThreadExecutor(runnable -> {
         Thread thread = new Thread(runnable, "youtube-card-metadata");
@@ -303,6 +308,7 @@ public final class MainActivity extends Activity {
         logoLoader = new ChannelLogoLoader(this);
         weatherForecast = cachedWeather();
         hiddenChannelKeys.addAll(preferences.getStringSet("hiddenChannels", Collections.emptySet()));
+        favoriteChannelKeys.addAll(preferences.getStringSet(FavoriteChannels.PREF, Collections.emptySet()));
         String folder = preferences.getString("wallpaperFolder", "");
         String album = preferences.getString("wallpaperAlbum", "");
         if (!folder.isEmpty()) backgroundPhotos.addAll(cachedBackgroundFolder(folder));
@@ -1245,6 +1251,21 @@ public final class MainActivity extends Activity {
         addPlaylistParams.topMargin = dp(16);
         liveContent.addView(addPlaylistButton, addPlaylistParams);
 
+        // Favourite channels first in Guardados: hold OK on any channel in TV en directo to add it.
+        favoritesSection = new LinearLayout(this);
+        favoritesSection.setOrientation(LinearLayout.VERTICAL);
+        favoritesSection.setClipChildren(false);
+        favoritesSection.setClipToPadding(false);
+        TextView favoritesHeading = label("Canales favoritos", 22, LiquidTheme.text(this), true);
+        favoritesSection.addView(favoritesHeading, new LinearLayout.LayoutParams(-1, dp(44)));
+        favoritesRow = createChannelRow();
+        favoritesSection.addView(favoritesRow.container, new LinearLayout.LayoutParams(-1, -2));
+        favoritesEmpty = label("Mantén pulsado OK sobre un canal de TV en directo para añadirlo aquí. "
+                + "Para quitarlo, igual: mantén pulsado OK sobre él.", 15, MUTED, false);
+        favoritesEmpty.setPadding(0, dp(4), 0, dp(12));
+        favoritesSection.addView(favoritesEmpty, new LinearLayout.LayoutParams(-1, -2));
+        savedContent.addView(favoritesSection, new LinearLayout.LayoutParams(-1, -2));
+
         youtubeSection = new LinearLayout(this);
         youtubeSection.setOrientation(LinearLayout.VERTICAL);
         LinearLayout youtubeTitleRow = new LinearLayout(this);
@@ -1252,6 +1273,7 @@ public final class MainActivity extends Activity {
         Button addYouTube = actionButton("Add shortcut");
         addYouTube.setOnClickListener(v -> openYouTubeSettings());
         linkTabEntry(TAB_SAVED, addYouTube);
+        savedTabFallbackEntry = addYouTube;
         youtubeTitleRow.addView(addYouTube, new LinearLayout.LayoutParams(dp(175), dp(48)));
 
         youtubeTitleRow.setPadding(0, dp(8), 0, 0);
@@ -4338,7 +4360,33 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         return null;
     }
 
+    private void renderFavorites() {
+        if (favoritesRow == null) return;
+        List<IptvRepository.Channel> picked = FavoriteChannels.pick(channels, IptvRepository.Channel::stableKey,
+                favoriteChannelKeys, hiddenChannelKeys);
+        favoritesRow.adapter.setChannels(picked);
+        favoritesRow.container.setVisibility(picked.isEmpty() ? View.GONE : View.VISIBLE);
+        favoritesEmpty.setVisibility(picked.isEmpty() ? View.VISIBLE : View.GONE);
+        // Up from the dock lands on the favourites when there are some, else on "Añadir acceso directo".
+        if (picked.isEmpty()) linkTabEntry(TAB_SAVED, savedTabFallbackEntry);
+        else linkTabEntry(TAB_SAVED, favoritesRow.list);
+    }
+
+    private void toggleFavorite(IptvRepository.Channel channel) {
+        boolean added = FavoriteChannels.toggle(favoriteChannelKeys, channel.stableKey());
+        preferences.edit().putStringSet(FavoriteChannels.PREF, new HashSet<>(favoriteChannelKeys)).apply();
+        Tr.toast(this, added ? "★ " + channel.name + " añadido a favoritos (en Guardados)"
+                : channel.name + " quitado de favoritos", Toast.LENGTH_SHORT).show();
+        // After this key event, never from inside a layout pass.
+        handler.post(() -> {
+            for (ChannelRow row : channelRowMap.values()) row.adapter.refreshFavourites();
+            renderFavorites();
+            if (favoritesRow != null) favoritesRow.adapter.refreshFavourites();
+        });
+    }
+
     private void renderChannels() {
+        renderFavorites();
         if (channelRows == null) return;
         IptvRepository.refreshProgrammeDisplay(channels, System.currentTimeMillis());
         LinkedHashMap<String, List<IptvRepository.Channel>> grouped = new LinkedHashMap<>();
@@ -4562,7 +4610,13 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         list.setHasFixedSize(true);
         list.setItemViewCacheSize(4);
         list.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        ChannelAdapter adapter = new ChannelAdapter(this, logoLoader, glassBackdrop, this::playChannel);
+        ChannelAdapter adapter = new ChannelAdapter(this, logoLoader, glassBackdrop, this::playChannel,
+                new ChannelAdapter.Favourites() {
+                    @Override public boolean isFavourite(IptvRepository.Channel channel) {
+                        return favoriteChannelKeys.contains(channel.stableKey());
+                    }
+                    @Override public void toggle(IptvRepository.Channel channel) { toggleFavorite(channel); }
+                });
         list.setAdapter(adapter);
         container.addView(list, new LinearLayout.LayoutParams(-1, dp(238)));
         return new ChannelRow(container, list, adapter);

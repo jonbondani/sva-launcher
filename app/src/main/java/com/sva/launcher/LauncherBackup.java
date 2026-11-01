@@ -33,7 +33,7 @@ final class LauncherBackup {
                 + "googlePhotosAttemptedAt googlePhotosUpdatedAt publicCalendarAttemptedAt publicCalendarUpdatedAt "
                 + "screensaverCacheUpdatedAt weatherAttemptedAt weatherUpdatedAt weatherLatitude weatherLongitude "
                 + "scheduleSlideshowMs schedulePlaylistMs scheduleGuideMs scheduleCalendarMs scheduleGooglePhotosMs scheduleWeatherMs");
-        register(types, "string-set", "hiddenChannels");
+        register(types, "string-set", "hiddenChannels favoriteChannels");
         return types;
     }
 
