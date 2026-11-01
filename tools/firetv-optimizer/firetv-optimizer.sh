@@ -13,7 +13,7 @@
 # =============================================================================
 set -u
 
-VERSION="1.11.1"
+VERSION="1.12.0"
 BASE_DIR="${FTVO_HOME:-$HOME/firetv-optimizer}"
 BACKUP_DIR="$BASE_DIR/copias"
 ADB="${ADB:-adb}"
@@ -1121,6 +1121,18 @@ cmd_sva_calendario() {
   sva_enviar set_calendar "$1"
 }
 
+cmd_sva_tema() {
+  local tema="${1:-}"
+  case "$tema" in
+    auto|automatico|clasico|otono|otoño|halloween|navidad|invierno|primavera|verano) ;;
+    *) die "Uso: sva-tema <auto|otoño|halloween|navidad|invierno|primavera|verano|clasico>" ;;
+  esac
+  [ "$tema" = "otoño" ] && tema=otono
+  resolve_target; need_sva
+  dsh am start -n "$SVA_PKG/.MainActivity" --es set_theme "'$tema'" >/dev/null
+  ok "Tema enviado a la tele: $tema (se aplica al momento; para volver: sva-tema auto)."
+}
+
 cmd_sva_equipo() {
   local name="${1:-}" url="${2:-}"
   [ -n "$name" ] && [ -n "$url" ] || die "Uso: sva-equipo \"Nombre\" <enlace-ical>"
@@ -1193,6 +1205,8 @@ ${C_BOLD}Sva Launcher${C_0}
   sva-quitar-equipo "Nombre"     Quita un equipo de los partidos
   sva-lista <m3u> [guía]         Manda a Sva una lista de canales M3U (y su guía); se confirma en la tele
   sva-calendario <ical>          Manda a Sva tu calendario de Google (dirección iCal); se confirma en la tele
+  sva-tema <tema>                Tema de Sva: auto (según la fecha), otoño, halloween, navidad, invierno,
+                                 primavera, verano o clasico
 
 ${C_BOLD}Opciones${C_0}
   -d, --dispositivo <IP>  Tele a usar (también: variable FIRETV)
@@ -1356,6 +1370,7 @@ case "${CMD:-menu}" in
   reiniciar)       cmd_reiniciar ;;
   sva-lista)       cmd_sva_lista "$@" ;;
   sva-calendario)  cmd_sva_calendario "$@" ;;
+  sva-tema)        cmd_sva_tema "$@" ;;
   instalar)        cmd_instalar "$@" ;;
   sva-inicio)      cmd_sva_inicio "$@" ;;
   sva-equipo)      cmd_sva_equipo "$@" ;;

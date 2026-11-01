@@ -80,7 +80,7 @@ final class ScreensaverView extends View {
             if (!hasSavedPhoto) {
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inSampleSize = 2;
-                Bitmap fallback = BitmapFactory.decodeResource(getResources(), R.drawable.mountain_wallpaper, options);
+                Bitmap fallback = BitmapFactory.decodeResource(getResources(), LiquidTheme.wallpaperRes(getContext()), options);
                 if (fallback != null) saved.put("__fallback__", fallback);
             }
             main.post(() -> {

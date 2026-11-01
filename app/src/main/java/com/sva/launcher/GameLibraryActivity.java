@@ -92,7 +92,7 @@ public final class GameLibraryActivity extends Activity {
                 }
             } catch (Exception ignored) { }
         }
-        if (photo == null) photo = getDrawable(R.drawable.mountain_wallpaper);
+        if (photo == null) photo = getDrawable(LiquidTheme.wallpaperRes(this));
         GradientDrawable veil = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
                 LiquidTheme.isLight(this)
                         ? new int[]{0xB8F2F2F7, 0xE8F2F2F7, 0xF4F2F2F7}

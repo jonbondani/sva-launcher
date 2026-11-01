@@ -187,6 +187,8 @@ public final class MainActivity extends Activity {
     private boolean initialAppFocus;
     private String focusedPackage;
     private ImageView wallpaperImage, slideA, slideB;
+    private SeasonParticles seasonParticles;
+    private String shownSeason;
     private TextView clock, clockPeriod, date, status;
     /** "Buenos días, jonbondani": large tvOS-style title above the home rows. */
     private TextView greeting;
@@ -237,6 +239,7 @@ public final class MainActivity extends Activity {
     private ProgrammeGuideAdapter guideAdapter;
     private TextView guideEmpty, guideHeading;
     private Button guideToggle;
+    private Button addPlaylistButton;
     private boolean guideCollapsed;
     private String renderedGuideCategory;
     private String pendingReminderChannelKey, pendingReminderStreamUrl;
@@ -390,7 +393,7 @@ public final class MainActivity extends Activity {
     }
 
     static final String EXTRA_SET_PLAYLIST = "set_playlist", EXTRA_SET_GUIDE = "set_guide",
-            EXTRA_SET_CALENDAR = "set_calendar";
+            EXTRA_SET_CALENDAR = "set_calendar", EXTRA_SET_THEME = "set_theme";
 
     /**
      * Private setup over ADB, so links never have to be typed with the remote or stored anywhere
@@ -402,6 +405,17 @@ public final class MainActivity extends Activity {
         String playlist = intent.getStringExtra(EXTRA_SET_PLAYLIST);
         String guide = intent.getStringExtra(EXTRA_SET_GUIDE);
         String calendar = intent.getStringExtra(EXTRA_SET_CALENDAR);
+        String theme = intent.getStringExtra(EXTRA_SET_THEME);
+        intent.removeExtra(EXTRA_SET_THEME);
+        if (theme != null) {
+            // Harmless and reversible, so no confirmation: just say what changed.
+            if (Season.normalize(theme) == null) {
+                Tr.toast(this, "Tema desconocido: " + theme, Toast.LENGTH_LONG).show();
+            } else {
+                Tr.toast(this, "Tema: " + Season.label(Season.normalize(theme)), Toast.LENGTH_SHORT).show();
+                applySeasonChoice(theme);
+            }
+        }
         intent.removeExtra(EXTRA_SET_PLAYLIST);
         intent.removeExtra(EXTRA_SET_GUIDE);
         intent.removeExtra(EXTRA_SET_CALENDAR);
@@ -598,7 +612,9 @@ public final class MainActivity extends Activity {
         super.onResume();
         // Puts the Home override back if a force-stop dropped it (only if the viewer had it on).
         HomeRepair.repair(this);
+        if (shownSeason != null && !shownSeason.equals(LiquidTheme.season(this))) { recreate(); return; }
         screenActive = true;
+        updateSeasonParticles();
         scheduleScreensaverIdle();
         maybeRefreshLiveData();
         scheduleLiveRefreshCheck();
@@ -645,6 +661,7 @@ public final class MainActivity extends Activity {
         if (matchTick != null) handler.removeCallbacks(matchTick);
         cancelWeatherLocation();
         backgroundImageGeneration++;
+        if (seasonParticles != null) seasonParticles.setRunning(false);
         super.onPause();
     }
 
@@ -704,13 +721,17 @@ public final class MainActivity extends Activity {
         heroFrame = new FrameLayout(this);
         heroFrame.setBackgroundColor(light ? LiquidTheme.background(this) : 0xFF0B0B0F);
         wallpaperImage = backgroundImage();
-        wallpaperImage.setImageResource(R.drawable.mountain_wallpaper);
+        shownSeason = LiquidTheme.season(this);
+        wallpaperImage.setImageResource(LiquidTheme.wallpaperRes(this));
         wallpaperImage.setVisibility(View.VISIBLE);
         slideA = backgroundImage();
         slideB = backgroundImage();
         heroFrame.addView(wallpaperImage, new FrameLayout.LayoutParams(-1, -1));
         heroFrame.addView(slideA, new FrameLayout.LayoutParams(-1, -1));
         heroFrame.addView(slideB, new FrameLayout.LayoutParams(-1, -1));
+        seasonParticles = new SeasonParticles(this);
+        seasonParticles.setSeason(shownSeason);
+        heroFrame.addView(seasonParticles, new FrameLayout.LayoutParams(-1, -1));
         showCachedBackgroundImmediately();
         GradientDrawable shadow = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
                 light ? new int[]{0x22FFFFFF, 0x05FFFFFF, 0x18FFFFFF, 0x55E9F1EE}
@@ -1215,6 +1236,12 @@ public final class MainActivity extends Activity {
         status = label("Add an M3U and optional XMLTV URL in Settings to get started.", 15, MUTED, false);
         status.setPadding(0, dp(12), 0, 0);
         liveContent.addView(status);
+        // With no list yet the tab has nothing to focus; this button is where Up from the dock lands.
+        addPlaylistButton = actionButton("Add playlist");
+        addPlaylistButton.setOnClickListener(v -> openLiveSettings());
+        LinearLayout.LayoutParams addPlaylistParams = new LinearLayout.LayoutParams(dp(260), dp(52));
+        addPlaylistParams.topMargin = dp(16);
+        liveContent.addView(addPlaylistButton, addPlaylistParams);
 
         youtubeSection = new LinearLayout(this);
         youtubeSection.setOrientation(LinearLayout.VERTICAL);
@@ -1554,6 +1581,7 @@ public final class MainActivity extends Activity {
         }
         activeTab = selectedTab;
         tabsInitialized = true;
+        updateSeasonParticles();
         switchingTabs = true;
         try {
             for (int i = 0; i < tabPages.length; i++) {
@@ -1625,6 +1653,19 @@ public final class MainActivity extends Activity {
             if (isNavigationHidden(tab)) continue;
             tabRow.addView(tabButtons[tab], new LinearLayout.LayoutParams(-2, dp(44)));
         }
+    }
+
+    private void showAddPlaylist(boolean show) {
+        if (addPlaylistButton == null) return;
+        addPlaylistButton.setVisibility(show ? View.VISIBLE : View.GONE);
+        if (show) linkTabEntry(TAB_TV, addPlaylistButton);
+        else if (tabEntryFocus[TAB_TV] == addPlaylistButton) tabEntryFocus[TAB_TV] = null;
+    }
+
+    private void openLiveSettings() {
+        if (settingsScreen == null) settingsScreen = new SettingsScreen();
+        settingsScreen.section = SettingsScreen.LIVE;
+        settingsScreen.show();
     }
 
     private void openYouTubeSettings() {
@@ -4304,9 +4345,11 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                 renderedCategories.clear();
                 selectedChannelCategory = null;
             }
+            showAddPlaylist(channels.isEmpty());
             renderGuide();
             return;
         }
+        showAddPlaylist(false);
 
         List<String> nextCategories = new ArrayList<>(grouped.keySet());
         if (!nextCategories.equals(renderedCategories)) {
@@ -4354,6 +4397,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         guideHeading.setText(selectedChannelCategory == null ? "TV guide"
                 : "TV guide  ·  " + selectedChannelCategory);
         guideToggle.setText(guideCollapsed ? "Expand" : "Collapse");
+        guideToggle.setVisibility(channels.isEmpty() ? View.GONE : View.VISIBLE);
         guideToggle.setContentDescription(guideCollapsed ? "Expand TV guide" : "Collapse TV guide");
         boolean categoryChanged = !java.util.Objects.equals(renderedGuideCategory, selectedChannelCategory);
         renderedGuideCategory = selectedChannelCategory;
@@ -4731,6 +4775,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         slideAActive = true;
         wallpaperImage.setVisibility(backgroundPhotos.isEmpty() ? View.VISIBLE : View.GONE);
         if (backgroundPhotos.isEmpty()) applyWallpaper();
+        updateSeasonParticles();
         if (slideshowTick != null) handler.removeCallbacks(slideshowTick);
         if (backgroundPhotos.isEmpty()) { slideshowTick = null; return; }
         slideshowTick = this::showNextBackgroundPhoto;
@@ -4981,6 +5026,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         private String draftCalendarUrl = preferences.getString("publicCalendarUrl", "");
 
         void show() {
+            if (seasonParticles != null) seasonParticles.setRunning(false);
             LinearLayout shell = new LinearLayout(MainActivity.this);
             shell.setOrientation(LinearLayout.VERTICAL);
             shell.setPadding(dp(compactSettings ? 24 : 40), dp(20), dp(compactSettings ? 24 : 40), dp(24));
@@ -5158,6 +5204,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             });
             dialog.setOnDismissListener(ignored -> {
                 if (settingsScreen == this) settingsScreen = null;
+                updateSeasonParticles();
                 if (appsChanged) renderApps();
                 if (channelsChanged) {
                     renderChannels();
@@ -6221,6 +6268,23 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             addChoice(form, "Appearance", new String[]{"System default", "Light", "Dark"},
                     LiquidTheme.LIGHT.equals(mode) ? 1 : LiquidTheme.DARK.equals(mode) ? 2 : 0,
                     index -> changeLiquidGlassMode(modes[index]));
+            addFormSectionHeader(form, "Tema de temporada");
+            String seasonChoice = preferences.getString(Season.PREF, Season.AUTO);
+            addFormHint(form, "Fondo, color y animación según la época del año. Ahora: "
+                    + Season.label(LiquidTheme.season(MainActivity.this))
+                    + (Season.AUTO.equals(Season.normalize(seasonChoice)) ? " (automático)." : ".")
+                    + " Si eliges tu propio fondo o un álbum, se usa ese y solo cambia el color.");
+            addChoice(form, "Tema", Season.LABELS, Season.index(seasonChoice), index -> {
+                preferences.edit().putString(Season.PREF, Season.CHOICES[index]).apply();
+                if (LiquidTheme.season(MainActivity.this).equals(shownSeason)) { renderSection(); return; }
+                dialog.dismiss();
+                MainActivity.this.recreate();
+            });
+            addChoice(form, "Animación de temporada", new String[]{"Activada", "Desactivada"},
+                    preferences.getBoolean(Season.PREF_ANIMATION, true) ? 0 : 1, index -> {
+                        preferences.edit().putBoolean(Season.PREF_ANIMATION, index == 0).apply();
+                        updateSeasonParticles();
+                    });
             String language = Tr.language(MainActivity.this);
             String[] languages = {Tr.SYSTEM, Tr.SPANISH, Tr.ENGLISH};
             addChoice(form, "Idioma / Language", new String[]{"Idioma del sistema", "Español", "English"},
@@ -6662,17 +6726,40 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         if (settingsScreen != null) settingsScreen.refreshAppearance();
     }
 
+    /**
+     * Seasonal drift over the built-in wallpaper: only on Home, only with the built-in wallpaper
+     * (not the viewer's photos), and never with animations turned off on the device.
+     */
+    private void updateSeasonParticles() {
+        if (seasonParticles == null) return;
+        boolean builtIn = !preferences.contains("wallpaper") && backgroundPhotos.isEmpty();
+        boolean wanted = builtIn && preferences.getBoolean(Season.PREF_ANIMATION, true)
+                && android.animation.ValueAnimator.areAnimatorsEnabled();
+        seasonParticles.setVisibility(wanted && Season.particles(shownSeason) != Season.PARTICLES_NONE
+                ? View.VISIBLE : View.GONE);
+        seasonParticles.setRunning(wanted && screenActive && activeTab == TAB_HOME && settingsScreen == null);
+    }
+
+    private void applySeasonChoice(String choice) {
+        String normal = Season.normalize(choice);
+        if (normal == null) return;
+        preferences.edit().putString(Season.PREF, normal).apply();
+        if (!LiquidTheme.season(this).equals(shownSeason)) recreate();
+    }
+
     private void applyWallpaper() {
         if (wallpaperImage == null || heroFrame == null) return;
+        updateSeasonParticles();
         String uriValue = preferences.getString("wallpaper", null);
         int targetWidth = Math.min(getResources().getDisplayMetrics().widthPixels, 1920);
         int targetHeight = Math.min(dp(heroHeightDp()), 1080);
         ioWorker.execute(() -> {
             android.graphics.Bitmap decoded = uriValue == null ? null : decodeWallpaper(Uri.parse(uriValue), targetWidth, targetHeight);
             if (decoded == null) {
+                int res = LiquidTheme.wallpaperRes(this);
                 BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inSampleSize = 2;
-                decoded = BitmapFactory.decodeResource(getResources(), R.drawable.mountain_wallpaper, options);
+                options.inSampleSize = res == R.drawable.mountain_wallpaper ? 2 : 1;
+                decoded = BitmapFactory.decodeResource(getResources(), res, options);
             }
             final android.graphics.Bitmap bitmap = decoded;
             handler.post(() -> {

@@ -121,3 +121,15 @@ Estos ajustes van con tu cuenta de Amazon, así que se cambian aquí, en los men
 ## Seguridad
 
 Cuando termines, **desactiva la Depuración ADB** en la tele. Mientras está activa, cualquier equipo de tu red puede pedir acceso.
+
+## Sva desde el ordenador
+
+Para no escribir enlaces largos con el mando. Los enlaces van directos a la tele (no se guardan en el ordenador ni en ningún repositorio) y la lista y el calendario se confirman en pantalla con «Guardar».
+
+```bash
+./firetv-optimizer.sh -d <IP> sva-lista <enlace M3U> [enlace guía EPG]
+./firetv-optimizer.sh -d <IP> sva-calendario <dirección iCal secreta de Google Calendar>
+./firetv-optimizer.sh -d <IP> sva-tema <auto|otoño|halloween|navidad|invierno|primavera|verano|clasico>
+```
+
+`sva-tema auto` sigue la fecha: Halloween del 25 de octubre al 2 de noviembre, Navidad del 1 de diciembre al 6 de enero y, el resto del año, la estación. `clasico` vuelve al paisaje de montaña de siempre.

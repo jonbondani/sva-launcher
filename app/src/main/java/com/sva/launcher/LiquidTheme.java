@@ -86,7 +86,32 @@ final class LiquidTheme {
     static int text(Context context) { return isLight(context) ? 0xFF1C1C1E : 0xFFFFFFFF; }
     static int secondaryText(Context context) { return isLight(context) ? 0xFF6E6E73 : 0xFFAEAEB2; }
     static int border(Context context) { return isLight(context) ? 0x26000000 : 0x40FFFFFF; }
-    static int accent(Context context) { return isLight(context) ? 0xFF007AFF : 0xFF409CFF; }
+    static int accent(Context context) {
+        int seasonal = Season.accent(season(context), isLight(context));
+        if (seasonal != 0) return seasonal;
+        return isLight(context) ? 0xFF007AFF : 0xFF409CFF;
+    }
+
+    /** The seasonal theme on screen today: the user's pick, or the date's when set to automatic. */
+    static String season(Context context) {
+        java.util.Calendar now = java.util.Calendar.getInstance();
+        String choice = context.getSharedPreferences("launcher", Context.MODE_PRIVATE)
+                .getString(Season.PREF, Season.AUTO);
+        return Season.resolve(choice, now.get(java.util.Calendar.MONTH) + 1, now.get(java.util.Calendar.DAY_OF_MONTH));
+    }
+
+    /** The built-in wallpaper for the current theme. */
+    static int wallpaperRes(Context context) {
+        switch (season(context)) {
+            case Season.AUTUMN: return R.drawable.season_autumn;
+            case Season.HALLOWEEN: return R.drawable.season_halloween;
+            case Season.CHRISTMAS: return R.drawable.season_christmas;
+            case Season.WINTER: return R.drawable.season_winter;
+            case Season.SPRING: return R.drawable.season_spring;
+            case Season.SUMMER: return R.drawable.season_summer;
+            default: return R.drawable.mountain_wallpaper;
+        }
+    }
     static int lavender(Context context) { return secondaryText(context); }
 
     // Liquid Glass tiles: mostly see-through over the blurred wallpaper, brighter when focused.
@@ -98,7 +123,7 @@ final class LiquidTheme {
     static int glassBarTint(Context context) { return isLight(context) ? 0x8CFFFFFF : 0x33FFFFFF; }
 
     static Drawable scenicBackground(Context context) {
-        Drawable photo = context.getDrawable(R.drawable.mountain_wallpaper);
+        Drawable photo = context.getDrawable(wallpaperRes(context));
         GradientDrawable veil = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
                 isLight(context)
                         ? new int[]{0xB8F2F2F7, 0xE8F2F2F7, 0xF4F2F2F7}

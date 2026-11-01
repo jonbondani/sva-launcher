@@ -84,6 +84,21 @@ adb shell cmd uimode night no
 adb shell am start -n com.sva.launcher/.MainActivity --es set_playlist "'https://iptv-org.github.io/iptv/countries/es.m3u?token=secreto'" > /dev/null
 sleep 4; shot 12-setup-playlist
 key KEYCODE_BACK 1.5
+# TV en directo without a list: Up from the dock lands on "Añadir lista", which opens the list settings.
+adb shell am force-stop com.sva.launcher
+adb shell am start -W -n com.sva.launcher/.MainActivity > /dev/null
+sleep 12
+key KEYCODE_DPAD_DOWN 1.5; key KEYCODE_DPAD_DOWN 1.5; key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_CENTER 3
+key KEYCODE_DPAD_UP 1.5; shot 12b-livetv-add-focus
+key KEYCODE_DPAD_CENTER 3; shot 12c-livetv-add-opens-settings
+key KEYCODE_BACK 2; key KEYCODE_BACK 2
+# Seasonal themes, sent the way firetv-optimizer does (sva-tema). 13-theme-auto is today's.
+for t in auto otono navidad invierno primavera verano clasico halloween; do
+  adb shell am start -n com.sva.launcher/.MainActivity --es set_theme "'$t'" > /dev/null
+  sleep 7; shot 13-theme-$t
+done
+adb shell am start -n com.sva.launcher/.MainActivity --es set_theme "'auto'" > /dev/null
+sleep 4
 # Home override self-repair (HomeRepair). Fire OS drops the accessibility service on an update;
 # stock Android does not, so the drop is simulated with the process dead, then Sva is reinstalled.
 SVC=com.sva.launcher/com.sva.launcher.LauncherOverrideService
@@ -113,5 +128,8 @@ case "$off" in *LauncherOverrideService*) echo "OFF_IGNORED" >> "$OUT/home-repai
 adb shell dumpsys tv_input > "$OUT/tv_input.txt" 2>&1
 adb logcat -d | grep -vE "RuntimeInit|commands.input|Shutting down VM|default boot image|lock profiling" | tail -400 > "$OUT/log.txt"
 if grep -q "FATAL EXCEPTION" "$OUT/log.txt"; then echo "CRASH" > "$OUT/CRASHED"; fi
+# Earlier crashes may have scrolled out of the tail above.
+adb logcat -d -b crash > "$OUT/crash-buffer.txt" 2>&1
+if grep -q "com.sva.launcher" "$OUT/crash-buffer.txt"; then echo "CRASH" > "$OUT/CRASHED"; fi
 adb shell am force-stop com.sva.launcher
 ls -la "$OUT"
