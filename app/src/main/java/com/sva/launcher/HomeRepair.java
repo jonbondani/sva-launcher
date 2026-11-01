@@ -25,6 +25,11 @@ public final class HomeRepair extends BroadcastReceiver {
     static final String PREF_WANTED_BEFORE_UNBIND = "homeOverrideWantedBeforeUnbind";
     static final long UPDATE_WINDOW_MS = 120_000L;
     static final String SERVICE = "com.sva.launcher/com.sva.launcher.LauncherOverrideService";
+    /** Sent to ourselves a while after boot to check the override really came back. */
+    static final String ACTION_CHECK = "com.sva.launcher.CHECK_HOME_OVERRIDE";
+    static final long BOOT_CHECK_DELAY_MS = 60_000L;
+    /** Time between taking the service out of the list and putting it back, so the system sees both. */
+    static final long REBIND_GAP_MS = 1_500L;
     private static final String TAG = "SvaHomeRepair";
 
     @Override public void onReceive(Context context, Intent intent) {
@@ -41,6 +46,10 @@ public final class HomeRepair extends BroadcastReceiver {
         } else if (Intent.ACTION_BOOT_COMPLETED.equals(action)
                 || "android.intent.action.LOCKED_BOOT_COMPLETED".equals(action)) {
             repair(context);
+            if (Intent.ACTION_BOOT_COMPLETED.equals(action)) scheduleCheck(context, BOOT_CHECK_DELAY_MS);
+        } else if (ACTION_CHECK.equals(action)) {
+            PendingResult pending = goAsync();
+            rebindIfStuck(context, pending::finish);
         }
     }
 
@@ -84,6 +93,79 @@ public final class HomeRepair extends BroadcastReceiver {
             android.util.Log.w(TAG, "could not write", notAllowed);
             return false;
         }
+    }
+
+    /**
+     * Pure: the override is listed and switched on, the viewer wants it, yet the system has not
+     * bound it. Happens after Sva crashes: newer Android versions stop rebinding a service whose
+     * process died until it is switched off and on again.
+     */
+    static boolean stuck(boolean wanted, boolean listed, boolean switchedOn, boolean connected) {
+        return wanted && listed && switchedOn && !connected;
+    }
+
+    static void scheduleCheck(Context context, long delayMs) {
+        try {
+            android.app.AlarmManager alarms = (android.app.AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            Intent check = new Intent(context, HomeRepair.class).setAction(ACTION_CHECK);
+            android.app.PendingIntent pending = android.app.PendingIntent.getBroadcast(context, 7, check,
+                    android.app.PendingIntent.FLAG_UPDATE_CURRENT | android.app.PendingIntent.FLAG_IMMUTABLE);
+            alarms.set(android.app.AlarmManager.ELAPSED_REALTIME,
+                    android.os.SystemClock.elapsedRealtime() + delayMs, pending);
+            android.util.Log.i(TAG, "check scheduled in " + delayMs + " ms");
+        } catch (RuntimeException e) {
+            android.util.Log.w(TAG, "could not schedule check", e);
+        }
+    }
+
+    /**
+     * If the override is stuck (see {@link #stuck}), takes it out of the enabled list and puts it
+     * back, which makes the system bind it again. {@code done} runs when finished either way.
+     */
+    static void rebindIfStuck(Context context, Runnable done) {
+        boolean wrote = false;
+        try {
+            if (context.checkSelfPermission("android.permission.WRITE_SECURE_SETTINGS") != PackageManager.PERMISSION_GRANTED) return;
+            String current = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+            String enabled = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ACCESSIBILITY_ENABLED);
+            boolean listed = current != null && withService(current, SERVICE).equals(current);
+            boolean isStuck = stuck(prefs(context).getBoolean(PREF_WANTED, false), listed, "1".equals(enabled),
+                    LauncherOverrideService.isConnected());
+            android.util.Log.i(TAG, "check: listed=" + listed + " enabled=" + enabled
+                    + " connected=" + LauncherOverrideService.isConnected() + " stuck=" + isStuck);
+            if (!isStuck) return;
+            Settings.Secure.putString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                    withoutService(current, SERVICE));
+            wrote = true;
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                try {
+                    String now = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+                    Settings.Secure.putString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                            withService(now, SERVICE));
+                    android.util.Log.i(TAG, "rebound");
+                } catch (RuntimeException e) {
+                    android.util.Log.w(TAG, "could not put the service back", e);
+                } finally {
+                    if (done != null) done.run();
+                }
+            }, REBIND_GAP_MS);
+        } catch (RuntimeException e) {
+            android.util.Log.w(TAG, "check failed", e);
+        } finally {
+            if (!wrote && done != null) done.run();
+        }
+    }
+
+    /** Pure: the enabled-services list without {@code service}. */
+    static String withoutService(String current, String service) {
+        if (current == null) return "";
+        StringBuilder out = new StringBuilder();
+        for (String part : current.split(":")) {
+            if (part.trim().isEmpty() || part.trim().equalsIgnoreCase(service)) continue;
+            if (out.length() > 0) out.append(':');
+            out.append(part);
+        }
+        return out.toString();
     }
 
     /** Pure: the enabled-services list with {@code service} in it, others kept in order. */

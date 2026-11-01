@@ -35,4 +35,19 @@ public final class HomeRepairTest {
         org.junit.Assert.assertFalse(HomeRepair.unboundByUpdate(true, 0L, t));
         org.junit.Assert.assertFalse(HomeRepair.unboundByUpdate(true, t, t - 1));
     }
+
+    @Test public void stuckOnlyWhenWantedListedOnAndUnbound() {
+        org.junit.Assert.assertTrue(HomeRepair.stuck(true, true, true, false));
+        org.junit.Assert.assertFalse(HomeRepair.stuck(true, true, true, true));
+        org.junit.Assert.assertFalse(HomeRepair.stuck(false, true, true, false));
+        org.junit.Assert.assertFalse(HomeRepair.stuck(true, false, true, false));
+        org.junit.Assert.assertFalse(HomeRepair.stuck(true, true, false, false));
+    }
+
+    @Test public void takesOnlySvaOutOfTheList() {
+        assertEquals("a/.A:b/.B", HomeRepair.withoutService("a/.A:" + SVA + ":b/.B", SVA));
+        assertEquals("", HomeRepair.withoutService(SVA, SVA));
+        assertEquals("", HomeRepair.withoutService(null, SVA));
+        assertEquals("a/.A", HomeRepair.withoutService("a/.A", SVA));
+    }
 }

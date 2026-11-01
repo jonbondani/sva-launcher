@@ -247,6 +247,7 @@ public final class MainActivity extends Activity {
     private Button addPlaylistButton;
     private static final long CHANNEL_ROW_FOCUS_GRACE_MS = 700;
     private long channelRowKeyAt;
+    private static boolean homeBindingChecked;
     private boolean guideCollapsed;
     private String renderedGuideCategory;
     private String pendingReminderChannelKey, pendingReminderStreamUrl;
@@ -620,6 +621,12 @@ public final class MainActivity extends Activity {
         super.onResume();
         // Puts the Home override back if a force-stop dropped it (only if the viewer had it on).
         HomeRepair.repair(this);
+        // Once per run: if Home should open Sva but the system has not bound the override (it can
+        // stop doing so after a crash), switch it off and on again. Late enough for a normal bind.
+        if (!homeBindingChecked) {
+            homeBindingChecked = true;
+            handler.postDelayed(() -> HomeRepair.rebindIfStuck(this, null), 10_000L);
+        }
         if (shownSeason != null && !shownSeason.equals(LiquidTheme.season(this))) { recreate(); return; }
         screenActive = true;
         updateSeasonParticles();

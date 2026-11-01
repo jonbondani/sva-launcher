@@ -93,6 +93,9 @@ public final class LauncherOverrideService extends AccessibilityService {
         super.onDestroy();
     }
 
+    /** True while the system has the override bound in this process. */
+    static boolean isConnected() { return running != null; }
+
     /** Opens the system power menu; false when the accessibility service is not enabled. */
     static boolean showPowerMenu() {
         LauncherOverrideService service = running;
@@ -131,9 +134,10 @@ public final class LauncherOverrideService extends AccessibilityService {
         }
 
         if (CrashWatch.tooManyCrashes(this)) {
-            // Sva keeps crashing: leave the TV's own home screen alone and switch the override off.
+            // Sva keeps crashing: leave the TV's own home screen alone for now. Only a pause: once
+            // the crashes are older than the window, Home opens Sva again (switching the override
+            // off for good here left the viewer on Amazon's home until they ran sva-inicio).
             uncover();
-            disableSelf();
             return;
         }
         long now = SystemClock.uptimeMillis();

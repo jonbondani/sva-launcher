@@ -188,6 +188,22 @@ sleep 8
 off=$(adb shell settings get secure enabled_accessibility_services | tr -d '\r')
 echo "after deliberate off + update: $off" | tee -a "$OUT/home-repair.txt"
 case "$off" in *LauncherOverrideService*) echo "OFF_IGNORED" >> "$OUT/home-repair.txt" ;; *) echo "OFF_RESPECTED" >> "$OUT/home-repair.txt" ;; esac
+# After a crash: does the override come back? Newer Android stops rebinding a crashed service;
+# Sva's check (10 s after it opens) switches it off and on again.
+adb shell settings put secure enabled_accessibility_services "$SVC"
+adb shell settings put secure accessibility_enabled 1
+sleep 8
+bound() { adb shell dumpsys accessibility | grep -iE "Bound services|bound services" | head -1 | tr -d '\r'; }
+echo "before crash: $(bound)" > "$OUT/home-crash.txt"
+adb shell am crash com.sva.launcher > /dev/null 2>&1
+sleep 10
+echo "after crash: $(bound)" >> "$OUT/home-crash.txt"
+adb shell am start -n com.sva.launcher/.MainActivity > /dev/null
+sleep 18
+echo "after opening Sva: $(bound)" >> "$OUT/home-crash.txt"
+adb shell settings get secure enabled_accessibility_services >> "$OUT/home-crash.txt"
+adb logcat -d | grep "SvaHomeRepair" | tail -8 >> "$OUT/home-crash.txt"
+case "$(bound)" in *LauncherOverrideService*) echo "REBOUND_OK" >> "$OUT/home-crash.txt" ;; *) echo "REBOUND_FAILED" >> "$OUT/home-crash.txt" ;; esac
 adb shell dumpsys tv_input > "$OUT/tv_input.txt" 2>&1
 adb logcat -d | grep -vE "RuntimeInit|commands.input|Shutting down VM|default boot image|lock profiling" | tail -400 > "$OUT/log.txt"
 if grep -q "FATAL EXCEPTION" "$OUT/log.txt"; then echo "CRASH" > "$OUT/CRASHED"; fi
