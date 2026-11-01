@@ -1399,6 +1399,17 @@ public final class MainActivity extends Activity {
             }
             View page = tabPages[activeTab];
             if (focused != null && page != null && isWithinPage(focused, page)) {
+                // Left and right inside the channel row stay in the row: at either end they stop
+                // there instead of jumping to the category tabs (which also changed the category
+                // and could leave nothing focused).
+                if (activeTab == TAB_TV && (direction == View.FOCUS_LEFT || direction == View.FOCUS_RIGHT)) {
+                    ChannelRow channelRow = channelRowMap.get(selectedChannelCategory);
+                    if (channelRow != null && isWithinPage(focused, channelRow.container)) {
+                        View next = focused.focusSearch(direction);
+                        if (next != null && isWithinPage(next, channelRow.container) && next.requestFocus()) return true;
+                        return true;
+                    }
+                }
                 if (activeTab == TAB_TV && direction == View.FOCUS_DOWN && guideToggle != null
                         && guideToggle.isShown() && guideToggle.isEnabled()) {
                     ChannelRow channelRow = channelRowMap.get(selectedChannelCategory);

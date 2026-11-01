@@ -119,11 +119,16 @@ sleep 25
 adb logcat -d -b crash > "$OUT/crash-before-stress.txt" 2>&1; grep -q com.sva.launcher "$OUT/crash-before-stress.txt" && echo CRASH > "$OUT/CRASHED"; adb logcat -c
 # Dock, TV en directo, up into the first channel.
 key KEYCODE_DPAD_DOWN 1; key KEYCODE_DPAD_DOWN 1; key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_CENTER 4
-key KEYCODE_DPAD_UP 1.5; key KEYCODE_DPAD_DOWN 1.5; shot 14c-stress-row
+# Up lands on the first category tab; focusing a tab selects it. Four to the right is "General"
+# (80 channels in the Spanish list), then down into its row.
+key KEYCODE_DPAD_UP 1.5
+for i in 1 2 3 4; do key KEYCODE_DPAD_RIGHT 1; done
+key KEYCODE_DPAD_DOWN 2; shot 14c-stress-row
 pid0=$(adb shell pidof com.sva.launcher | tr -d '\r')
 # Many key presses in one shell call (no per-key process start): about as fast as a held button.
-R=$(printf 'KEYCODE_DPAD_RIGHT %.0s' $(seq 1 60))
+R=$(printf 'KEYCODE_DPAD_RIGHT %.0s' $(seq 1 40))
 for round in 1 2 3; do adb shell input keyevent $R; done
+adb shell dumpsys gfxinfo com.sva.launcher | grep -E "Total frames|Janky|percentile" >> "$OUT/stress.txt"
 sleep 2; shot 14d-stress-after-right
 adb shell input keyevent --longpress $(printf 'KEYCODE_DPAD_RIGHT %.0s' $(seq 1 20))
 sleep 2; shot 14e-stress-after-hold
