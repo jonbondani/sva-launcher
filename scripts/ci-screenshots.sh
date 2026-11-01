@@ -122,7 +122,12 @@ key KEYCODE_DPAD_DOWN 1; key KEYCODE_DPAD_DOWN 1; key KEYCODE_DPAD_RIGHT; key KE
 # Up lands on the first category tab; focusing a tab selects it. Four to the right is "General"
 # (80 channels in the Spanish list), then down into its row.
 key KEYCODE_DPAD_UP 1.5
-for i in 1 2 3 4; do key KEYCODE_DPAD_RIGHT 1; done
+for i in $(seq 1 14); do
+  adb shell uiautomator dump /sdcard/ui.xml > /dev/null 2>&1
+  adb shell cat /sdcard/ui.xml | grep -o 'text="[^"]*" [^>]*focused="true"' | grep -q 'text="General · 80"' && break
+  key KEYCODE_DPAD_RIGHT 1
+done
+echo "category tab: $(adb shell cat /sdcard/ui.xml | grep -o 'text="[^"]*" [^>]*focused="true"' | head -1 | cut -c1-40)" >> "$OUT/stress.txt"
 key KEYCODE_DPAD_DOWN 2; shot 14c-stress-row
 pid0=$(adb shell pidof com.sva.launcher | tr -d '\r')
 # Many key presses in one shell call (no per-key process start): about as fast as a held button.
