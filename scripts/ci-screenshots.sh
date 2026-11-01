@@ -99,6 +99,44 @@ for t in auto otono navidad invierno primavera verano clasico halloween; do
 done
 adb shell am start -n com.sva.launcher/.MainActivity --es set_theme "'auto'" > /dev/null
 sleep 4
+# Stress: a real Spanish list, then the channel row scrolled right as fast as keys can go
+# (a viewer reported Sva vanishing while doing this on a Fire TV Stick).
+adb shell am force-stop com.sva.launcher
+adb shell am start -W -n com.sva.launcher/.MainActivity > /dev/null
+sleep 10
+adb shell am start -n com.sva.launcher/.MainActivity --es set_playlist "'https://iptv-org.github.io/iptv/countries/es.m3u'" > /dev/null
+sleep 3; shot 14a-stress-confirm
+# The dialog: try "Guardar" (positive) whichever button starts focused.
+key KEYCODE_DPAD_RIGHT 0.8; shot 14b-stress-confirm-right
+key KEYCODE_DPAD_CENTER 3
+adb shell run-as com.sva.launcher cat shared_prefs/launcher.xml 2>/dev/null | grep -o '<string name="playlist">[^<]*' > "$OUT/stress.txt"
+if ! grep -q es.m3u "$OUT/stress.txt"; then
+  adb shell am start -n com.sva.launcher/.MainActivity --es set_playlist "'https://iptv-org.github.io/iptv/countries/es.m3u'" > /dev/null
+  sleep 3; key KEYCODE_DPAD_LEFT 0.8; key KEYCODE_DPAD_CENTER 3
+  adb shell run-as com.sva.launcher cat shared_prefs/launcher.xml 2>/dev/null | grep -o '<string name="playlist">[^<]*' >> "$OUT/stress.txt"
+fi
+sleep 25
+adb logcat -d -b crash > "$OUT/crash-before-stress.txt" 2>&1; grep -q com.sva.launcher "$OUT/crash-before-stress.txt" && echo CRASH > "$OUT/CRASHED"; adb logcat -c
+# Dock, TV en directo, up into the first channel.
+key KEYCODE_DPAD_DOWN 1; key KEYCODE_DPAD_DOWN 1; key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_CENTER 4
+key KEYCODE_DPAD_UP 1.5; key KEYCODE_DPAD_DOWN 1.5; shot 14c-stress-row
+pid0=$(adb shell pidof com.sva.launcher | tr -d '\r')
+# Many key presses in one shell call (no per-key process start): about as fast as a held button.
+R=$(printf 'KEYCODE_DPAD_RIGHT %.0s' $(seq 1 60))
+for round in 1 2 3; do adb shell input keyevent $R; done
+sleep 2; shot 14d-stress-after-right
+adb shell input keyevent --longpress $(printf 'KEYCODE_DPAD_RIGHT %.0s' $(seq 1 20))
+sleep 2; shot 14e-stress-after-hold
+L=$(printf 'KEYCODE_DPAD_LEFT %.0s' $(seq 1 60))
+for round in 1 2; do adb shell input keyevent $L; done
+sleep 2; shot 14f-stress-after-left
+pid1=$(adb shell pidof com.sva.launcher | tr -d '\r')
+top=$(adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" | head -2)
+{ echo "pid before: $pid0  after: $pid1"; echo "$top"; } >> "$OUT/stress.txt"
+adb logcat -d > "$OUT/stress-log.txt"
+grep -E "FATAL|AndroidRuntime|OutOfMemory|lowmemorykiller|Process com.sva.launcher|ANR in|signal 11|backtrace" "$OUT/stress-log.txt" | head -80 >> "$OUT/stress.txt"
+adb logcat -d -b crash >> "$OUT/stress.txt" 2>&1
+adb shell dumpsys meminfo com.sva.launcher | head -40 >> "$OUT/stress.txt"
 # Home override self-repair (HomeRepair). Fire OS drops the accessibility service on an update;
 # stock Android does not, so the drop is simulated with the process dead, then Sva is reinstalled.
 SVC=com.sva.launcher/com.sva.launcher.LauncherOverrideService
