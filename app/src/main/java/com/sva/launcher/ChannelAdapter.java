@@ -28,6 +28,7 @@ final class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.Holder> {
     private final ChannelLogoLoader logos;
     private final OnChannelClick listener;
     private final List<IptvRepository.Channel> items = new ArrayList<>();
+    private int focusedPosition = RecyclerView.NO_POSITION;
 
     ChannelAdapter(Activity activity, ChannelLogoLoader logos, GlassBackdrop backdrop, OnChannelClick listener) {
         this.activity = activity;
@@ -64,6 +65,7 @@ final class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.Holder> {
         }, false);
         items.clear();
         items.addAll(next);
+        focusedPosition = RecyclerView.NO_POSITION;
         diff.dispatchUpdatesTo(this);
     }
 
@@ -116,7 +118,13 @@ final class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.Holder> {
                 LiquidTheme.surface(activity), LiquidTheme.border(activity), 1, density));
         tile.setBackground(states);
         tile.setElevation(dp(2, density));
-        tile.setOnFocusChangeListener(LiquidTheme::animateFocus);
+        tile.setOnFocusChangeListener((view, focused) -> {
+            LiquidTheme.animateFocus(view, focused);
+            if (focused && view.getParent() instanceof RecyclerView) {
+                int position = ((RecyclerView) view.getParent()).getChildAdapterPosition(view);
+                if (position != RecyclerView.NO_POSITION) focusedPosition = position;
+            }
+        });
 
         FrameLayout logoBox = new FrameLayout(activity);
         GradientDrawable logoBackground = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
@@ -183,6 +191,11 @@ final class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.Holder> {
     }
 
     @Override public int getItemCount() { return items.size(); }
+
+    /** The channel last focused in the row, to put focus back if the row ever loses it. */
+    int focusedPosition() {
+        return focusedPosition >= 0 && focusedPosition < items.size() ? focusedPosition : RecyclerView.NO_POSITION;
+    }
 
     private android.graphics.drawable.Drawable shape(int color, int border, int width, float density) {
         return new GlassDrawable(activity, backdrop, color, border, width, 20);

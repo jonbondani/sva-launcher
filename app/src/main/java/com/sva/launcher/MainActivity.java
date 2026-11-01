@@ -240,6 +240,8 @@ public final class MainActivity extends Activity {
     private TextView guideEmpty, guideHeading;
     private Button guideToggle;
     private Button addPlaylistButton;
+    private static final long CHANNEL_ROW_FOCUS_GRACE_MS = 700;
+    private long channelRowKeyAt;
     private boolean guideCollapsed;
     private String renderedGuideCategory;
     private String pendingReminderChannelKey, pendingReminderStreamUrl;
@@ -1405,6 +1407,7 @@ public final class MainActivity extends Activity {
                 if (activeTab == TAB_TV && (direction == View.FOCUS_LEFT || direction == View.FOCUS_RIGHT)) {
                     ChannelRow channelRow = channelRowMap.get(selectedChannelCategory);
                     if (channelRow != null && isWithinPage(focused, channelRow.container)) {
+                        channelRowKeyAt = android.os.SystemClock.uptimeMillis();
                         View next = focused.focusSearch(direction);
                         if (next != null && isWithinPage(next, channelRow.container) && next.requestFocus()) return true;
                         return true;
@@ -4466,14 +4469,47 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         tab.setMinWidth(dp(72));
         tab.setOnFocusChangeListener((view, focused) -> {
             LiquidTheme.animateFocus(view, focused);
-            if (focused) selectChannelCategory(category, view);
+            if (!focused) return;
+            // Scrolling the channel row fast, Android can drop the focused tile mid-scroll and hand
+            // focus to the first focusable view: this tab. That is not the viewer choosing it, so
+            // focus goes back to the channel and the category stays. (Changing the list right then,
+            // inside the row's layout, is what closed Sva.)
+            if (android.os.SystemClock.uptimeMillis() - channelRowKeyAt < CHANNEL_ROW_FOCUS_GRACE_MS) {
+                handler.post(this::restoreChannelRowFocus);
+                return;
+            }
+            // Never change the row's data from inside a focus change: do it right after.
+            handler.post(() -> { if (view.hasFocus()) selectChannelCategory(category, view); });
         });
         tab.setOnClickListener(view -> selectChannelCategory(category, view));
         return tab;
     }
 
+    private void restoreChannelRowFocus() {
+        ChannelRow row = channelRowMap.get(selectedChannelCategory);
+        if (row == null || isFinishing()) return;
+        int position = row.adapter.focusedPosition();
+        if (position == RecyclerView.NO_POSITION) position = 0;
+        if (row.adapter.getItemCount() == 0) return;
+        RecyclerView.LayoutManager manager = row.list.getLayoutManager();
+        View tile = manager == null ? null : manager.findViewByPosition(position);
+        if (tile != null) { tile.requestFocus(); return; }
+        final int target = position;
+        row.list.scrollToPosition(target);
+        row.list.post(() -> {
+            RecyclerView.LayoutManager m = row.list.getLayoutManager();
+            View again = m == null ? null : m.findViewByPosition(target);
+            if (again != null) again.requestFocus();
+        });
+    }
+
     private void selectChannelCategory(String category, View view) {
         if (category.equals(selectedChannelCategory)) return;
+        ChannelRow busy = channelRowMap.isEmpty() ? null : channelRowMap.values().iterator().next();
+        if (busy != null && busy.list.isComputingLayout()) {
+            handler.post(() -> selectChannelCategory(category, view));
+            return;
+        }
         selectedChannelCategory = category;
         updateChannelCategoryTabStyles();
         ChannelRow row = channelRowMap.isEmpty() ? null : channelRowMap.values().iterator().next();
@@ -4529,7 +4565,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         ChannelAdapter adapter = new ChannelAdapter(this, logoLoader, glassBackdrop, this::playChannel);
         list.setAdapter(adapter);
         container.addView(list, new LinearLayout.LayoutParams(-1, dp(238)));
-        return new ChannelRow(container, adapter);
+        return new ChannelRow(container, list, adapter);
     }
 
     private void loadBackgroundFolder(Uri treeUri, boolean userSelected) {
@@ -4859,9 +4895,11 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
 
     private static final class ChannelRow {
         final LinearLayout container;
+        final RecyclerView list;
         final ChannelAdapter adapter;
-        ChannelRow(LinearLayout container, ChannelAdapter adapter) {
+        ChannelRow(LinearLayout container, RecyclerView list, ChannelAdapter adapter) {
             this.container = container;
+            this.list = list;
             this.adapter = adapter;
         }
     }
