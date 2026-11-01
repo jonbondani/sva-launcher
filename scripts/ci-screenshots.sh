@@ -203,12 +203,16 @@ sleep 18
 echo "after opening Sva: $(bound)" >> "$OUT/home-crash.txt"
 adb shell settings get secure enabled_accessibility_services >> "$OUT/home-crash.txt"
 adb logcat -d | grep "SvaHomeRepair" | tail -8 >> "$OUT/home-crash.txt"
-case "$(bound)" in *LauncherOverrideService*) echo "REBOUND_OK" >> "$OUT/home-crash.txt" ;; *) echo "REBOUND_FAILED" >> "$OUT/home-crash.txt" ;; esac
+case "$(bound)" in *"Sva Launcher"*) echo "REBOUND_OK" >> "$OUT/home-crash.txt" ;; *) echo "REBOUND_FAILED" >> "$OUT/home-crash.txt" ;; esac
 adb shell dumpsys tv_input > "$OUT/tv_input.txt" 2>&1
 adb logcat -d | grep -vE "RuntimeInit|commands.input|Shutting down VM|default boot image|lock profiling" | tail -400 > "$OUT/log.txt"
-if grep -q "FATAL EXCEPTION" "$OUT/log.txt"; then echo "CRASH" > "$OUT/CRASHED"; fi
+if [ "$(grep -c "FATAL EXCEPTION" "$OUT/log.txt")" -gt "$(grep -c "shell-induced crash" "$OUT/log.txt")" ]; then echo "CRASH" > "$OUT/CRASHED"; fi
 # Earlier crashes may have scrolled out of the tail above.
 adb logcat -d -b crash > "$OUT/crash-buffer.txt" 2>&1
-if grep -q "com.sva.launcher" "$OUT/crash-buffer.txt"; then echo "CRASH" > "$OUT/CRASHED"; fi
+# The crash the HomeRepair test causes on purpose (am crash) does not count.
+if grep -v "shell-induced crash" "$OUT/crash-buffer.txt" | grep -q "Process: com.sva.launcher" \
+   && [ "$(grep -c "Process: com.sva.launcher" "$OUT/crash-buffer.txt")" -gt "$(grep -c "shell-induced crash" "$OUT/crash-buffer.txt")" ]; then
+  echo "CRASH" > "$OUT/CRASHED"
+fi
 adb shell am force-stop com.sva.launcher
 ls -la "$OUT"

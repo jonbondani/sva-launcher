@@ -220,7 +220,29 @@ final class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.Holder> {
         holder.star.setVisibility(favourite ? View.VISIBLE : View.GONE);
         if (favourites != null) {
             holder.itemView.setLongClickable(true);
-            holder.itemView.setOnLongClickListener(view -> { favourites.toggle(channel); return true; });
+            holder.itemView.setOnLongClickListener(view -> {
+                if (!holder.heldToggled) favourites.toggle(channel);
+                holder.heldToggled = true;
+                return true;
+            });
+            // OK held on the remote arrives as repeated key-downs: toggle once, and the release must
+            // not also open the channel.
+            holder.itemView.setOnKeyListener((view, keyCode, event) -> {
+                boolean ok = keyCode == android.view.KeyEvent.KEYCODE_DPAD_CENTER
+                        || keyCode == android.view.KeyEvent.KEYCODE_ENTER;
+                if (!ok) return false;
+                if (event.getAction() == android.view.KeyEvent.ACTION_DOWN) {
+                    if (event.getRepeatCount() == 0) { holder.heldToggled = false; return false; }
+                    if (!holder.heldToggled) { holder.heldToggled = true; favourites.toggle(channel); }
+                    return true;
+                }
+                if (event.getAction() == android.view.KeyEvent.ACTION_UP && holder.heldToggled) {
+                    holder.heldToggled = false;
+                    view.setPressed(false);
+                    return true;
+                }
+                return false;
+            });
         }
     }
 
@@ -240,6 +262,7 @@ final class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.Holder> {
     static final class Holder extends RecyclerView.ViewHolder {
         final TextView fallback, name, now, next, star;
         final ImageView logo;
+        boolean heldToggled;
         Holder(View itemView, TextView fallback, ImageView logo, TextView name, TextView now, TextView next,
                TextView star) {
             super(itemView);
