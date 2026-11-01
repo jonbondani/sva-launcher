@@ -45,4 +45,12 @@ public final class FireOsHomeTest {
         assertFalse(TvInputs.bogusConnected(1, 1));
         assertFalse(TvInputs.bogusConnected(0, 0));
     }
+
+    @Test public void opensSvaWhenTheServiceArrivesAfterTheBootHome() {
+        org.junit.Assert.assertTrue(LauncherOverrideService.catchUpAtConnect(90_000L, false, false));
+        org.junit.Assert.assertFalse(LauncherOverrideService.catchUpAtConnect(90_000L, true, false));
+        org.junit.Assert.assertFalse(LauncherOverrideService.catchUpAtConnect(90_000L, false, true));
+        org.junit.Assert.assertFalse(LauncherOverrideService.catchUpAtConnect(
+                LauncherOverrideService.BOOT_CATCH_UP_MS + 1, false, false));
+    }
 }

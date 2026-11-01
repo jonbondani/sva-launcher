@@ -14,6 +14,19 @@ adb shell input keyevent KEYCODE_WAKEUP
 sleep 20
 adb install -r app/build/outputs/apk/debug/app-debug.apk 2>&1 | tee "$OUT/install.txt"
 grep -q Success "$OUT/install.txt" || { echo "INSTALL FAILED" > "$OUT/CRASHED"; }
+# Boot catch-up: the stock home is already on screen when the Home override connects (as after a
+# power cut). Sva must open by itself within a few seconds.
+adb shell input keyevent KEYCODE_HOME; sleep 4
+adb shell settings put secure enabled_accessibility_services com.sva.launcher/com.sva.launcher.LauncherOverrideService
+adb shell settings put secure accessibility_enabled 1
+sleep 9
+top=$(adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" | head -1 | tr -d '\r')
+echo "uptime: $(adb shell cat /proc/uptime | cut -d' ' -f1)  top: $top" > "$OUT/boot-catch-up.txt"
+case "$top" in *com.sva.launcher*) echo "CATCH_UP_OK" >> "$OUT/boot-catch-up.txt" ;; *) echo "CATCH_UP_FAILED" >> "$OUT/boot-catch-up.txt" ;; esac
+shot 00-boot-catch-up
+adb shell settings put secure enabled_accessibility_services "''"
+sleep 3
+adb shell am force-stop com.sva.launcher
 adb logcat -c
 adb shell am start -W -n com.sva.launcher/.MainActivity | tee "$OUT/start.txt"
 sleep 15

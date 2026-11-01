@@ -28,6 +28,15 @@ import android.view.accessibility.AccessibilityEvent;
  */
 public final class LauncherOverrideService extends AccessibilityService {
     private static final long REOPEN_THROTTLE_MS = 1000L;
+    /**
+     * Shortly after boot the stock home is usually on screen before the system binds this
+     * service, so its "home appeared" event is never seen; and pressing Home while that home is
+     * already showing changes no window, so nothing arrives later either. Within this time after
+     * boot, connecting opens Sva once unless some window was already seen.
+     */
+    static final long BOOT_CATCH_UP_MS = 10 * 60_000L;
+    private static final long CATCH_UP_DELAY_MS = 2_000L;
+    private boolean sawWindowSinceConnect;
     /** Upper bound for the cover, so a failed launch can never leave the screen blank. */
     private static final long COVER_MAX_MS = 1500L;
     private static final long UNCOVER_DELAY_MS = 120L;
@@ -58,6 +67,14 @@ public final class LauncherOverrideService extends AccessibilityService {
         CrashWatch.clear(this);
         // The viewer wants Sva on Home: put it back if an update or a force-stop drops it.
         HomeRepair.markWanted(this, true);
+        sawWindowSinceConnect = false;
+        handler.postDelayed(() -> {
+            if (catchUpAtConnect(SystemClock.elapsedRealtime(), sawWindowSinceConnect, CrashWatch.tooManyCrashes(this))) {
+                android.util.Log.i("SvaHomeOverride", "boot catch-up: opening Sva");
+                lastReopenAt = SystemClock.uptimeMillis();
+                reopen();
+            }
+        }, CATCH_UP_DELAY_MS);
         try {
             View view = new View(this);
             view.setBackgroundColor(COVER_COLOR);
@@ -112,11 +129,17 @@ public final class LauncherOverrideService extends AccessibilityService {
         }
     }
 
+    /** Pure: open Sva when the service connects soon after boot and nothing has shown since. */
+    static boolean catchUpAtConnect(long sinceBootMs, boolean sawWindow, boolean tooManyCrashes) {
+        return sinceBootMs < BOOT_CATCH_UP_MS && !sawWindow && !tooManyCrashes;
+    }
+
     @Override public void onAccessibilityEvent(AccessibilityEvent event) {
         if (event == null || event.getEventType() != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return;
         CharSequence packageName = event.getPackageName();
         if (packageName == null) return;
         String pkg = packageName.toString();
+        if (!"com.android.systemui".equals(pkg) && !"android".equals(pkg)) sawWindowSinceConnect = true;
 
         CharSequence className = event.getClassName();
         if (!isStockHome(pkg, className == null ? null : className.toString())) {
