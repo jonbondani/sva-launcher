@@ -157,8 +157,10 @@ final class LiveScores {
             if (covered) continue;
             String[] sides = splitTitle(match.title);
             String state = match.isLive(nowMs) ? "in" : match.startMs > nowMs ? "pre" : "post";
+            // Some team calendars put the score in the title as it changes: "(1-0)".
+            String[] score = titleScore(match.title);
             games.add(new Game(match.uid, match.competition, state, "", "", match.startMs,
-                    sides[0], "", "", sides[1], "", ""));
+                    sides[0], score[0], "", sides[1], score[1], ""));
         }
         Collections.sort(games, (a, b) -> {
             int ra = a.live() ? 0 : a.upcoming() ? 1 : 2, rb = b.live() ? 0 : b.upcoming() ? 1 : 2;
@@ -178,9 +180,21 @@ final class LiveScores {
         String clean = title.replaceAll("\\s*\\(.*\\)\\s*$", "").trim();
         for (String separator : new String[]{" - ", " – ", " vs. ", " vs ", " v "}) {
             int at = clean.indexOf(separator);
-            if (at > 0) return new String[]{clean.substring(0, at).trim(), clean.substring(at + separator.length()).trim()};
+            if (at > 0) return new String[]{teamName(clean.substring(0, at)), teamName(clean.substring(at + separator.length()))};
         }
-        return new String[]{clean, ""};
+        return new String[]{teamName(clean), ""};
+    }
+
+    /** Pure: a team name without the emoji or symbols calendars put in front ("⚽ Marbella FC"). */
+    static String teamName(String raw) {
+        return raw == null ? "" : raw.replaceAll("^[^\\p{L}\\p{N}]+", "").trim();
+    }
+
+    /** Pure: the score at the end of a calendar title, "(2-1)" or "(2 - 1)", or two empty strings. */
+    static String[] titleScore(String title) {
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("\\(\\s*(\\d{1,2})\\s*[-–:]\\s*(\\d{1,2})\\s*\\)\\s*$")
+                .matcher(title == null ? "" : title);
+        return m.find() ? new String[]{m.group(1), m.group(2)} : new String[]{"", ""};
     }
 
     /** The followed team's game being played right now, if any. */
@@ -340,16 +354,24 @@ final class LiveScores {
         states.addState(new int[]{}, shape(light ? Color.WHITE : 0xFF303134,
                 light ? 0xFFDADCE0 : 0xFF3C4043, dp(activity, 1), dp(activity, 16)));
         card.setBackground(states);
-        card.setOnFocusChangeListener(LiquidTheme::animateFocus);
+        // Wide cards: a gentle lift, so the focused one stays inside its row.
+        card.setOnFocusChangeListener((v, focused) -> v.animate().scaleX(focused ? 1.03f : 1f)
+                .scaleY(focused ? 1.03f : 1f).setDuration(160).start());
 
         LinearLayout top = new LinearLayout(activity);
         top.setGravity(Gravity.CENTER_VERTICAL);
-        top.addView(label(activity, game.competition, 13, muted, false), new LinearLayout.LayoutParams(0, -2, 1));
+        TextView competition = label(activity, game.competition, 13, muted, false);
+        // One line: a long name ("LaLiga Hypermotion") must not push the teams down.
+        competition.setSingleLine(true);
+        competition.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        top.addView(competition, new LinearLayout.LayoutParams(0, -2, 1));
         if (game.live()) {
             TextView dot = label(activity, "●", 12, 0xFFD93025, false);
-            dot.setPadding(0, 0, dp(activity, 6), 0);
+            dot.setPadding(dp(activity, 8), 0, dp(activity, 6), 0);
             top.addView(dot);
-            top.addView(label(activity, "En directo · " + game.status(), 13, 0xFFD93025, true));
+            // Minute or half-time when known; without a clock, just "En directo".
+            String status = game.status();
+            top.addView(label(activity, "En juego".equals(status) ? "En directo" : "En directo · " + status, 13, 0xFFD93025, true));
         } else {
             top.addView(label(activity, game.finished() ? "Final" : "Hoy " + game.status(), 13, muted, game.finished()));
         }

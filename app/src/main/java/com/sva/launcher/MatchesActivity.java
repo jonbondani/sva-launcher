@@ -199,6 +199,10 @@ public final class MatchesActivity extends Activity {
         // Today's games with live scores (ESPN), Google-card style, above the fixture list.
         liveBox = new LinearLayout(this);
         liveBox.setOrientation(LinearLayout.VERTICAL);
+        // Room for the focused card's lift and ring, which used to be cut at the edges.
+        liveBox.setClipChildren(false);
+        liveBox.setClipToPadding(false);
+        liveBox.setPadding(SettingsUi.dp(this, 10), SettingsUi.dp(this, 6), SettingsUi.dp(this, 10), SettingsUi.dp(this, 6));
         content.addView(liveBox, new LinearLayout.LayoutParams(-1, -2));
         renderLive();
         if (refreshing && matches.isEmpty()) {
@@ -248,6 +252,8 @@ public final class MatchesActivity extends Activity {
             LiveScores.Game game = games.get(i);
             if (i % 3 == 0) {
                 row = new LinearLayout(this);
+                row.setClipChildren(false);
+                row.setClipToPadding(false);
                 LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(-1, -2);
                 rowParams.bottomMargin = SettingsUi.dp(this, 12);
                 liveBox.addView(row, rowParams);
