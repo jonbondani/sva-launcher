@@ -232,9 +232,15 @@ adb shell am force-stop com.sva.launcher
 # it runs last: everything above is already saved. Taps go by the text uiautomator finds.
 tap_text() {
   adb shell uiautomator dump /sdcard/ui.xml > /dev/null 2>&1
-  b=$(adb shell cat /sdcard/ui.xml | tr '>' '\n' | grep -F "text=\"$1\"" | head -1 | grep -o 'bounds="[^"]*"' | grep -o '[0-9]\+')
+  local want="$1"
+  b=$(adb shell cat /sdcard/ui.xml | tr '>' '\n' | grep -F "text=\"$want\"" | head -1 | grep -o 'bounds="[^"]*"' | grep -o '[0-9]\+')
   set -- $b
-  [ $# -eq 4 ] || { echo "tap_text: '$1' not found" >> "$OUT/adb-switch.txt"; return 1; }
+  if [ $# -ne 4 ]; then
+    echo "tap_text: '$want' not found" >> "$OUT/adb-switch.txt"
+    adb shell cat /sdcard/ui.xml > "$OUT/ui-$(echo "$want" | tr -c 'a-zA-Z' '_').xml"
+    shot "16x-not-found-$(echo "$want" | tr -c 'a-zA-Z' '_')"
+    return 1
+  fi
   adb shell input tap $(( ($1 + $3) / 2 )) $(( ($2 + $4) / 2 )); sleep 2
 }
 adb shell pm grant com.sva.launcher android.permission.WRITE_SECURE_SETTINGS
