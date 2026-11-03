@@ -2897,43 +2897,47 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         int ready = preferences.getInt("updateReadyCode", 0);
         java.io.File apk = Updater.pendingApk(this);
         if (ready > installed && apk.isFile()) {
-            if (now - preferences.getLong("updatePromptedAt", 0) > UPDATE_CHECK_MS) offerUpdate(preferences.getString("updateReadyName", ""));
+            if (now - preferences.getLong("updatePromptedAt", 0) > UPDATE_CHECK_MS) offerUpdate(preferences.getString("updateReadyName", ""),
+                    preferences.getString("updateReadyChanges", ""));
             return;
         }
         if (ready > 0 && ready <= installed) {
             // Already installed: drop the leftover download.
             apk.delete();
-            preferences.edit().remove("updateReadyCode").remove("updateReadyName").apply();
+            preferences.edit().remove("updateReadyCode").remove("updateReadyName").remove("updateReadyChanges").apply();
         }
         if (now - preferences.getLong("updateCheckedAt", 0) < UPDATE_CHECK_MS) return;
         autoUpdateRunning = true;
         final android.content.Context app = getApplicationContext();
         ioWorker.execute(() -> {
-            String readyName = null;
+            String readyName = null, readyChanges = "";
             try {
                 Updater.Release latest = Updater.latest();
                 preferences.edit().putLong("updateCheckedAt", System.currentTimeMillis()).apply();
                 if (latest.versionCode > Updater.installedCode(app)) {
                     Updater.download(app, message -> { });
+                    readyChanges = Updater.changesText(latest.changes);
                     preferences.edit().putInt("updateReadyCode", latest.versionCode)
-                            .putString("updateReadyName", latest.versionName).apply();
+                            .putString("updateReadyName", latest.versionName)
+                            .putString("updateReadyChanges", readyChanges).apply();
                     readyName = latest.versionName;
                 }
             } catch (Exception ignored) { }
-            final String name = readyName;
+            final String name = readyName, changes = readyChanges;
             handler.post(() -> {
                 autoUpdateRunning = false;
-                if (name != null && screenActive && settingsScreen == null) offerUpdate(name);
+                if (name != null && screenActive && settingsScreen == null) offerUpdate(name, changes);
             });
         });
     }
 
-    private void offerUpdate(String versionName) {
+    private void offerUpdate(String versionName, String changes) {
         preferences.edit().putLong("updatePromptedAt", System.currentTimeMillis()).apply();
         AlertDialog dialog = new AlertDialog.Builder(new android.view.ContextThemeWrapper(this,
                 LiquidTheme.alertDialogTheme(this)))
                 .setTitle("Actualización de Sva lista")
                 .setMessage("La versión " + versionName + " ya está descargada. Tus ajustes se conservan.\n\n"
+                        + (changes == null || changes.isEmpty() ? "" : changes + "\n\n")
                         + "Si no la instalas ahora, te lo recordaremos más tarde; también está en Ajustes › Versión y actualizaciones.")
                 .setPositiveButton("Instalar ahora", (d, which) -> installDownloadedUpdate())
                 .setNegativeButton("Más tarde", null)
@@ -5729,7 +5733,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                     + "  ·  build " + Updater.installedCode(MainActivity.this));
             addFormSectionHeader(form, "Updates");
             updateStatus = label(availableUpdate == null ? "Pulsa «Buscar actualización» para comprobar si hay una versión nueva."
-                    : "Disponible: " + availableUpdate.versionName, 15, SettingsUi.text(MainActivity.this), false);
+                    : "Disponible: " + availableUpdate.versionName + changesSuffix(availableUpdate), 15, SettingsUi.text(MainActivity.this), false);
             updateStatus.setPadding(dp(2), dp(6), dp(2), dp(10));
             form.addView(updateStatus);
             Button check = addFormButton(form, availableUpdate == null ? "Buscar actualización"
@@ -5755,6 +5759,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                             found = Updater.latest();
                             result = found.versionCode > Updater.installedCode(MainActivity.this)
                                     ? "Hay una versión nueva: " + found.versionName + ". Pulsa de nuevo para instalarla."
+                                            + changesSuffix(found)
                                     : "Ya tienes la última versión.";
                             if (found.versionCode <= Updater.installedCode(MainActivity.this)) found = null;
                         } else {
@@ -5779,6 +5784,52 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             });
             addFormHint(form, "La primera vez, Fire TV pedirá permitir que Sva instale apps (Opciones para desarrolladores › "
                     + "Instalar apps desconocidas › Sva). Tus ajustes se conservan al actualizar.");
+            renderAdbSwitch(form);
+        }
+
+        /** Network ADB on/off: open only while the computer needs it. */
+        private void renderAdbSwitch(LinearLayout form) {
+            addFormSectionHeader(form, "Depuración ADB");
+            if (!AdbSwitch.canChange(MainActivity.this)) {
+                addFormHint(form, "Para encender y apagar ADB desde aquí, Sva necesita un permiso que se concede una vez "
+                        + "desde el ordenador:  ./firetv-optimizer.sh sva-inicio");
+                return;
+            }
+            boolean on = AdbSwitch.isOn(MainActivity.this);
+            addFormHint(form, "Con ADB activado, cualquier ordenador de tu red que hayas autorizado puede conectarse a la tele "
+                    + "(lo usan firetv-optimizer y las instalaciones a mano). Lo más seguro es activarlo solo cuando lo vayas "
+                    + "a usar y desactivarlo al terminar.");
+            addChoice(form, "ADB por red", new String[]{"Activado", "Desactivado"}, on ? 0 : 1, index -> {
+                boolean want = index == 0;
+                if (want == AdbSwitch.isOn(MainActivity.this)) return;
+                if (want) {
+                    boolean ok = AdbSwitch.set(MainActivity.this, true);
+                    Tr.toast(MainActivity.this, ok ? "ADB activado. Desactívalo aquí cuando termines."
+                            : "Fire TV no aceptó el cambio.", Toast.LENGTH_LONG).show();
+                    renderSection();
+                    return;
+                }
+                AlertDialog confirm = new AlertDialog.Builder(new android.view.ContextThemeWrapper(MainActivity.this,
+                        LiquidTheme.alertDialogTheme(MainActivity.this)))
+                        .setTitle("¿Desactivar ADB?")
+                        .setMessage("El ordenador (firetv-optimizer) dejará de poder conectarse hasta que lo vuelvas a "
+                                + "activar aquí o en Ajustes de Fire TV › Opciones para desarrolladores.")
+                        .setPositiveButton("Desactivar", (d, w) -> {
+                            boolean ok = AdbSwitch.set(MainActivity.this, false);
+                            Tr.toast(MainActivity.this, ok ? "ADB desactivado." : "Fire TV no aceptó el cambio.",
+                                    Toast.LENGTH_LONG).show();
+                            renderSection();
+                        })
+                        .setNegativeButton("Cancelar", (d, w) -> renderSection())
+                        .create();
+                confirm.show();
+                styleDialog(confirm);
+            });
+        }
+
+        private String changesSuffix(Updater.Release release) {
+            String text = Updater.changesText(release.changes);
+            return text.isEmpty() ? "" : "\n\n" + text;
         }
 
         private void setUpdateStatus(String message) {

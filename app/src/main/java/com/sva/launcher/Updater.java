@@ -35,7 +35,39 @@ final class Updater {
     static final class Release {
         final int versionCode;
         final String versionName;
-        Release(int versionCode, String versionName) { this.versionCode = versionCode; this.versionName = versionName; }
+        /** What changed since the previous release, one line each (may be empty). */
+        final java.util.List<String> changes;
+        Release(int versionCode, String versionName) { this(versionCode, versionName, java.util.Collections.emptyList()); }
+        Release(int versionCode, String versionName, java.util.List<String> changes) {
+            this.versionCode = versionCode;
+            this.versionName = versionName;
+            this.changes = changes;
+        }
+    }
+
+    static final int MAX_CHANGES = 8;
+
+    /** Pure: parses version.json as published by the release workflow. */
+    static Release parse(String body) throws org.json.JSONException {
+        JSONObject json = new JSONObject(body);
+        int code = json.getInt("versionCode");
+        java.util.List<String> changes = new java.util.ArrayList<>();
+        org.json.JSONArray list = json.optJSONArray("changes");
+        if (list != null) {
+            for (int i = 0; i < list.length() && changes.size() < MAX_CHANGES; i++) {
+                String line = list.optString(i, "").trim();
+                if (!line.isEmpty()) changes.add(line);
+            }
+        }
+        return new Release(code, json.optString("versionName", String.valueOf(code)), changes);
+    }
+
+    /** Pure: the changes as a bulleted block for a dialog, or "" when there are none. */
+    static String changesText(java.util.List<String> changes) {
+        if (changes == null || changes.isEmpty()) return "";
+        StringBuilder out = new StringBuilder("Novedades:\n");
+        for (String line : changes) out.append("• ").append(line).append('\n');
+        return out.toString().trim();
     }
 
     interface Progress { void update(String message); }
@@ -81,8 +113,7 @@ final class Updater {
     /** Blocking: reads version.json from the release. */
     static Release latest() throws Exception {
         String body = new String(download(RELEASE + "version.json", 64 * 1024, null), StandardCharsets.UTF_8);
-        JSONObject json = new JSONObject(body);
-        return new Release(json.getInt("versionCode"), json.optString("versionName", String.valueOf(json.getInt("versionCode"))));
+        return parse(body);
     }
 
     /** Blocking: downloads the APK and hands it to the system installer (which asks to confirm). */

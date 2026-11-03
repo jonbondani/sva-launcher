@@ -228,4 +228,35 @@ if grep -v "shell-induced crash" "$OUT/crash-buffer.txt" | grep -q "Process: com
   echo "CRASH" > "$OUT/CRASHED"
 fi
 adb shell am force-stop com.sva.launcher
+# ADB switch in Settings › Versión y actualizaciones. Switching it off cuts this very connection, so
+# it runs last: everything above is already saved. Taps go by the text uiautomator finds.
+tap_text() {
+  adb shell uiautomator dump /sdcard/ui.xml > /dev/null 2>&1
+  b=$(adb shell cat /sdcard/ui.xml | tr '>' '\n' | grep -F "text=\"$1\"" | head -1 | grep -o 'bounds="[^"]*"' | grep -o '[0-9]\+')
+  set -- $b
+  [ $# -eq 4 ] || { echo "tap_text: '$1' not found" >> "$OUT/adb-switch.txt"; return 1; }
+  adb shell input tap $(( ($1 + $3) / 2 )) $(( ($2 + $4) / 2 )); sleep 2
+}
+adb shell pm grant com.sva.launcher android.permission.WRITE_SECURE_SETTINGS
+adb shell settings put secure enabled_accessibility_services "''"
+adb shell am start -W -n com.sva.launcher/.MainActivity > /dev/null; sleep 10
+key KEYCODE_DPAD_DOWN 1.5; key KEYCODE_DPAD_DOWN 1.5
+for i in 1 2 3 4 5 6 7 8 9; do key KEYCODE_DPAD_RIGHT 1; done
+key KEYCODE_DPAD_CENTER 3
+tap_text "Versión y actualizaciones" && shot 16a-adb-section
+for i in 1 2 3 4 5 6 7 8; do adb shell input swipe 1200 900 1200 300 300; done; sleep 1; shot 16b-adb-switch
+echo "adb_enabled before: $(adb shell settings get global adb_enabled | tr -d '\r')" >> "$OUT/adb-switch.txt"
+if tap_text "ADB por red"; then
+  shot 16c-adb-choice
+  tap_text "Desactivado" && shot 16d-adb-confirm
+  ls -la "$OUT"
+  tap_text "Desactivar"
+  sleep 8
+  if timeout 15 adb shell true 2>/dev/null; then
+    echo "after: $(adb shell settings get global adb_enabled | tr -d '\r')" >> "$OUT/adb-switch.txt"
+    echo "ADB_STILL_ON" >> "$OUT/adb-switch.txt"
+  else
+    echo "ADB_OFF_OK (the emulator no longer answers over ADB)" >> "$OUT/adb-switch.txt"
+  fi
+fi
 ls -la "$OUT"
