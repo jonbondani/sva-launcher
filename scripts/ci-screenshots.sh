@@ -251,10 +251,15 @@ for i in 1 2 3 4 5 6 7 8 9; do key KEYCODE_DPAD_RIGHT 1; done
 key KEYCODE_DPAD_CENTER 3
 # The settings rail scrolls: walk down to its last entry, "Versión y actualizaciones".
 for i in $(seq 1 14); do key KEYCODE_DPAD_DOWN 0.6; done
-sleep 1; shot 16a-adb-section
-for i in 1 2 3 4 5 6 7 8; do adb shell input swipe 1200 900 1200 300 300; done; sleep 1; shot 16b-adb-switch
+key KEYCODE_DPAD_CENTER 2; shot 16a-adb-section
+# Into the page and down to its last row, the ADB switch; OK opens its choices.
+key KEYCODE_DPAD_RIGHT 1
+for i in $(seq 1 10); do key KEYCODE_DPAD_DOWN 0.6; done
+sleep 1; shot 16b-adb-switch
 echo "adb_enabled before: $(adb shell settings get global adb_enabled | tr -d '\r')" >> "$OUT/adb-switch.txt"
-if tap_text "ADB por red"; then
+key KEYCODE_DPAD_CENTER 2
+adb shell uiautomator dump /sdcard/ui.xml > /dev/null 2>&1
+if adb shell cat /sdcard/ui.xml | grep -q 'text="Desactivado"'; then
   shot 16c-adb-choice
   tap_text "Desactivado" && shot 16d-adb-confirm
   ls -la "$OUT"
