@@ -249,7 +249,9 @@ adb shell am start -W -n com.sva.launcher/.MainActivity > /dev/null; sleep 10
 key KEYCODE_DPAD_DOWN 1.5; key KEYCODE_DPAD_DOWN 1.5
 for i in 1 2 3 4 5 6 7 8 9; do key KEYCODE_DPAD_RIGHT 1; done
 key KEYCODE_DPAD_CENTER 3
-tap_text "Versión y actualizaciones" && shot 16a-adb-section
+# The settings rail scrolls: walk down to its last entry, "Versión y actualizaciones".
+for i in $(seq 1 14); do key KEYCODE_DPAD_DOWN 0.6; done
+sleep 1; shot 16a-adb-section
 for i in 1 2 3 4 5 6 7 8; do adb shell input swipe 1200 900 1200 300 300; done; sleep 1; shot 16b-adb-switch
 echo "adb_enabled before: $(adb shell settings get global adb_enabled | tr -d '\r')" >> "$OUT/adb-switch.txt"
 if tap_text "ADB por red"; then
