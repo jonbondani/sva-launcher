@@ -3048,20 +3048,20 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             if (event.startMs > System.currentTimeMillis()) { nextEvent = event; break; }
         }
         if (todayEvent != null) {
-            homeCalendarEyebrow.setText("TODAY");
+            homeCalendarEyebrow.setText(Tr.s(this, "TODAY"));
             homeCalendarTitle.setText(todayEvent.title);
-            homeCalendarSubtitle.setText(todayEvent.allDay ? "All day"
+            homeCalendarSubtitle.setText(todayEvent.allDay ? Tr.s(this, "All day")
                     : new java.text.SimpleDateFormat("h:mm a", Tr.formatLocale()).format(new Date(todayEvent.startMs)));
         } else if (nextEvent != null) {
-            homeCalendarEyebrow.setText("UP NEXT");
+            homeCalendarEyebrow.setText(Tr.s(this, "UP NEXT"));
             homeCalendarTitle.setText(nextEvent.title);
             homeCalendarSubtitle.setText(new java.text.SimpleDateFormat("EEE · h:mm a", Tr.formatLocale())
                     .format(new Date(nextEvent.startMs)));
         } else {
-            homeCalendarEyebrow.setText("TODAY");
-            homeCalendarTitle.setText("No events today");
+            homeCalendarEyebrow.setText(Tr.s(this, "TODAY"));
+            homeCalendarTitle.setText(Tr.s(this, "No events today"));
             homeCalendarSubtitle.setText(preferences.getString("publicCalendarUrl", "").isEmpty()
-                    ? "Add a calendar in Settings" : "Your calendar is clear");
+                    ? Tr.s(this, "Add a calendar in Settings") : Tr.s(this, "Your calendar is clear"));
         }
     }
 
