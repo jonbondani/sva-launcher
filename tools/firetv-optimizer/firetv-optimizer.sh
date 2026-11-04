@@ -1119,6 +1119,8 @@ cmd_sva_lista() {
 cmd_sva_calendario() {
   [ -n "${1:-}" ] || die "Uso: sva-calendario '<enlace iCal de Google Calendar>'  (entre comillas simples)"
   case "$1" in
+    */calendar/ical/*/public/*)
+      warn "Ese enlace es la dirección PÚBLICA: solo funciona si el calendario está compartido públicamente. Si es privado, usa la «Dirección secreta en formato iCal» (lleva «private-»)." ;;
     */calendar/ical/*) ;;
     *calendar.google.com*)
       die "Ese es el enlace para ver el calendario en la web, no el iCal. En Google Calendar (en el ordenador): Configuración › tu calendario › Integrar el calendario › «Dirección secreta en formato iCal» (termina en .ics). Pégalo entre comillas simples." ;;

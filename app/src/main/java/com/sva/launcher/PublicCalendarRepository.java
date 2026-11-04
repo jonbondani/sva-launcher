@@ -55,6 +55,20 @@ final class PublicCalendarRepository {
         } catch (Exception ignored) { return null; }
     }
 
+    /** Pure: what to tell the viewer when Google refuses the feed. */
+    static String feedError(int status, String url) {
+        boolean publicAddress = url != null && url.toLowerCase(Locale.ROOT).contains("/public/");
+        if ((status == 404 || status == 403) && publicAddress) {
+            return "Ese calendario no es público. Usa la «Dirección secreta en formato iCal» de Google Calendar "
+                    + "(Configuración › tu calendario › Integrar el calendario).";
+        }
+        if (status == 404 || status == 403) {
+            return "Google no encuentra ese calendario. Copia de nuevo la «Dirección secreta en formato iCal» "
+                    + "(si la restableciste, la antigua deja de funcionar).";
+        }
+        return "Calendar feed returned HTTP " + status + ".";
+    }
+
     static String download(String publicUrl) throws Exception {
         HttpURLConnection connection = null;
         try {
@@ -65,7 +79,7 @@ final class PublicCalendarRepository {
             connection.setRequestProperty("Accept", "text/calendar, text/plain;q=0.9, */*;q=0.5");
             connection.setRequestProperty("User-Agent", "SvaLauncher/1.0 (Android TV)");
             int status = connection.getResponseCode();
-            if (status < 200 || status >= 300) throw new IllegalStateException("Calendar feed returned HTTP " + status + ".");
+            if (status < 200 || status >= 300) throw new IllegalStateException(feedError(status, publicUrl));
             try (InputStream input = connection.getInputStream(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
                 byte[] buffer = new byte[8192];
                 int total = 0, count;
