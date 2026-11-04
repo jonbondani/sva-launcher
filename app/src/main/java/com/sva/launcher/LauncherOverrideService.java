@@ -192,6 +192,7 @@ public final class LauncherOverrideService extends AccessibilityService {
 
     private Intent homeIntent() {
         return new Intent(this, MainActivity.class)
+                .putExtra(MainActivity.EXTRA_FROM_HOME, true)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
     }
 

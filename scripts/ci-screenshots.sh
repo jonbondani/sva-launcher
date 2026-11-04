@@ -175,6 +175,23 @@ key KEYCODE_DPAD_CENTER 3; shot 15c-saved
 key KEYCODE_DPAD_UP 1.5; shot 15d-saved-focus
 adb shell input keyevent --longpress KEYCODE_DPAD_CENTER; sleep 2; shot 15e-saved-removed
 adb shell run-as com.sva.launcher cat shared_prefs/launcher.xml 2>/dev/null | grep -A4 'favoriteChannels' >> "$OUT/favourites.txt"
+# Home from inside Sva: Settings open (and Partidos, another screen) must give way to a clean Home.
+# The intent is the one the Home override sends when Home is pressed.
+HOME_FLAGS=0x34000000
+adb shell am force-stop com.sva.launcher
+adb shell am start -W -n com.sva.launcher/.MainActivity > /dev/null; sleep 10
+key KEYCODE_DPAD_DOWN 1.5; key KEYCODE_DPAD_DOWN 1.5
+for i in 1 2 3 4 5 6 7 8 9; do key KEYCODE_DPAD_RIGHT 1; done
+key KEYCODE_DPAD_CENTER 3; shot 17a-settings-open
+adb shell am start -n com.sva.launcher/.MainActivity -f $HOME_FLAGS --ez from_home true > /dev/null; sleep 3
+shot 17b-home-from-settings
+adb shell uiautomator dump /sdcard/ui.xml > /dev/null 2>&1
+if adb shell cat /sdcard/ui.xml | grep -q 'text="Ajustes"'; then echo "SETTINGS_STILL_OPEN" > "$OUT/home-button.txt"; else echo "SETTINGS_CLOSED_OK" > "$OUT/home-button.txt"; fi
+adb shell am start -n com.sva.launcher/.MatchesActivity > /dev/null; sleep 5
+adb shell am start -n com.sva.launcher/.MainActivity -f $HOME_FLAGS --ez from_home true > /dev/null; sleep 3
+shot 17c-home-from-matches
+top=$(adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" | head -1)
+case "$top" in *MainActivity*) echo "MATCHES_CLOSED_OK" >> "$OUT/home-button.txt" ;; *) echo "MATCHES_STILL_ON_TOP: $top" >> "$OUT/home-button.txt" ;; esac
 # Home override self-repair (HomeRepair). Fire OS drops the accessibility service on an update;
 # stock Android does not, so the drop is simulated with the process dead, then Sva is reinstalled.
 SVC=com.sva.launcher/com.sva.launcher.LauncherOverrideService

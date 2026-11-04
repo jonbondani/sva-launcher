@@ -384,6 +384,8 @@ public final class MainActivity extends Activity {
     @Override protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
+        // Home pressed anywhere in Sva: back to a clean Home, closing Settings and any dialog.
+        if (intent.getBooleanExtra(EXTRA_FROM_HOME, false)) closeEverythingForHome();
         acceptReminderIntent(intent);
         acceptConfigIntent(intent);
         if (!ACTION_WATCH_REMINDER.equals(intent.getAction())) selectTab(TAB_HOME, true);
@@ -399,6 +401,21 @@ public final class MainActivity extends Activity {
         if (settingsScreen != null) { settingsScreen.requestClose(); return; }
         if (activeTab != TAB_HOME) { selectTab(TAB_HOME, true); return; }
         super.onBackPressed();
+    }
+
+    /** Set by the Home override when it brings Sva back for the Home button. */
+    static final String EXTRA_FROM_HOME = "from_home";
+    private final List<android.app.Dialog> openDialogs = new ArrayList<>();
+
+    private void closeEverythingForHome() {
+        for (android.app.Dialog open : new ArrayList<>(openDialogs)) {
+            try { if (open.isShowing()) open.dismiss(); } catch (RuntimeException ignored) { }
+        }
+        openDialogs.clear();
+        SettingsUi.closeOpenChoice();
+        // Home leaves Settings like Back would, except unsaved edits are dropped without asking.
+        if (settingsScreen != null) settingsScreen.closeNow();
+        if (movingPackage != null) finishMove();
     }
 
     static final String EXTRA_SET_PLAYLIST = "set_playlist", EXTRA_SET_GUIDE = "set_guide",
@@ -5064,6 +5081,9 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
     private SettingsScreen settingsScreen;
 
     private void styleDialog(AlertDialog dialog) {
+        // Remembered so Home can close it; no dismiss listener here, callers may set their own.
+        openDialogs.removeIf(d -> !d.isShowing());
+        openDialogs.add(dialog);
         Tr.attach(dialog);
         Window window = dialog.getWindow();
         if (window != null) {
@@ -5460,6 +5480,10 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                     || !draftLicense.trim().equals(iptv.drmLicenseUrl())
                     || !draftHeaders.trim().equals(iptv.drmHeaderText())
                     || !draftCalendarUrl.trim().equals(preferences.getString("publicCalendarUrl", ""));
+        }
+
+        void closeNow() {
+            try { dialog.dismiss(); } catch (RuntimeException ignored) { }
         }
 
         private void requestClose() {

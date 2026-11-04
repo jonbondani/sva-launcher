@@ -116,6 +116,17 @@ final class SettingsUi {
         });
         return row;
     }
+    private static java.lang.ref.WeakReference<AlertDialog> openChoice;
+
+    /** Closes a choice list left open (the Home button leaves Settings). */
+    static void closeOpenChoice() {
+        AlertDialog open = openChoice == null ? null : openChoice.get();
+        if (open != null && open.isShowing()) {
+            try { open.dismiss(); } catch (RuntimeException ignored) { }
+        }
+        openChoice = null;
+    }
+
     static View choice(Context c, String title, String[] rawOptions, int selected, IntConsumer save) {
         // Translate up front so the shown value and the list stay comparable in either language.
         String[] options = Tr.all(c, rawOptions);
@@ -134,6 +145,7 @@ final class SettingsUi {
                         save.accept(which); d.dismiss(); row.requestFocus();
                     }).setNegativeButton("Cancel", null).create();
             dialog.setOnDismissListener(d -> row.requestFocus()); dialog.show(); Tr.attach(dialog);
+            openChoice = new java.lang.ref.WeakReference<>(dialog);
             dialog.getListView().setSelection(current);
         });
         return row;
