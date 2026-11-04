@@ -13,7 +13,7 @@
 # =============================================================================
 set -u
 
-VERSION="1.12.0"
+VERSION="1.12.1"
 BASE_DIR="${FTVO_HOME:-$HOME/firetv-optimizer}"
 BACKUP_DIR="$BASE_DIR/copias"
 ADB="${ADB:-adb}"
@@ -1117,7 +1117,12 @@ cmd_sva_lista() {
   if [ -n "${2:-}" ]; then sva_enviar set_playlist "$1" set_guide "$2"; else sva_enviar set_playlist "$1"; fi
 }
 cmd_sva_calendario() {
-  [ -n "${1:-}" ] || die "Uso: sva-calendario <enlace iCal de Google Calendar>"
+  [ -n "${1:-}" ] || die "Uso: sva-calendario '<enlace iCal de Google Calendar>'  (entre comillas simples)"
+  case "$1" in
+    */calendar/ical/*) ;;
+    *calendar.google.com*)
+      die "Ese es el enlace para ver el calendario en la web, no el iCal. En Google Calendar (en el ordenador): Configuración › tu calendario › Integrar el calendario › «Dirección secreta en formato iCal» (termina en .ics). Pégalo entre comillas simples." ;;
+  esac
   sva_enviar set_calendar "$1"
 }
 
