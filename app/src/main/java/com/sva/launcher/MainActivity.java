@@ -315,6 +315,7 @@ public final class MainActivity extends Activity {
         if (!folder.isEmpty()) backgroundPhotos.addAll(cachedBackgroundFolder(folder));
         else if (!album.isEmpty()) backgroundPhotos.addAll(cachedBackgroundAlbum(album));
         buildHome();
+        registerPackagesReceiver();
         renderChannels();
         handler.post(() -> acceptConfigIntent(getIntent()));
         loadCachedChannels();
@@ -697,7 +698,40 @@ public final class MainActivity extends Activity {
         super.onPause();
     }
 
+    /** Apps installed or removed while Sva runs (DAZN from the Appstore, say) show up on Home at once. */
+    private final android.content.BroadcastReceiver packagesChanged = new android.content.BroadcastReceiver() {
+        @Override public void onReceive(android.content.Context context, Intent intent) {
+            if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
+                    && Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) return;   // an update, not a removal
+            handler.removeCallbacks(appsChangedRefresh);
+            handler.postDelayed(appsChangedRefresh, 1500);
+        }
+    };
+    private final Runnable appsChangedRefresh = new Runnable() {
+        @Override public void run() {
+            if (appsLoading) { handler.postDelayed(this, 1000); return; }   // a load is running: after it
+            if (settingsScreen != null) settingsScreen.forgetInstalledApps();
+            renderApps();
+        }
+    };
+    private boolean packagesReceiverRegistered;
+
+    private void registerPackagesReceiver() {
+        if (packagesReceiverRegistered) return;
+        android.content.IntentFilter filter = new android.content.IntentFilter();
+        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        filter.addDataScheme("package");
+        registerReceiver(packagesChanged, filter);
+        packagesReceiverRegistered = true;
+    }
+
     @Override protected void onDestroy() {
+        if (packagesReceiverRegistered) {
+            try { unregisterReceiver(packagesChanged); } catch (RuntimeException ignored) { }
+            packagesReceiverRegistered = false;
+        }
         if (clockTick != null) handler.removeCallbacks(clockTick);
         if (guideRefreshTick != null) handler.removeCallbacks(guideRefreshTick);
         if (calendarRefreshTick != null) handler.removeCallbacks(calendarRefreshTick);
@@ -5149,6 +5183,12 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         private AppSettingsAdapter appAdapter;
         private RecyclerView appList;
         private List<AppEntry> availableApps;
+
+        /** The installed apps changed: read them again next time the Apps page is shown. */
+        void forgetInstalledApps() {
+            availableApps = null;
+            if (section == APPS && dialog.isShowing()) renderSection();
+        }
         private boolean loadingApps, appsChanged, channelsChanged, youtubeChanged;
         private String draftPlaylist = iptv.playlistUrl();
         private String draftGuide = iptv.guideUrl();

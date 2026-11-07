@@ -198,6 +198,17 @@ adb shell am start -n com.sva.launcher/.MainActivity -f $HOME_FLAGS --ez from_ho
 shot 17c-home-from-matches
 top=$(adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" | head -1)
 case "$top" in *MainActivity*) echo "MATCHES_CLOSED_OK" >> "$OUT/home-button.txt" ;; *) echo "MATCHES_STILL_ON_TOP: $top" >> "$OUT/home-button.txt" ;; esac
+# Apps installed or removed while Sva is open show up without restarting it (disable/enable the
+# emulator's camera app, which is on Home, to fire the same package broadcasts as an install).
+adb shell am force-stop com.sva.launcher
+adb shell am start -W -n com.sva.launcher/.MainActivity > /dev/null; sleep 10
+cam=$(adb shell pm list packages | tr -d '\r' | grep -o 'com.android.camera2\|com.android.camera$' | head -1)
+echo "camera package: $cam" > "$OUT/apps-refresh.txt"
+if [ -n "$cam" ]; then
+  adb shell pm disable-user "$cam" > /dev/null; sleep 6; shot 19a-app-removed
+  adb shell dumpsys activity top | grep -c "$cam" >> "$OUT/apps-refresh.txt"
+  adb shell pm enable "$cam" > /dev/null; sleep 6; shot 19b-app-back
+fi
 # Settings at the Fire TV Stick's density (1080p at 320 dpi = 960x540 dp): moving down the rail
 # opens each page, and Apps keeps room for its app list (the Stremio sign-in used to take it all).
 adb shell wm density 320
