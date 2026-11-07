@@ -5,6 +5,12 @@
 set -u
 OUT=shots
 mkdir -p "$OUT"
+# Reference pages for the "where to watch" reader (futbolenlatv.es team pages), fetched by the runner.
+mkdir -p "$OUT/fixtures"
+for team in real-madrid sevilla malaga marbella-fc; do
+  curl -sL -A "Mozilla/5.0 (SvaLauncher CI)" --max-time 20 "https://www.futbolenlatv.es/equipo/$team" -o "$OUT/fixtures/$team.html" || true
+done
+curl -sL --max-time 20 "https://www.futbolenlatv.es/robots.txt" -o "$OUT/fixtures/robots.txt" || true
 shot() { adb exec-out screencap -p > "$OUT/$1.png"; echo "shot $1"; }
 key()  { adb shell input keyevent "$1"; sleep "${2:-1.2}"; }
 
@@ -192,6 +198,22 @@ adb shell am start -n com.sva.launcher/.MainActivity -f $HOME_FLAGS --ez from_ho
 shot 17c-home-from-matches
 top=$(adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" | head -1)
 case "$top" in *MainActivity*) echo "MATCHES_CLOSED_OK" >> "$OUT/home-button.txt" ;; *) echo "MATCHES_STILL_ON_TOP: $top" >> "$OUT/home-button.txt" ;; esac
+# Settings at the Fire TV Stick's density (1080p at 320 dpi = 960x540 dp): moving down the rail
+# opens each page, and Apps keeps room for its app list (the Stremio sign-in used to take it all).
+adb shell wm density 320
+adb shell am force-stop com.sva.launcher
+adb shell am start -W -n com.sva.launcher/.MainActivity > /dev/null; sleep 10
+key KEYCODE_DPAD_DOWN 1.5; key KEYCODE_DPAD_DOWN 1.5
+for i in 1 2 3 4 5 6 7 8 9; do key KEYCODE_DPAD_RIGHT 1; done
+key KEYCODE_DPAD_CENTER 3; shot 18a-settings-stick-density
+for i in 1 2 3 4 5; do key KEYCODE_DPAD_DOWN 0.4; done
+sleep 1.5; shot 18b-rail-on-apps
+key KEYCODE_DPAD_RIGHT 1.5; shot 18c-apps-list-focus
+key KEYCODE_DPAD_DOWN 1; key KEYCODE_DPAD_DOWN 1; shot 18d-apps-list-down
+adb shell uiautomator dump /sdcard/ui.xml > /dev/null 2>&1
+adb shell cat /sdcard/ui.xml | tr '>' '\n' | grep 'focused="true"' | grep -o 'text="[^"]*"\|class="[^"]*"' | head -4 > "$OUT/settings-apps.txt"
+key KEYCODE_BACK 1.5; key KEYCODE_BACK 1.5
+adb shell wm density reset
 # Home override self-repair (HomeRepair). Fire OS drops the accessibility service on an update;
 # stock Android does not, so the drop is simulated with the process dead, then Sva is reinstalled.
 SVC=com.sva.launcher/com.sva.launcher.LauncherOverrideService

@@ -5253,7 +5253,14 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                 tab.setPadding(dp(14), 0, dp(10), 0);
                 tab.setFocusable(true);
                 tab.setId(View.generateViewId());
-                tab.setOnFocusChangeListener(null);
+                // The section follows focus (after a short pause, so moving fast down the list does not
+                // rebuild every page on the way): only one entry ever looks selected.
+                tab.setOnFocusChangeListener((view, focused) -> {
+                    handler.removeCallbacks(railSelect);
+                    if (!focused || target == section) return;
+                    railTarget = target;
+                    handler.postDelayed(railSelect, RAIL_SELECT_DELAY_MS);
+                });
                 tab.setStateListAnimator(null);
                 tab.setElevation(0);
                 tab.setOnClickListener(v -> {
@@ -5306,6 +5313,17 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                 if (rail != null && isWithinPage(focused, rail)) {
                     if (direction == View.FOCUS_UP && focused == tabs[NAV_ORDER[0]]) return true;
                     if (direction == View.FOCUS_RIGHT) {
+                        // Right before the pause ran out: open the focused entry's page now.
+                        if (focused != tabs[section]) {
+                            for (int i = 0; i < tabs.length; i++) {
+                                if (tabs[i] != focused) continue;
+                                handler.removeCallbacks(railSelect);
+                                captureDrafts();
+                                section = i;
+                                renderSection();
+                                break;
+                            }
+                        }
                         if (focused == tabs[section] && firstControl != null && firstControl.requestFocus()) return true;
                         return true;
                     }
@@ -5496,6 +5514,17 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                     .setNegativeButton("Keep editing", null).show();
             styleDialog(prompt);
         }
+
+        private static final long RAIL_SELECT_DELAY_MS = 350L;
+        private int railTarget = -1;
+        private final Runnable railSelect = () -> {
+            int target = railTarget;
+            if (target < 0 || target == section || tabs[target] == null || !tabs[target].hasFocus()) return;
+            captureDrafts();
+            section = target;
+            renderSection();
+            tabs[target].requestFocus();
+        };
 
         private void renderSection() {
             boolean restoreFocus = detail.findFocus() != null;
@@ -6616,22 +6645,40 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
         }
 
         /** Stremio account for "Estoy viendo": only the session key is stored, never the password. */
+        /**
+         * One row on the Apps page: the e-mail and password live in their own window. Inline, they
+         * took the whole height of a 1080p Fire TV (960x540 dp) and left the app list with none.
+         */
         private void renderStremioAccount(LinearLayout page) {
-            addFormSectionHeader(page, "Estoy viendo · Stremio");
             if (Stremio.signedIn(preferences)) {
-                addFormHint(page, "Conectado como " + preferences.getString(Stremio.PREF_EMAIL, "") + ". Lo que estás viendo en Stremio aparece en el inicio.");
-                addFormButton(page, "Cerrar sesión de Stremio", v -> {
+                addFormButton(page, "Stremio: " + preferences.getString(Stremio.PREF_EMAIL, "") + " · cerrar sesión", v -> {
                     Stremio.signOut(preferences);
                     renderWatching(new ArrayList<>());
                     renderSection();
                 });
                 return;
             }
-            addFormHint(page, "Entra con tu cuenta de Stremio para ver en el inicio lo que tienes a medias. Sva solo guarda la sesión, no la contraseña.");
-            EditText email = addInput(page, "Correo de Stremio", "tu@correo.com", preferences.getString(Stremio.PREF_EMAIL, ""), false);
-            EditText password = addInput(page, "Contraseña", "", "", false);
+            addFormButton(page, "Conectar Stremio (Estoy viendo en el inicio)", v -> showStremioSignIn());
+        }
+
+        private void showStremioSignIn() {
+            LinearLayout form = new LinearLayout(MainActivity.this);
+            form.setOrientation(LinearLayout.VERTICAL);
+            form.setPadding(dp(24), dp(8), dp(24), dp(4));
+            addFormHint(form, "Entra con tu cuenta de Stremio para ver en el inicio lo que tienes a medias. Sva solo guarda la sesión, no la contraseña.");
+            EditText email = addInput(form, "Correo de Stremio", "tu@correo.com", preferences.getString(Stremio.PREF_EMAIL, ""), false);
+            EditText password = addInput(form, "Contraseña", "", "", false);
             password.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-            addFormButton(page, "Conectar Stremio", v -> {
+            AlertDialog signIn = new AlertDialog.Builder(new android.view.ContextThemeWrapper(MainActivity.this,
+                    LiquidTheme.alertDialogTheme(MainActivity.this)))
+                    .setTitle("Conectar Stremio")
+                    .setView(form)
+                    .setPositiveButton("Conectar", null)
+                    .setNegativeButton("Cancelar", null)
+                    .create();
+            signIn.show();
+            styleDialog(signIn);
+            signIn.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
                 String user = email.getText().toString().trim(), pass = password.getText().toString();
                 if (user.isEmpty() || pass.isEmpty()) { Tr.toast(MainActivity.this, "Escribe correo y contraseña.", Toast.LENGTH_SHORT).show(); return; }
                 Tr.toast(MainActivity.this, "Conectando con Stremio…", Toast.LENGTH_SHORT).show();
@@ -6646,6 +6693,7 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
                             return;
                         }
                         Tr.toast(MainActivity.this, "Stremio conectado", Toast.LENGTH_SHORT).show();
+                        signIn.dismiss();
                         maybeRefreshWatching(true);
                         renderSection();
                     });
@@ -6670,7 +6718,9 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             appList.setOverScrollMode(View.OVER_SCROLL_NEVER);
             appAdapter = new AppSettingsAdapter(appList);
             appList.setAdapter(appAdapter);
-            page.addView(appList, new LinearLayout.LayoutParams(-1, 0, 1));
+            LinearLayout.LayoutParams listParams = new LinearLayout.LayoutParams(-1, 0, 1);
+            page.addView(appList, listParams);
+            appList.setMinimumHeight(dp(220));
             if (availableApps != null) appAdapter.setApps(availableApps);
             else if (!loadingApps) {
                 loadingApps = true;
