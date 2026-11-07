@@ -1,0 +1,13 @@
+before crash:      Bound services:{Service[label=Sva Launcher, feedbackType[FEEDBACK_GENERIC], capabilities=0, eventTypes=TYPE_WINDOW_STATE_CHANGED, notificationTimeout=0, requestA11yBtn=false]}
+after crash:      Bound services:{Service[label=Sva Launcher, feedbackType[FEEDBACK_GENERIC], capabilities=0, eventTypes=TYPE_WINDOW_STATE_CHANGED, notificationTimeout=0, requestA11yBtn=false]}
+after opening Sva:      Bound services:{Service[label=Sva Launcher, feedbackType[FEEDBACK_GENERIC], capabilities=0, eventTypes=TYPE_WINDOW_STATE_CHANGED, notificationTimeout=0, requestA11yBtn=false]}
+com.sva.launcher/com.sva.launcher.LauncherOverrideService
+11-07 10:38:14.447  5724  5724 I SvaHomeRepair: wanted=true
+11-07 10:38:25.405  5724  5724 I SvaHomeRepair: unbound
+11-07 10:40:36.309  5784  5784 I SvaHomeRepair: received android.intent.action.MY_PACKAGE_REPLACED
+11-07 10:40:36.312  5784  5784 I SvaHomeRepair: not wanted
+11-07 10:40:43.731  5784  5784 I SvaHomeRepair: wanted=true
+11-07 10:40:52.999  5835  5835 I SvaHomeRepair: wanted=true
+11-07 10:41:02.654  5835  5835 I SvaHomeRepair: list=com.sva.launcher/com.sva.launcher.LauncherOverrideService enabled=1
+11-07 10:41:12.712  5835  5835 I SvaHomeRepair: check: listed=true enabled=1 connected=true stuck=false
+REBOUND_OK

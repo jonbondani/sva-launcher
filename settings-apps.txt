@@ -1,0 +1,2 @@
+text="✓  Camera"
+class="android.widget.Button"

@@ -1,0 +1,2 @@
+adb_enabled before: 1
+ADB_OFF_OK (the emulator no longer answers over ADB)

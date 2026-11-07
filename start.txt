@@ -1,0 +1,7 @@
+Starting: Intent { cmp=com.sva.launcher/.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: com.sva.launcher/.MainActivity
+TotalTime: 3054
+WaitTime: 3059
+Complete
