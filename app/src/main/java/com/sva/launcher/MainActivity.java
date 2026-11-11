@@ -3072,24 +3072,21 @@ private void updateCalendarDetails(List<PublicCalendarRepository.Event> events) 
             return;
         }
         LocalDate today = LocalDate.now();
-        PublicCalendarRepository.Event todayEvent = null;
-        PublicCalendarRepository.Event nextEvent = null;
-        for (PublicCalendarRepository.Event event : cachedCalendarEvents()) {
-            if (CalendarDates.includes(event, today, ZoneId.systemDefault())) {
-                todayEvent = event;
-                break;
-            }
-            if (event.startMs > System.currentTimeMillis()) { nextEvent = event; break; }
-        }
+        // The meeting on now, or the next one: one that already ended is not shown any more.
+        PublicCalendarRepository.Event shown = CalendarDates.forHome(cachedCalendarEvents(), System.currentTimeMillis());
+        PublicCalendarRepository.Event todayEvent = null, nextEvent = null;
+        if (shown != null && CalendarDates.includes(shown, today, ZoneId.systemDefault())) todayEvent = shown;
+        else nextEvent = shown;
+        String timePattern = "es".equals(Tr.formatLocale().getLanguage()) ? "H:mm" : "h:mm a";
         if (todayEvent != null) {
             homeCalendarEyebrow.setText(Tr.s(this, "TODAY"));
             homeCalendarTitle.setText(todayEvent.title);
             homeCalendarSubtitle.setText(todayEvent.allDay ? Tr.s(this, "All day")
-                    : new java.text.SimpleDateFormat("h:mm a", Tr.formatLocale()).format(new Date(todayEvent.startMs)));
+                    : new java.text.SimpleDateFormat(timePattern, Tr.formatLocale()).format(new Date(todayEvent.startMs)));
         } else if (nextEvent != null) {
             homeCalendarEyebrow.setText(Tr.s(this, "UP NEXT"));
             homeCalendarTitle.setText(nextEvent.title);
-            homeCalendarSubtitle.setText(new java.text.SimpleDateFormat("EEE · h:mm a", Tr.formatLocale())
+            homeCalendarSubtitle.setText(new java.text.SimpleDateFormat("EEE · " + timePattern, Tr.formatLocale())
                     .format(new Date(nextEvent.startMs)));
         } else {
             homeCalendarEyebrow.setText(Tr.s(this, "TODAY"));

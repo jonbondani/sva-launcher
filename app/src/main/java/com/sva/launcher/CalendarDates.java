@@ -22,6 +22,21 @@ final class CalendarDates {
         return event.startMs < end && event.endMs > start;
     }
 
+    /**
+     * Pure: the event Home should show at {@code nowMs}: the one on now, or else the next one to
+     * start. Events that are over are skipped (a meeting at 11:00 no longer shows at 18:00). An
+     * event without a usable end counts as one hour long.
+     */
+    static PublicCalendarRepository.Event forHome(java.util.List<PublicCalendarRepository.Event> events, long nowMs) {
+        PublicCalendarRepository.Event best = null;
+        for (PublicCalendarRepository.Event event : events) {
+            long end = event.endMs > event.startMs ? event.endMs : event.startMs + 3_600_000L;
+            if (end <= nowMs) continue;
+            if (best == null || event.startMs < best.startMs) best = event;
+        }
+        return best;
+    }
+
     static boolean inRange(YearMonth month, YearMonth today) {
         return !month.isBefore(today.minusMonths(12)) && !month.isAfter(today.plusMonths(12));
     }

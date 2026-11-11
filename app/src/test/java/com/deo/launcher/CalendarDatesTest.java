@@ -34,4 +34,24 @@ public final class CalendarDatesTest {
         assertFalse(CalendarDates.inRange(current.minusMonths(13), current));
         assertFalse(CalendarDates.inRange(current.plusMonths(13), current));
     }
+
+    @Test public void homeSkipsMeetingsThatAreOver() {
+        long h = 3_600_000L, day = 1_794_000_000_000L;
+        PublicCalendarRepository.Event morning = new PublicCalendarRepository.Event("Reunión 11:00", day + 11 * h, day + 12 * h);
+        PublicCalendarRepository.Event evening = new PublicCalendarRepository.Event("Cena", day + 21 * h, day + 23 * h);
+        PublicCalendarRepository.Event tomorrow = new PublicCalendarRepository.Event("Médico", day + 33 * h, day + 34 * h);
+        java.util.List<PublicCalendarRepository.Event> list = java.util.Arrays.asList(morning, evening, tomorrow);
+        org.junit.Assert.assertSame(morning, CalendarDates.forHome(list, day + 10 * h));      // before it
+        org.junit.Assert.assertSame(morning, CalendarDates.forHome(list, day + 11 * h + 30 * 60_000L)); // during it
+        org.junit.Assert.assertSame(evening, CalendarDates.forHome(list, day + 18 * h));      // 18:00: the 11:00 is over
+        org.junit.Assert.assertSame(tomorrow, CalendarDates.forHome(list, day + 23 * h + 1)); // all of today is over
+        org.junit.Assert.assertNull(CalendarDates.forHome(list, day + 40 * h));
+    }
+
+    @Test public void eventWithoutEndCountsAsOneHour() {
+        PublicCalendarRepository.Event noEnd = new PublicCalendarRepository.Event("Llamada", 1000L, 0L);
+        java.util.List<PublicCalendarRepository.Event> list = java.util.Collections.singletonList(noEnd);
+        org.junit.Assert.assertSame(noEnd, CalendarDates.forHome(list, 1000L + 30 * 60_000L));
+        org.junit.Assert.assertNull(CalendarDates.forHome(list, 1000L + 3_600_000L));
+    }
 }
