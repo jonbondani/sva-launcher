@@ -67,7 +67,9 @@ final class LiveScores {
             this.startMs = startMs; this.homeName = homeName; this.homeScore = homeScore; this.homeLogo = homeLogo;
             this.awayName = awayName; this.awayScore = awayScore; this.awayLogo = awayLogo;
         }
-        boolean live() { return "in".equals(state); }
+        /** Being played now: ESPN says so and it kicked off within the last few hours (a score
+         *  saved before the TV was switched off must not stay "live" for days). */
+        boolean live() { return "in".equals(state) && withinLiveWindow(startMs, System.currentTimeMillis()); }
         boolean finished() { return "post".equals(state); }
         boolean upcoming() { return "pre".equals(state); }
         String title() { return homeName + " - " + awayName; }
@@ -103,8 +105,24 @@ final class LiveScores {
         return context.getApplicationContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
     }
 
+    /** A match lasts at most about three hours with extra time and penalties; four is generous. */
+    static final long LIVE_WINDOW_MS = 4L * 3_600_000L;
+
+    /** Pure: could a game that kicked off at {@code startMs} still be on at {@code nowMs}? */
+    static boolean withinLiveWindow(long startMs, long nowMs) {
+        return startMs <= 0 || (nowMs >= startMs - 15L * 60_000L && nowMs - startMs <= LIVE_WINDOW_MS);
+    }
+
+    /** Pure: is a saved scoreboard from {@code savedDay} (yyyyMMdd) still today's? */
+    static boolean sameScoreboardDay(String savedDay, String today) {
+        return savedDay != null && savedDay.equals(today);
+    }
+
     static List<Game> cached(Context context) {
         ArrayList<Game> games = new ArrayList<>();
+        // Only today's scoreboard: an older one (the TV was off for days) is dropped, not shown.
+        String today = new SimpleDateFormat("yyyyMMdd", Locale.US).format(new Date());
+        if (!sameScoreboardDay(prefs(context).getString("day", ""), today)) return games;
         try {
             JSONArray array = new JSONArray(prefs(context).getString("games", "[]"));
             for (int i = 0; i < array.length(); i++) {
