@@ -1,0 +1,2 @@
+uptime: 62.75  top:     mResumedActivity: ActivityRecord{14121d0 u0 com.sva.launcher/.MainActivity t10}
+CATCH_UP_OK

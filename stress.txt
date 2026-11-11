@@ -1,0 +1,133 @@
+category tab: text="Sports  ·  9" resource-id="" clas
+Total frames rendered: 664
+Janky frames: 663 (99.85%)
+50th percentile: 125ms
+90th percentile: 200ms
+95th percentile: 250ms
+99th percentile: 450ms
+50th gpu percentile: 15ms
+90th gpu percentile: 4950ms
+95th gpu percentile: 4950ms
+99th gpu percentile: 4950ms
+pid before: 4066  after: 4066
+    mResumedActivity: ActivityRecord{178478c u0 com.sva.launcher/.MainActivity t17}
+11-11 17:21:06.933  4202  4202 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-11 17:21:06.949  4202  4202 I AndroidRuntime: Using default boot image
+11-11 17:21:06.949  4202  4202 I AndroidRuntime: Leaving lock profiling enabled
+11-11 17:21:07.028  4202  4202 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-11 17:21:07.031  4202  4202 D AndroidRuntime: Shutting down VM
+11-11 17:21:08.780  4215  4215 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-11 17:21:08.790  4215  4215 I AndroidRuntime: Using default boot image
+11-11 17:21:08.790  4215  4215 I AndroidRuntime: Leaving lock profiling enabled
+11-11 17:21:08.933  4215  4215 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-11 17:21:08.975  4215  4215 D AndroidRuntime: Shutting down VM
+11-11 17:21:10.940  4228  4228 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-11 17:21:10.959  4228  4228 I AndroidRuntime: Using default boot image
+11-11 17:21:10.959  4228  4228 I AndroidRuntime: Leaving lock profiling enabled
+11-11 17:21:11.063  4228  4228 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-11 17:21:11.302  4228  4228 D AndroidRuntime: Shutting down VM
+11-11 17:21:12.947  4244  4244 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-11 17:21:12.948  4244  4244 I AndroidRuntime: Using default boot image
+11-11 17:21:12.948  4244  4244 I AndroidRuntime: Leaving lock profiling enabled
+11-11 17:21:12.986  4244  4244 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-11 17:21:12.994  4244  4244 D AndroidRuntime: Shutting down VM
+11-11 17:21:17.439  4259  4259 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-11 17:21:17.440  4259  4259 I AndroidRuntime: Using default boot image
+11-11 17:21:17.440  4259  4259 I AndroidRuntime: Leaving lock profiling enabled
+11-11 17:21:17.478  4259  4259 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-11 17:21:17.481  4259  4259 D AndroidRuntime: Shutting down VM
+11-11 17:21:19.444  4272  4272 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-11 17:21:19.445  4272  4272 I AndroidRuntime: Using default boot image
+11-11 17:21:19.445  4272  4272 I AndroidRuntime: Leaving lock profiling enabled
+11-11 17:21:19.487  4272  4272 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-11 17:21:20.526  4272  4272 D AndroidRuntime: Shutting down VM
+11-11 17:21:20.979  4294  4294 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-11 17:21:20.980  4294  4294 I AndroidRuntime: Using default boot image
+11-11 17:21:20.980  4294  4294 I AndroidRuntime: Leaving lock profiling enabled
+11-11 17:21:21.024  4294  4294 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-11 17:21:21.028  4294  4294 D AndroidRuntime: Shutting down VM
+11-11 17:21:22.503  4308  4308 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-11 17:21:22.504  4308  4308 I AndroidRuntime: Using default boot image
+11-11 17:21:22.504  4308  4308 I AndroidRuntime: Leaving lock profiling enabled
+11-11 17:21:22.542  4308  4308 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-11 17:21:23.581  4308  4308 D AndroidRuntime: Shutting down VM
+11-11 17:21:24.043  4328  4328 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-11 17:21:24.044  4328  4328 I AndroidRuntime: Using default boot image
+11-11 17:21:24.044  4328  4328 I AndroidRuntime: Leaving lock profiling enabled
+11-11 17:21:24.082  4328  4328 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-11 17:21:24.086  4328  4328 D AndroidRuntime: Shutting down VM
+11-11 17:21:25.730  4341  4341 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-11 17:21:25.731  4341  4341 I AndroidRuntime: Using default boot image
+11-11 17:21:25.731  4341  4341 I AndroidRuntime: Leaving lock profiling enabled
+11-11 17:21:25.769  4341  4341 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-11 17:21:26.795  4341  4341 D AndroidRuntime: Shutting down VM
+11-11 17:21:27.248  4360  4360 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-11 17:21:27.249  4360  4360 I AndroidRuntime: Using default boot image
+11-11 17:21:27.249  4360  4360 I AndroidRuntime: Leaving lock profiling enabled
+11-11 17:21:27.293  4360  4360 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-11 17:21:27.297  4360  4360 D AndroidRuntime: Shutting down VM
+11-11 17:21:28.852  4373  4373 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-11 17:21:28.853  4373  4373 I AndroidRuntime: Using default boot image
+11-11 17:21:28.853  4373  4373 I AndroidRuntime: Leaving lock profiling enabled
+11-11 17:21:28.891  4373  4373 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-11 17:21:29.918  4373  4373 D AndroidRuntime: Shutting down VM
+11-11 17:21:30.371  4392  4392 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-11 17:21:30.372  4392  4392 I AndroidRuntime: Using default boot image
+11-11 17:21:30.372  4392  4392 I AndroidRuntime: Leaving lock profiling enabled
+11-11 17:21:30.411  4392  4392 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-11 17:21:30.416  4392  4392 D AndroidRuntime: Shutting down VM
+11-11 17:21:32.071  4407  4407 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-11 17:21:32.072  4407  4407 I AndroidRuntime: Using default boot image
+11-11 17:21:32.072  4407  4407 I AndroidRuntime: Leaving lock profiling enabled
+11-11 17:21:32.117  4407  4407 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-11 17:21:33.145  4407  4407 D AndroidRuntime: Shutting down VM
+11-11 17:21:33.598  4425  4425 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-11 17:21:33.599  4425  4425 I AndroidRuntime: Using default boot image
+11-11 17:21:33.599  4425  4425 I AndroidRuntime: Leaving lock profiling enabled
+11-11 17:21:33.638  4425  4425 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-11 17:21:33.641  4425  4425 D AndroidRuntime: Shutting down VM
+11-11 17:21:35.171  4439  4439 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-11 17:21:35.172  4439  4439 I AndroidRuntime: Using default boot image
+11-11 17:21:35.172  4439  4439 I AndroidRuntime: Leaving lock profiling enabled
+11-11 17:21:35.212  4439  4439 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-11 17:21:36.238  4439  4439 D AndroidRuntime: Shutting down VM
+Applications Memory Usage (in Kilobytes):
+Uptime: 588592 Realtime: 588592
+
+** MEMINFO in pid 4066 [com.sva.launcher] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap    44730    44660        0        0    47116    66800    41088    21763
+  Dalvik Heap    12354    12224        0        0    16288    15331     7666     7665
+ Dalvik Other     3127     1208        0        0     5540                           
+        Stack      980      980        0        0      992                           
+       Ashmem        2        0        0        0       16                           
+    Other dev      200        0      200        0      412                           
+     .so mmap     4179      208      480        0    44864                           
+    .jar mmap     2776        0      164        0    29744                           
+    .apk mmap      933        0       48        0    24184                           
+    .ttf mmap      123        0       60        0      360                           
+    .dex mmap     6586        4     6568        0     6684                           
+    .oat mmap       82        0        0        0     2460                           
+    .art mmap     8062     7648        8        0    19980                           
+   Other mmap      500       36      108        0     3124                           
+      Unknown      397      380        0        0      840                           
+        TOTAL    85031    67348     7636        0    85031    82131    48754    29428
+ 
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:    19880                          36268
+         Native Heap:    44660                          47116
+                Code:     7532                         112184
+               Stack:      980                            992
+            Graphics:        0                              0
+       Private Other:     1932
+              System:    10047
+             Unknown:                                    6044
+ 
+           TOTAL PSS:    85031            TOTAL RSS:   202604      TOTAL SWAP (KB):        0
+ 
+ Objects
+               Views:      466         ViewRootImpl:        1

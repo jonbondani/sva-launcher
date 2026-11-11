@@ -1,0 +1,10 @@
+    <set name="favoriteChannels">
+        <string>id:BobEsponja.de@ES</string>
+        <string>id:KinoKazka.es@SD</string>
+    </set>
+    <long name="weatherLongitude" value="-4606188812132228792" />
+    <set name="favoriteChannels">
+        <string>id:KinoKazka.es@SD</string>
+    </set>
+    <long name="weatherLongitude" value="-4606188812132228792" />
+    <long name="weatherAttemptedAt" value="1794417745631" />
