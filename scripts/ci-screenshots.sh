@@ -38,6 +38,15 @@ adb shell am start -W -n com.sva.launcher/.MainActivity | tee "$OUT/start.txt"
 sleep 15
 adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" > "$OUT/resumed.txt"
 shot 01-home
+# Smoothness of moving along the Home apps (the emulator's GPU is software, so compare runs only).
+adb shell dumpsys gfxinfo com.sva.launcher reset > /dev/null
+for round in 1 2 3; do
+  adb shell input keyevent KEYCODE_DPAD_RIGHT KEYCODE_DPAD_RIGHT KEYCODE_DPAD_RIGHT KEYCODE_DPAD_RIGHT KEYCODE_DPAD_RIGHT
+  sleep 1
+  adb shell input keyevent KEYCODE_DPAD_LEFT KEYCODE_DPAD_LEFT KEYCODE_DPAD_LEFT KEYCODE_DPAD_LEFT KEYCODE_DPAD_LEFT
+  sleep 1
+done
+adb shell dumpsys gfxinfo com.sva.launcher | grep -E "Total frames|Janky|percentile|Slow UI|Slow bitmap|Slow issue|Frame deadline" > "$OUT/shelf-smoothness.txt"
 key KEYCODE_DPAD_RIGHT; shot 02-home-focus-second-tile
 key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_RIGHT; shot 03-home-focus-fourth-tile
 key KEYCODE_DPAD_UP 1.5; shot 04-home-up

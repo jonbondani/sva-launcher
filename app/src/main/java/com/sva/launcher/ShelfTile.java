@@ -2,7 +2,6 @@ package com.sva.launcher;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -150,25 +149,41 @@ final class ShelfTile {
             return true;
         }
 
+        // Shaders depend only on the bounds and the focus: built once, not on every frame.
+        private final Rect shaderBounds = new Rect();
+        private boolean shadersFocused;
+        private Shader body, glow, sheen, rim;
+        private final RectF outer = new RectF();
+
+        private void buildShaders(Rect b) {
+            float w = rect.width(), h = rect.height();
+            body = new LinearGradient(rect.left, rect.top, rect.right, rect.bottom,
+                    new int[]{0x3DFFFFFF, 0x14FFFFFF, 0x0AFFFFFF, 0x21FFFFFF}, new float[]{0f, .44f, .62f, 1f},
+                    Shader.TileMode.CLAMP);
+            int tintAlpha = Math.round(255 * (focused || moving ? .7f : .34f));
+            glow = new RadialGradient(rect.centerX(), rect.bottom, Math.max(1f, h * .85f),
+                    new int[]{(color & 0x00FFFFFF) | (tintAlpha << 24), color & 0x00FFFFFF}, null, Shader.TileMode.CLAMP);
+            sheen = new RadialGradient(rect.left + w * .26f, rect.top, Math.max(1f, h * .55f),
+                    new int[]{0x57FFFFFF, 0x1AFFFFFF, 0x00FFFFFF}, new float[]{0f, .5f, 1f}, Shader.TileMode.CLAMP);
+            rim = new LinearGradient(0, rect.top, 0, rect.top + h * .5f,
+                    new int[]{0x99FFFFFF, 0x00FFFFFF}, null, Shader.TileMode.CLAMP);
+            shaderBounds.set(b);
+            shadersFocused = focused;
+        }
+
         @Override public void draw(Canvas canvas) {
             Rect b = getBounds();
             rect.set(b);
-            float w = rect.width(), h = rect.height();
+            if (body == null || !shaderBounds.equals(b) || shadersFocused != focused) buildShaders(b);
             paint.setStyle(Paint.Style.FILL);
-            paint.setMaskFilter(null);
             // Body: clear glass, lighter at the top-left and bottom-right edges.
-            paint.setShader(new LinearGradient(rect.left, rect.top, rect.right, rect.bottom,
-                    new int[]{0x3DFFFFFF, 0x14FFFFFF, 0x0AFFFFFF, 0x21FFFFFF}, new float[]{0f, .44f, .62f, 1f},
-                    Shader.TileMode.CLAMP));
+            paint.setShader(body);
             canvas.drawRoundRect(rect, radius, radius, paint);
             // The app's colour glowing up from the bottom (stronger when focused).
-            int tintAlpha = Math.round(255 * (focused || moving ? .7f : .34f));
-            paint.setShader(new RadialGradient(rect.centerX(), rect.bottom, Math.max(1f, h * .85f),
-                    new int[]{(color & 0x00FFFFFF) | (tintAlpha << 24), color & 0x00FFFFFF}, null, Shader.TileMode.CLAMP));
+            paint.setShader(glow);
             canvas.drawRoundRect(rect, radius, radius, paint);
             // Sheen from the upper-left corner, fading out well before the middle (no hard edge).
-            paint.setShader(new RadialGradient(rect.left + w * .26f, rect.top, Math.max(1f, h * .55f),
-                    new int[]{0x57FFFFFF, 0x1AFFFFFF, 0x00FFFFFF}, new float[]{0f, .5f, 1f}, Shader.TileMode.CLAMP));
+            paint.setShader(sheen);
             canvas.drawRoundRect(rect, radius, radius, paint);
             paint.setShader(null);
             // Rims: a bright top edge and a faint outline.
@@ -176,20 +191,21 @@ final class ShelfTile {
             paint.setStrokeWidth(onePx);
             paint.setColor(0x1AFFFFFF);
             canvas.drawRoundRect(rect, radius, radius, paint);
-            paint.setShader(new LinearGradient(0, rect.top, 0, rect.top + h * .5f,
-                    new int[]{0x99FFFFFF, 0x00FFFFFF}, null, Shader.TileMode.CLAMP));
+            paint.setShader(rim);
             canvas.drawRoundRect(rect, radius, radius, paint);
             paint.setShader(null);
             if (focused || moving) {
-                // Ring just outside the glass, with a soft glow.
-                RectF outer = new RectF(rect);
+                // Ring just outside the glass, its glow as two soft strokes (a blur mask filter here
+                // is redrawn on the CPU every frame of the focus animation, which a Fire TV Stick feels).
+                outer.set(rect);
                 outer.inset(-ringGap, -ringGap);
                 float outerRadius = radius + ringGap;
-                paint.setStrokeWidth(ring * 3);
-                paint.setColor((ringColor & 0x00FFFFFF) | 0x55000000);
-                paint.setMaskFilter(new BlurMaskFilter(ring * 3, BlurMaskFilter.Blur.NORMAL));
+                paint.setStrokeWidth(ring * 4);
+                paint.setColor((ringColor & 0x00FFFFFF) | 0x1A000000);
                 canvas.drawRoundRect(outer, outerRadius, outerRadius, paint);
-                paint.setMaskFilter(null);
+                paint.setStrokeWidth(ring * 2.2f);
+                paint.setColor((ringColor & 0x00FFFFFF) | 0x33000000);
+                canvas.drawRoundRect(outer, outerRadius, outerRadius, paint);
                 paint.setStrokeWidth(ring);
                 paint.setColor(ringColor);
                 canvas.drawRoundRect(outer, outerRadius, outerRadius, paint);

@@ -1439,6 +1439,8 @@ public final class MainActivity extends Activity {
     }
 
     @Override public boolean dispatchKeyEvent(KeyEvent event) {
+        // Navigating: the seasonal drift pauses so the focus animation gets the whole GPU.
+        if (seasonParticles != null && event.getAction() == KeyEvent.ACTION_DOWN) seasonParticles.quiet();
         // Moving an app: the tile being moved takes the arrows, OK and Back itself.
         if (movingPackage != null) return super.dispatchKeyEvent(event);
         if (event.getAction() == KeyEvent.ACTION_DOWN && isDpadDirection(event.getKeyCode())

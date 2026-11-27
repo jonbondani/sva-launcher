@@ -15,7 +15,10 @@ import java.util.Random;
  */
 final class SeasonParticles extends View {
     private static final int COUNT = 22;
-    private static final long FRAME_MS = 33;
+    private static final long FRAME_MS = 50;   // 20 fps: enough for falling leaves, half the GPU work of 30+
+    /** While the viewer moves around Home the drift stands still, so every frame goes to the focus. */
+    static final long QUIET_AFTER_KEY_MS = 3000;
+    private long quietUntil;
 
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Path leaf = new Path();
@@ -29,6 +32,12 @@ final class SeasonParticles extends View {
     private final Runnable tick = new Runnable() {
         @Override public void run() {
             if (!running) return;
+            long now = android.os.SystemClock.uptimeMillis();
+            if (now < quietUntil) {
+                last = 0;   // no jump when it resumes
+                postDelayed(this, quietUntil - now);
+                return;
+            }
             invalidate();
             postDelayed(this, FRAME_MS);
         }
@@ -75,6 +84,11 @@ final class SeasonParticles extends View {
         }
         setVisibility(kind == Season.PARTICLES_NONE ? GONE : VISIBLE);
         invalidate();
+    }
+
+    /** A key was pressed: hold still for a moment (the last frame stays on screen). */
+    void quiet() {
+        quietUntil = android.os.SystemClock.uptimeMillis() + QUIET_AFTER_KEY_MS;
     }
 
     /** Starts or stops the drift. Stopped, the last frame stays still on screen. */
