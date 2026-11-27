@@ -55,6 +55,46 @@ final class GlassBackdrop {
         });
     }
 
+    /**
+     * The blurred wallpaper inside a rounded rectangle, drawn as one shaded shape. Cheaper on a
+     * Fire TV Stick's GPU than clipping the canvas to a rounded path and drawing the bitmap into it.
+     */
+    void drawRounded(Canvas canvas, Paint paint, RectF shape, float radius, int x, int y, int width, int height) {
+        if (outgoing != null && fraction < 1f) drawShaded(canvas, paint, outgoing, shape, radius, x, y, width, height, 255);
+        if (current != null) drawShaded(canvas, paint, current, shape, radius, x, y, width, height, Math.round(255 * fraction));
+        paint.setShader(null);
+        paint.setAlpha(255);
+    }
+
+    private final android.graphics.Matrix matrix = new android.graphics.Matrix();
+    private Bitmap shaderBitmap, outgoingShaderBitmap;
+    private android.graphics.BitmapShader shader, outgoingShader;
+
+    private android.graphics.BitmapShader shaderFor(Bitmap image) {
+        if (image == shaderBitmap && shader != null) return shader;
+        if (image == outgoingShaderBitmap && outgoingShader != null) return outgoingShader;
+        outgoingShaderBitmap = shaderBitmap;
+        outgoingShader = shader;
+        shaderBitmap = image;
+        shader = new android.graphics.BitmapShader(image, android.graphics.Shader.TileMode.CLAMP, android.graphics.Shader.TileMode.CLAMP);
+        return shader;
+    }
+
+    private void drawShaded(Canvas canvas, Paint paint, Bitmap image, RectF shape, float radius,
+                            int x, int y, int width, int height, int alpha) {
+        if (image.isRecycled()) return;
+        float scale = Math.max((float) width / image.getWidth(), (float) height / image.getHeight());
+        float left = (width - image.getWidth() * scale) / 2f - x;
+        float top = (height - image.getHeight() * scale) * .30f - y;
+        android.graphics.BitmapShader s = shaderFor(image);
+        matrix.setScale(scale, scale);
+        matrix.postTranslate(left, top);
+        s.setLocalMatrix(matrix);
+        paint.setShader(s);
+        paint.setAlpha(alpha);
+        canvas.drawRoundRect(shape, radius, radius, paint);
+    }
+
     void draw(Canvas canvas, Paint paint, int x, int y, int width, int height) {
         if (outgoing != null && fraction < 1f) drawBitmap(canvas, paint, outgoing, x, y, width, height, 255);
         if (current != null) drawBitmap(canvas, paint, current, x, y, width, height, Math.round(255 * fraction));

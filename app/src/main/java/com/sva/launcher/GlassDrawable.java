@@ -9,7 +9,6 @@ import android.view.View;
 final class GlassDrawable extends Drawable {
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private final RectF rect = new RectF();
-    private final Path clip = new Path();
     private final Context context;
     private final GlassBackdrop backdrop;
     private final int tint, border;
@@ -27,13 +26,22 @@ final class GlassDrawable extends Drawable {
         if (backdrop != null) backdrop.register(this);
     }
 
+    // Gradients depend only on the bounds: built once per size, not on every frame.
+    private final Rect shaderBounds = new Rect();
+    private Shader sheen, rim;
+
     @Override public void draw(Canvas canvas) {
         rect.set(getBounds());
         rect.inset(Math.max(1, stroke) / 2f, Math.max(1, stroke) / 2f);
-        clip.reset();
-        clip.addRoundRect(rect, radius, radius, Path.Direction.CW);
-        int save = canvas.save();
-        canvas.clipPath(clip);
+        if (sheen == null || !shaderBounds.equals(getBounds())) {
+            shaderBounds.set(getBounds());
+            sheen = new LinearGradient(0, rect.top, rect.right, rect.bottom,
+                    new int[]{0x26FFFFFF, 0x03FFFFFF, 0x080B1525}, null, Shader.TileMode.CLAMP);
+            rim = new LinearGradient(rect.left, rect.top, rect.right, rect.bottom,
+                    new int[]{0xB3FFFFFF, 0x08FFFFFF, 0x30FFFFFF}, null, Shader.TileMode.CLAMP);
+        }
+        // No canvas clip: every layer is a rounded shape of its own (clipping to a rounded path is
+        // what a Fire TV Stick's GPU finds most expensive, and Home has a dozen of these surfaces).
         paint.setStyle(Paint.Style.FILL);
         paint.setShader(null);
         paint.setColor(Color.WHITE);
@@ -42,26 +50,24 @@ final class GlassDrawable extends Drawable {
         if (backdrop != null && owner instanceof View) {
             View view = (View) owner;
             view.getLocationOnScreen(location);
-            backdrop.draw(canvas, paint, location[0], location[1],
+            backdrop.drawRounded(canvas, paint, rect, radius, location[0], location[1],
                     context.getResources().getDisplayMetrics().widthPixels,
                     context.getResources().getDisplayMetrics().heightPixels);
         }
+        paint.setShader(null);
         paint.setColor(tint);
         paint.setAlpha(Color.alpha(tint) * alpha / 255);
-        canvas.drawRect(rect, paint);
+        canvas.drawRoundRect(rect, radius, radius, paint);
         paint.setAlpha(alpha);
-        paint.setShader(new LinearGradient(0, rect.top, rect.right, rect.bottom,
-                new int[]{0x26FFFFFF, 0x03FFFFFF, 0x080B1525}, null, Shader.TileMode.CLAMP));
-        canvas.drawRect(rect, paint);
-        canvas.restoreToCount(save);
+        paint.setShader(sheen);
+        canvas.drawRoundRect(rect, radius, radius, paint);
         paint.setShader(null);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(Math.max(1, stroke));
         paint.setColor(border);
         paint.setAlpha(Color.alpha(border) * alpha / 255);
         canvas.drawRoundRect(rect, radius, radius, paint);
-        paint.setShader(new LinearGradient(rect.left, rect.top, rect.right, rect.bottom,
-                new int[]{0xB3FFFFFF, 0x08FFFFFF, 0x30FFFFFF}, null, Shader.TileMode.CLAMP));
+        paint.setShader(rim);
         paint.setStrokeWidth(LiquidTheme.dp(context, .7f));
         paint.setAlpha(alpha);
         canvas.drawRoundRect(rect, radius, radius, paint);
