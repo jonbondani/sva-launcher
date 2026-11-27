@@ -46,7 +46,15 @@ for round in 1 2 3; do
   adb shell input keyevent KEYCODE_DPAD_LEFT KEYCODE_DPAD_LEFT KEYCODE_DPAD_LEFT KEYCODE_DPAD_LEFT KEYCODE_DPAD_LEFT
   sleep 1
 done
-adb shell dumpsys gfxinfo com.sva.launcher | grep -E "Total frames|Janky|percentile|Slow UI|Slow bitmap|Slow issue|Frame deadline" > "$OUT/shelf-smoothness.txt"
+adb shell dumpsys gfxinfo com.sva.launcher > "$OUT/shelf-gfxinfo-full.txt"
+grep -E "Total frames|Janky|percentile|Slow UI|Slow bitmap|Slow issue|Frame deadline" "$OUT/shelf-gfxinfo-full.txt" > "$OUT/shelf-smoothness.txt"
+# Same walk with per-frame timings: where each frame's time goes (input, animation, layout, draw).
+adb shell dumpsys gfxinfo com.sva.launcher reset > /dev/null
+for round in 1 2; do
+  adb shell input keyevent KEYCODE_DPAD_RIGHT KEYCODE_DPAD_RIGHT KEYCODE_DPAD_RIGHT KEYCODE_DPAD_LEFT KEYCODE_DPAD_LEFT KEYCODE_DPAD_LEFT
+  sleep 1
+done
+adb shell dumpsys gfxinfo com.sva.launcher framestats > "$OUT/shelf-framestats.txt"
 key KEYCODE_DPAD_RIGHT; shot 02-home-focus-second-tile
 key KEYCODE_DPAD_RIGHT; key KEYCODE_DPAD_RIGHT; shot 03-home-focus-fourth-tile
 key KEYCODE_DPAD_UP 1.5; shot 04-home-up
