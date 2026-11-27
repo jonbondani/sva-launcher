@@ -1,0 +1,18 @@
+      android.permission.WRITE_SECURE_SETTINGS
+      android.permission.WRITE_SECURE_SETTINGS: granted=true
+    User 0: ceDataInode=123473 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      android.permission.WRITE_SECURE_SETTINGS
+      android.permission.WRITE_SECURE_SETTINGS: granted=true
+    User 0: ceDataInode=123473 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false
+11-27 11:47:45.717  5124  5124 I SvaHomeRepair: not wanted
+11-27 11:48:20.631  5322  5322 I SvaHomeRepair: not wanted
+11-27 11:48:54.445  5322  5322 I SvaHomeRepair: not wanted
+11-27 11:49:09.855  5322  5322 I SvaHomeRepair: not wanted
+11-27 11:49:15.322  5599  5599 I SvaHomeRepair: not wanted
+11-27 11:49:45.961  5694  5694 I SvaHomeRepair: not wanted
+11-27 11:50:37.501  5694  5694 I SvaHomeRepair: wanted=true
+11-27 11:50:45.434  5694  5694 I SvaHomeRepair: unbound
+11-27 11:50:47.792  6114  6114 I SvaHomeRepair: received android.intent.action.MY_PACKAGE_REPLACED
+11-27 11:50:47.793  6114  6114 I SvaHomeRepair: unbound by the update: restoring
+11-27 11:50:47.798  6114  6114 I SvaHomeRepair: list= enabled=0
+11-27 11:50:47.816  6114  6114 I SvaHomeRepair: wanted=true

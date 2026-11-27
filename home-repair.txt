@@ -1,0 +1,4 @@
+repair after update: com.sva.launcher/com.sva.launcher.LauncherOverrideService
+REPAIR_OK
+after deliberate off + update: 
+OFF_RESPECTED

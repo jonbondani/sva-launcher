@@ -1,0 +1,400 @@
+11-27 11:50:44.668     0     0 I apexd   : Found "/apex/com.android.media.swcodec@300000000" backed by file /system/apex/com.android.media.swcodec.apex
+11-27 11:50:44.711     0     0 I apexd   : Found "/apex/com.android.os.statsd@300000000" backed by file /system/apex/com.android.os.statsd.apex
+11-27 11:50:44.753     0     0 I apexd   : Found "/apex/com.android.wifi@300000000" backed by file /system/apex/com.android.wifi.apex
+11-27 11:50:44.760     0     0 I apexd   : Found "/apex/com.android.sdkext@300000000" backed by file /system/apex/com.android.sdkext.apex
+11-27 11:50:44.765     0     0 I apexd   : 21 packages restored.
+11-27 11:50:44.716   157   157 I BpBinder: onLastStrongRef automatically unlinking death recipients: <uncached descriptor>
+11-27 11:50:44.900     0     0 I AidlLazyServiceRegistrar: Registering service apexservice
+11-27 11:50:44.723   157   157 I servicemanager: Tried to unregister apexservice, but there is about to be a client.
+11-27 11:50:44.904     0     0 I AidlLazyServiceRegistrar: Trying to shut down the service. No clients in use for any service in process.
+11-27 11:50:44.910     0     0 I AidlLazyServiceRegistrar: Failed to unregister service apexservice
+11-27 11:50:35.528   507   538 D AutofillManagerService: onBackKeyPressed()
+11-27 11:50:45.139   507   507 W WindowManager: removeWindowToken: Attempted to remove non-existing token: android.os.Binder@ce01355
+11-27 11:50:45.256  2319  2319 I abb     : StartCommandInProcess(73657474696e67730067657400676c6f settings.get.glo [truncated])
+11-27 11:50:45.404  2319  2323 I abb     : oneway function results will be dropped but finished with status OK and parcel size 4
+11-27 11:50:45.414   507   537 W Looper  : Slow dispatch took 146ms android.fg h=android.os.Handler c=com.android.server.-$$Lambda$NetworkManagementService$NetdUnsolicitedEventListener$0xWa9DGxTnoGVHppsM-nng2PygE@2dde035 m=0
+11-27 11:50:45.416  2319  2319 I abb     : StartCommandInProcess(7061636b61676500696e7374616c6c00 package.install. [truncated])
+11-27 11:50:45.400   507   507 W Binder:507_16: type=1400 audit(0.0:727): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+11-27 11:50:45.400   507   507 W Binder:507_16: type=1400 audit(0.0:728): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+11-27 11:50:45.434  5694  5694 I SvaHomeRepair: unbound
+11-27 11:50:45.400   507   507 W Binder:507_16: type=1400 audit(0.0:729): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+11-27 11:50:45.453   507  3938 W WindowManager: Cannot find window which accessibility connection is added to
+11-27 11:50:45.454   507  3938 W WindowManager: Failed looking up window session=Session{a22bccb 5694:u0a10130} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5425 com.android.server.wm.WindowManagerService.removeWindow:1892 com.android.server.wm.Session.remove:193 
+11-27 11:50:46.805   507   605 W RuleEvaluation: Integrity rule files are not available.
+11-27 11:50:46.806   507   563 I PackageManager: Integrity check passed for file:///data/app/vmdl1816241709.tmp
+11-27 11:50:46.817   507   546 I ActivityManager: Force stopping com.sva.launcher appid=10130 user=-1: installPackageLI
+11-27 11:50:46.819   507   546 I ActivityManager: Killing 5694:com.sva.launcher/u0a130 (adj 0): stop com.sva.launcher due to installPackageLI
+11-27 11:50:46.821   507   563 I PackageManager: Update package com.sva.launcher code path from /data/app/~~sRjeGnbQiTfbA7dOx9frDg==/com.sva.launcher-38VKRstVOBqTncz7cENRDg== to /data/app/~~cAiavSa4vU3wJ7729TBXDQ==/com.sva.launcher-7doZDCm0uDi5bIeB8PYU5A==; Retain data and using new
+11-27 11:50:46.821   507   563 I PackageManager: Update package com.sva.launcher resource path from /data/app/~~sRjeGnbQiTfbA7dOx9frDg==/com.sva.launcher-38VKRstVOBqTncz7cENRDg== to /data/app/~~cAiavSa4vU3wJ7729TBXDQ==/com.sva.launcher-7doZDCm0uDi5bIeB8PYU5A==; Retain data and using new
+11-27 11:50:46.822   507   546 W ActivityTaskManager: Force removing ActivityRecord{e60d0ef u0 com.sva.launcher/.MainActivity t21 f}}: app died, no saved state
+11-27 11:50:46.827   507   563 D CompatibilityChangeReporter: Compat change id reported: 135549675; UID 10130; state: ENABLED
+11-27 11:50:46.827   507   563 I PackageManager: Permission ownership changed. Updating all permissions.
+11-27 11:50:47.025     0     0 I binder  : undelivered transaction 281425, process died.
+11-27 11:50:46.304   507   507 W Binder:507_16: type=1400 audit(0.0:730): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+11-27 11:50:46.842   282   282 I Zygote  : Process 5694 exited due to signal 9 (Killed)
+11-27 11:50:46.846   300   337 W EmuHWC2 : No layers, exit, buffer 0x0
+11-27 11:50:46.857   507   563 D PackageManager: Instant App installer not found with android.intent.action.INSTALL_INSTANT_APP_PACKAGE
+11-27 11:50:46.857   507   563 D PackageManager: Clear ephemeral installer activity
+11-27 11:50:46.858   507   546 W InputReader: Device virtio_input_multi_touch_10 is associated with display ADISPLAY_ID_NONE.
+11-27 11:50:46.858   507   546 W InputReader: Device virtio_input_multi_touch_7 is associated with display ADISPLAY_ID_NONE.
+11-27 11:50:46.858   507   546 W InputReader: Device virtio_input_multi_touch_4 is associated with display ADISPLAY_ID_NONE.
+11-27 11:50:46.858   507   546 W InputReader: Device virtio_input_multi_touch_5 is associated with display ADISPLAY_ID_NONE.
+11-27 11:50:46.858   507   546 W InputReader: Device virtio_input_multi_touch_2 is associated with display ADISPLAY_ID_NONE.
+11-27 11:50:46.858   507   546 W InputReader: Device virtio_input_multi_touch_6 is associated with display ADISPLAY_ID_NONE.
+11-27 11:50:46.858   507   546 W InputReader: Device virtio_input_multi_touch_3 is associated with display ADISPLAY_ID_NONE.
+11-27 11:50:46.858   507   546 W InputReader: Device virtio_input_multi_touch_8 is associated with display ADISPLAY_ID_NONE.
+11-27 11:50:46.858   507   546 W InputReader: Device virtio_input_multi_touch_9 is associated with display ADISPLAY_ID_NONE.
+11-27 11:50:46.858   507   546 W InputReader: Device virtio_input_multi_touch_11 is associated with display ADISPLAY_ID_NONE.
+11-27 11:50:46.858   507   546 W InputReader: Device virtio_input_multi_touch_10 is associated with display ADISPLAY_ID_NONE.
+11-27 11:50:46.858   507   546 W InputReader: Device virtio_input_multi_touch_7 is associated with display ADISPLAY_ID_NONE.
+11-27 11:50:46.858   507   546 W InputReader: Device virtio_input_multi_touch_4 is associated with display ADISPLAY_ID_NONE.
+11-27 11:50:46.858   507   546 W InputReader: Device virtio_input_multi_touch_5 is associated with display ADISPLAY_ID_NONE.
+11-27 11:50:46.858   507   546 W InputReader: Device virtio_input_multi_touch_2 is associated with display ADISPLAY_ID_NONE.
+11-27 11:50:46.858   507   546 W InputReader: Device virtio_input_multi_touch_6 is associated with display ADISPLAY_ID_NONE.
+11-27 11:50:46.858   507   546 W InputReader: Device virtio_input_multi_touch_3 is associated with display ADISPLAY_ID_NONE.
+11-27 11:50:46.858   507   546 W InputReader: Device virtio_input_multi_touch_8 is associated with display ADISPLAY_ID_NONE.
+11-27 11:50:46.858   507   546 W InputReader: Device virtio_input_multi_touch_9 is associated with display ADISPLAY_ID_NONE.
+11-27 11:50:46.858   507   546 W InputReader: Device virtio_input_multi_touch_11 is associated with display ADISPLAY_ID_NONE.
+11-27 11:50:46.863   507   540 W ActivityManager: setHasOverlayUi called on unknown pid: 5694
+11-27 11:50:46.867   507   548 I libprocessgroup: Successfully killed process cgroup uid 10130 pid 5694 in 44ms
+11-27 11:50:46.871   416   423 E installd: Couldn't opendir /data/app/vmdl1816241709.tmp: No such file or directory
+11-27 11:50:46.871   416   423 E installd: Failed to delete /data/app/vmdl1816241709.tmp: No such file or directory
+11-27 11:50:46.872  2319  2323 I abb     : oneway function results will be dropped but finished with status OK and parcel size 4
+11-27 11:50:46.873   507   563 I ActivityManager: Force stopping com.sva.launcher appid=10130 user=0: pkg removed
+11-27 11:50:46.875   507   546 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.sva.launcher flg=0x4000010 (has extras) } to com.android.gallery3d/.app.PackagesMonitor
+11-27 11:50:46.877   507   599 I InputReader: Reconfiguring input devices, changes=KEYBOARD_LAYOUTS | 
+11-27 11:50:46.878   300   337 W EmuHWC2 : No layers, exit, buffer 0x0
+11-27 11:50:46.880  1719  1719 I MediaProvider: Invalidating LocalCallingIdentity cache for package com.sva.launcher. Reason: package android.intent.action.PACKAGE_REMOVED
+11-27 11:50:46.880   696   696 V AvrcpMediaPlayerList: mPackageChangedBroadcastReceiver: action: android.intent.action.PACKAGE_REMOVED
+11-27 11:50:46.868   507   507 W Binder:507_16: type=1400 audit(0.0:731): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+11-27 11:50:46.890   507   507 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 1000; state: DISABLED
+11-27 11:50:46.868   507   507 W Binder:507_16: type=1400 audit(0.0:732): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+11-27 11:50:46.895   300   337 W EmuHWC2 : No layers, exit, buffer 0x0
+11-27 11:50:46.896   299   304 D goldfish-address-space: claimShared: Ask to claim region [0x3f5fa4000 0x3f678d000]
+11-27 11:50:46.899   299   303 D goldfish-address-space: claimShared: Ask to claim region [0x3f678d000 0x3f70fd000]
+11-27 11:50:46.901   282   282 D Zygote  : Forked child process 6101
+11-27 11:50:46.909   300   337 W EmuHWC2 : No layers, exit, buffer 0x0
+11-27 11:50:46.910   299   303 D goldfish-address-space: claimShared: Ask to claim region [0x3f70fd000 0x3f78e6000]
+11-27 11:50:46.910   299   303 D goldfish-address-space: claimShared: Ask to claim region [0x3f4000000 0x3f47e9000]
+11-27 11:50:46.919   507   547 I ActivityManager: Start proc 6101:com.android.keychain/1000 for service {com.android.keychain/com.android.keychain.KeyChainService}
+11-27 11:50:46.925   300   337 W EmuHWC2 : No layers, exit, buffer 0x0
+11-27 11:50:46.935   507   546 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.sva.launcher flg=0x4000010 (has extras) } to com.android.packageinstaller/.PackageInstalledReceiver
+11-27 11:50:46.935   507   546 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.sva.launcher flg=0x4000010 (has extras) } to com.android.gallery3d/.app.PackagesMonitor
+11-27 11:50:46.936   507   507 I Telecom : DefaultDialerCache: Refreshing default dialer for user 0: now com.android.dialer: DDC.oR@AJw
+11-27 11:50:46.939  1719  1719 I MediaProvider: Invalidating LocalCallingIdentity cache for package com.sva.launcher. Reason: package android.intent.action.PACKAGE_ADDED
+11-27 11:50:46.941   507   599 I InputReader: Reconfiguring input devices, changes=KEYBOARD_LAYOUTS | 
+11-27 11:50:46.941   696   696 V AvrcpMediaPlayerList: mPackageChangedBroadcastReceiver: action: android.intent.action.PACKAGE_ADDED
+11-27 11:50:46.941   696   696 D AvrcpMediaPlayerList: Name of package changed: com.sva.launcher
+11-27 11:50:46.958  1034  1034 D CarrierSvcBindHelper: No carrier app for: 0
+11-27 11:50:46.966  1034  1034 D CarrierSvcBindHelper: No carrier app for: 0
+11-27 11:50:46.982  2348  2348 I ResolverListAdapter: Add DisplayResolveInfo component: ComponentInfo{com.sva.launcher/com.sva.launcher.MainActivity}, intent component: ComponentInfo{com.sva.launcher/com.sva.launcher.MainActivity}
+11-27 11:50:46.983  2348  2348 I ResolverListAdapter: Add DisplayResolveInfo component: ComponentInfo{com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}, intent component: ComponentInfo{com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+11-27 11:50:46.994   507   599 I InputReader: Reconfiguring input devices, changes=KEYBOARD_LAYOUTS | 
+11-27 11:50:46.996  1034  1034 D CarrierConfigLoader: mHandler: 9 phoneId: 0
+11-27 11:50:47.001  6101  6101 W ndroid.keychai: Unexpected CPU variant for X86 using defaults: x86_64
+11-27 11:50:47.004   507   546 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10130; state: DISABLED
+11-27 11:50:47.004   507   547 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10130; state: ENABLED
+11-27 11:50:46.868   507   507 W Binder:507_16: type=1400 audit(0.0:733): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+11-27 11:50:47.007   299   303 D goldfish-address-space: claimShared: Ask to claim region [0x3f47e9000 0x3f5159000]
+11-27 11:50:47.011   378   391 I adbd    : jdwp connection from 6101
+11-27 11:50:47.030   734   825 I PermissionControllerServiceImpl: Updating user sensitive for uid 10130
+11-27 11:50:47.072  6114  6114 I om.sva.launche: Late-enabling -Xcheck:jni
+11-27 11:50:47.085  6114  6114 I om.sva.launche: Unquickening 12 vdex files!
+11-27 11:50:47.085  6114  6114 W om.sva.launche: Unexpected CPU variant for X86 using defaults: x86_64
+11-27 11:50:47.113   507   517 I system_server: Background concurrent copying GC freed 167671(7890KB) AllocSpace objects, 49(2248KB) LOS objects, 49% free, 9495KB/18MB, paused 66us total 222.053ms
+11-27 11:50:47.063   282   282 D Zygote  : Forked child process 6114
+11-27 11:50:47.149   507   547 W ActivityManager: Slow operation: 146ms so far, now at startProcess: returned from zygote!
+11-27 11:50:47.166   507   547 W ActivityManager: Slow operation: 162ms so far, now at startProcess: done updating battery stats
+11-27 11:50:47.166   507   547 W ActivityManager: Slow operation: 162ms so far, now at startProcess: building log message
+11-27 11:50:47.166   507   547 I ActivityManager: Start proc 6114:com.sva.launcher/u0a130 for broadcast {com.sva.launcher/com.sva.launcher.HomeRepair}
+11-27 11:50:47.166   507   547 W ActivityManager: Slow operation: 162ms so far, now at startProcess: starting to update pids map
+11-27 11:50:47.166   507   547 W ActivityManager: Slow operation: 162ms so far, now at startProcess: done updating pids map
+11-27 11:50:47.170   507   545 W VoiceInteractionManager: no available voice recognition services found for user 0
+11-27 11:50:47.170  6101  6101 I ndroid.keychai: The ClassLoaderContext is a special shared library.
+11-27 11:50:47.177  6101  6101 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+11-27 11:50:47.177  6101  6101 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+11-27 11:50:47.279   378   391 I adbd    : jdwp connection from 6114
+11-27 11:50:47.306  6101  6140 W KeyChain: Creating new DB.
+11-27 11:50:47.354   507  3672 D CompatibilityChangeReporter: Compat change id reported: 136274596; UID 1000; state: ENABLED
+11-27 11:50:47.656   299   303 D goldfish-address-space: claimShared: Ask to claim region [0x3f5159000 0x3f5ac9000]
+11-27 11:50:47.778  6114  6114 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+11-27 11:50:47.779  6114  6114 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+11-27 11:50:47.792  6114  6114 I SvaHomeRepair: received android.intent.action.MY_PACKAGE_REPLACED
+11-27 11:50:47.793  6114  6114 I SvaHomeRepair: unbound by the update: restoring
+11-27 11:50:47.798  6114  6114 I SvaHomeRepair: list= enabled=0
+11-27 11:50:47.806  2348  2348 I ResolverListAdapter: Add DisplayResolveInfo component: ComponentInfo{com.sva.launcher/com.sva.launcher.MainActivity}, intent component: ComponentInfo{com.sva.launcher/com.sva.launcher.MainActivity}
+11-27 11:50:47.806  2348  2348 I ResolverListAdapter: Add DisplayResolveInfo component: ComponentInfo{com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}, intent component: ComponentInfo{com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+11-27 11:50:47.816  6114  6114 I SvaHomeRepair: wanted=true
+11-27 11:50:47.872   157   157 I servicemanager: Notifying apexservice they have clients: 1
+11-27 11:50:47.872   157   157 I servicemanager: Notifying apexservice they have clients: 0
+11-27 11:50:48.060     0     0 I AidlLazyServiceRegistrar: Process has 1 (of 1 available) client(s) in use after notification android.apex.IApexService has clients: 1
+11-27 11:50:48.083     0     0 I AidlLazyServiceRegistrar: Process has 0 (of 1 available) client(s) in use after notification android.apex.IApexService has clients: 0
+11-27 11:50:48.091     0     0 I AidlLazyServiceRegistrar: Trying to shut down the service. No clients in use for any service in process.
+11-27 11:50:48.103     0     0 I AidlLazyServiceRegistrar: Unregistered all clients and exiting
+11-27 11:50:47.915   157   157 I BpBinder: onLastStrongRef automatically unlinking death recipients: <uncached descriptor>
+11-27 11:50:48.270     0     0 I init    : Service 'apexd' (pid 6087) exited with status 0 oneshot service took 4.318000 seconds in background
+11-27 11:50:48.283     0     0 I init    : Sending signal 9 to service 'apexd' (pid 6087) process group...
+11-27 11:50:48.293     0     0 I libprocessgroup: Successfully killed process cgroup uid 0 pid 6087 in 0ms
+11-27 11:50:49.866   507  1479 E TaskPersister: File error accessing recents directory (directory doesn't exist?).
+11-27 11:50:52.969  6114  6149 D ProfileInstaller: Installing profile for com.sva.launcher
+11-27 11:50:54.897  6152  6154 I cmd     : oneway function results will be dropped but finished with status OK and parcel size 4
+11-27 11:50:54.911   157   157 I servicemanager: Since 'apexservice' could not be found, trying to start it as a lazy AIDL service
+11-27 11:50:55.098     0     0 I init    : starting service 'apexd'...
+11-27 11:50:55.100     0     0 I init    : Control message: Processed ctl.interface_start for 'aidl/apexservice' from pid: 157 (/system/bin/servicemanager)
+11-27 11:50:55.107     0     0 I apexd   : Scanning /system/apex for preinstalled data
+11-27 11:50:55.110     0     0 I apexd   : Scanning /system_ext/apex for preinstalled data
+11-27 11:50:55.112     0     0 I apexd   : ... does not exist. Skipping
+11-27 11:50:55.113     0     0 I apexd   : Scanning /product/apex for preinstalled data
+11-27 11:50:55.115     0     0 I apexd   : ... does not exist. Skipping
+11-27 11:50:55.116     0     0 I apexd   : Scanning /vendor/apex for preinstalled data
+11-27 11:50:55.118     0     0 I apexd   : ... does not exist. Skipping
+11-27 11:50:55.119     0     0 I apexd   : Populating APEX database from mounts...
+11-27 11:50:55.121     0     0 I apexd   : Found "/apex/com.android.neuralnetworks@300000000" backed by file /system/apex/com.android.neuralnetworks.apex
+11-27 11:50:55.124     0     0 I apexd   : Found "/apex/com.android.runtime@1" backed by file /system/apex/com.android.runtime.apex
+11-27 11:50:55.127     0     0 I apexd   : Found "/apex/com.android.resolv@300000000" backed by file /system/apex/com.android.resolv.apex
+11-27 11:50:55.130     0     0 I apexd   : Found "/apex/com.android.extservices@300000000" backed by file /system/apex/com.android.extservices.apex
+11-27 11:50:55.134     0     0 I apexd   : Found "/apex/com.android.tethering@300000000" backed by file /system/apex/com.android.tethering.apex
+11-27 11:50:55.137     0     0 I apexd   : Found "/apex/com.android.cellbroadcast@300000000" backed by file /system/apex/com.android.cellbroadcast.apex
+11-27 11:50:55.140     0     0 I apexd   : Found "/apex/com.android.vndk.v30@1" backed by file /system/apex/com.android.vndk.current.apex
+11-27 11:50:55.143     0     0 I apexd   : Found "/apex/com.android.art@1" backed by file /system/apex/com.android.art.debug.apex
+11-27 11:50:55.146     0     0 I apexd   : Found "/apex/com.android.conscrypt@300000000" backed by file /system/apex/com.android.conscrypt.apex
+11-27 11:50:55.149     0     0 I apexd   : Found "/apex/com.android.apex.cts.shim@1" backed by file /system/apex/com.android.apex.cts.shim.apex
+11-27 11:50:55.152     0     0 I apexd   : Found "/apex/com.android.i18n@1" backed by file /system/apex/com.android.i18n.apex
+11-27 11:50:55.155     0     0 I apexd   : Found "/apex/com.android.permission@300000000" backed by file /system/apex/com.android.permission.apex
+11-27 11:50:55.158     0     0 I apexd   : Found "/apex/com.android.media@300000000" backed by file /system/apex/com.android.media.apex
+11-27 11:50:55.161     0     0 I apexd   : Found "/apex/com.android.adbd@300000000" backed by file /system/apex/com.android.adbd.apex
+11-27 11:50:55.164     0     0 I apexd   : Found "/apex/com.android.mediaprovider@300000000" backed by file /system/apex/com.android.mediaprovider.apex
+11-27 11:50:55.167     0     0 I apexd   : Found "/apex/com.android.ipsec@300000000" backed by file /system/apex/com.android.ipsec.apex
+11-27 11:50:55.170     0     0 I apexd   : Found "/apex/com.android.tzdata@300000000" backed by file /system/apex/com.android.tzdata.apex
+11-27 11:50:55.173     0     0 I apexd   : Found "/apex/com.android.media.swcodec@300000000" backed by file /system/apex/com.android.media.swcodec.apex
+11-27 11:50:55.176     0     0 I apexd   : Found "/apex/com.android.os.statsd@300000000" backed by file /system/apex/com.android.os.statsd.apex
+11-27 11:50:55.179     0     0 I apexd   : Found "/apex/com.android.wifi@300000000" backed by file /system/apex/com.android.wifi.apex
+11-27 11:50:55.182     0     0 I apexd   : Found "/apex/com.android.sdkext@300000000" backed by file /system/apex/com.android.sdkext.apex
+11-27 11:50:55.185     0     0 I apexd   : 21 packages restored.
+11-27 11:50:55.002   157   157 I BpBinder: onLastStrongRef automatically unlinking death recipients: <uncached descriptor>
+11-27 11:50:55.186     0     0 I AidlLazyServiceRegistrar: Registering service apexservice
+11-27 11:50:55.189     0     0 I AidlLazyServiceRegistrar: Trying to shut down the service. No clients in use for any service in process.
+11-27 11:50:55.005   157   157 I servicemanager: Tried to unregister apexservice, but there is about to be a client.
+11-27 11:50:55.192     0     0 I AidlLazyServiceRegistrar: Failed to unregister service apexservice
+11-27 11:50:55.203     0     0 D logd    : logdr: UID=2000 GID=2000 PID=6162 n tail=0 logMask=99 pid=0 start=0ns timeout=0ns
+11-27 11:50:57.833   157   157 I servicemanager: Notifying apexservice they have clients: 1
+11-27 11:50:58.020     0     0 I AidlLazyServiceRegistrar: Process has 1 (of 1 available) client(s) in use after notification android.apex.IApexService has clients: 1
+11-27 11:50:59.073  6168  6170 I cmd     : oneway function results will be dropped but finished with status OK and parcel size 4
+11-27 11:50:59.076   507   507 W WindowManager: removeWindowToken: Attempted to remove non-existing token: android.os.Binder@c4705aa
+11-27 11:50:59.080  6114  6114 I SvaHomeRepair: unbound
+11-27 11:50:59.085   507  1692 W WindowManager: Cannot find window which accessibility connection is added to
+11-27 11:50:59.085   507  1692 W WindowManager: Failed looking up window session=Session{218c077 6114:u0a10130} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5425 com.android.server.wm.WindowManagerService.removeWindow:1892 com.android.server.wm.Session.remove:193 
+11-27 11:50:59.087   507   534 I ActivityManager: Killing 1637:com.android.messaging/u0a101 (adj 975): empty #17
+11-27 11:50:59.097   282   282 I Zygote  : Process 1637 exited due to signal 9 (Killed)
+11-27 11:50:59.136   507   548 I libprocessgroup: Successfully killed process cgroup uid 10101 pid 1637 in 48ms
+11-27 11:51:00.001   714   714 D KeyguardClockSwitch: Updating clock: 1151
+11-27 11:51:10.790     0     0 W healthd : battery none chg=a
+11-27 11:51:12.469   457   457 E netmgr  : qemu_pipe_open_ns:62: Could not connect to the 'pipe:qemud:network' service: Invalid argument
+11-27 11:51:12.469   457   457 E netmgr  : Failed to open QEMU pipe 'qemud:network': Invalid argument
+11-27 11:51:12.583   466   466 E wifi_forwarder: qemu_pipe_open_ns:62: Could not connect to the 'pipe:qemud:wififorward' service: Invalid argument
+11-27 11:51:12.583   466   466 E wifi_forwarder: RemoteConnection failed to initialize: RemoteConnection failed to open pipe
+11-27 11:51:57.743   507  1236 D WifiNl80211Manager: Scan result ready event
+11-27 11:51:57.743   507  1236 D WifiNative: Scan result ready event
+11-27 11:52:00.001   714   714 D KeyguardClockSwitch: Updating clock: 1152
+11-27 11:52:12.482   457   457 E netmgr  : qemu_pipe_open_ns:62: Could not connect to the 'pipe:qemud:network' service: Invalid argument
+11-27 11:52:12.482   457   457 E netmgr  : Failed to open QEMU pipe 'qemud:network': Invalid argument
+11-27 11:52:12.641   466   466 E wifi_forwarder: qemu_pipe_open_ns:62: Could not connect to the 'pipe:qemud:wififorward' service: Invalid argument
+11-27 11:52:12.641   466   466 E wifi_forwarder: RemoteConnection failed to initialize: RemoteConnection failed to open pipe
+11-27 11:53:00.001   714   714 D KeyguardClockSwitch: Updating clock: 1153
+11-27 11:53:09.096  2319  2319 I abb     : StartCommandInProcess(73657474696e67730067657400676c6f settings.get.glo [truncated])
+11-27 11:53:09.097  2319  6118 I abb     : oneway function results will be dropped but finished with status OK and parcel size 4
+11-27 11:53:09.099  2319  2319 I abb     : StartCommandInProcess(7061636b61676500696e7374616c6c00 package.install. [truncated])
+11-27 11:53:09.096   507   507 W Binder:507_B: type=1400 audit(0.0:734): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+11-27 11:53:09.282   507   605 W RuleEvaluation: Integrity rule files are not available.
+11-27 11:53:09.283   507   563 I PackageManager: Integrity check passed for file:///data/app/vmdl407913780.tmp
+11-27 11:53:09.286   507   546 I ActivityManager: Force stopping com.sva.launcher appid=10130 user=-1: installPackageLI
+11-27 11:53:09.286   507   546 I ActivityManager: Killing 6114:com.sva.launcher/u0a130 (adj 905): stop com.sva.launcher due to installPackageLI
+11-27 11:53:09.096   507   507 I chatty  : uid=1000(system) Binder:507_3 identical 2 lines
+11-27 11:53:09.180   507   507 W Binder:507_B: type=1400 audit(0.0:737): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+11-27 11:53:09.287   282   282 I Zygote  : Process 6114 exited due to signal 9 (Killed)
+11-27 11:53:09.288   507   563 I PackageManager: Update package com.sva.launcher code path from /data/app/~~cAiavSa4vU3wJ7729TBXDQ==/com.sva.launcher-7doZDCm0uDi5bIeB8PYU5A== to /data/app/~~ZC4tdaEHtYjlv0lUd-isZA==/com.sva.launcher-DSiFO0ic6hbHui_nhfCf0w==; Retain data and using new
+11-27 11:53:09.288   507   563 I PackageManager: Update package com.sva.launcher resource path from /data/app/~~cAiavSa4vU3wJ7729TBXDQ==/com.sva.launcher-7doZDCm0uDi5bIeB8PYU5A== to /data/app/~~ZC4tdaEHtYjlv0lUd-isZA==/com.sva.launcher-DSiFO0ic6hbHui_nhfCf0w==; Retain data and using new
+11-27 11:53:09.289   507   563 D CompatibilityChangeReporter: Compat change id reported: 135549675; UID 10130; state: ENABLED
+11-27 11:53:09.289   507   563 I PackageManager: Permission ownership changed. Updating all permissions.
+11-27 11:53:09.293   507   540 W ActivityManager: setHasOverlayUi called on unknown pid: 6114
+11-27 11:53:09.302   507   563 D PackageManager: Instant App installer not found with android.intent.action.INSTALL_INSTANT_APP_PACKAGE
+11-27 11:53:09.302   507   563 D PackageManager: Clear ephemeral installer activity
+11-27 11:53:09.306   416   423 E installd: Couldn't opendir /data/app/vmdl407913780.tmp: No such file or directory
+11-27 11:53:09.306   416   423 E installd: Failed to delete /data/app/vmdl407913780.tmp: No such file or directory
+11-27 11:53:09.308  2319  6118 I abb     : oneway function results will be dropped but finished with status OK and parcel size 4
+11-27 11:53:09.313   507   563 I ActivityManager: Force stopping com.sva.launcher appid=10130 user=0: pkg removed
+11-27 11:52:10.789     0     0 W healthd : battery none chg=a
+11-27 11:53:09.493     0     0 W audit   : audit_lost=10 audit_rate_limit=5 audit_backlog_limit=64
+11-27 11:53:09.500     0     0 E audit   : rate limit exceeded
+11-27 11:53:09.316   507   546 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.sva.launcher flg=0x4000010 (has extras) } to com.android.gallery3d/.app.PackagesMonitor
+11-27 11:53:09.316  1719  1719 I MediaProvider: Invalidating LocalCallingIdentity cache for package com.sva.launcher. Reason: package android.intent.action.PACKAGE_REMOVED
+11-27 11:53:09.316   696   696 V AvrcpMediaPlayerList: mPackageChangedBroadcastReceiver: action: android.intent.action.PACKAGE_REMOVED
+11-27 11:53:09.317   507   599 I InputReader: Reconfiguring input devices, changes=KEYBOARD_LAYOUTS | 
+11-27 11:53:09.318   507   546 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.sva.launcher flg=0x4000010 (has extras) } to com.android.packageinstaller/.PackageInstalledReceiver
+11-27 11:53:09.318   507   546 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.sva.launcher flg=0x4000010 (has extras) } to com.android.gallery3d/.app.PackagesMonitor
+11-27 11:53:09.318  1719  1719 I MediaProvider: Invalidating LocalCallingIdentity cache for package com.sva.launcher. Reason: package android.intent.action.PACKAGE_ADDED
+11-27 11:53:09.318   507   599 I InputReader: Reconfiguring input devices, changes=KEYBOARD_LAYOUTS | 
+11-27 11:53:09.319   696   696 V AvrcpMediaPlayerList: mPackageChangedBroadcastReceiver: action: android.intent.action.PACKAGE_ADDED
+11-27 11:53:09.319   696   696 D AvrcpMediaPlayerList: Name of package changed: com.sva.launcher
+11-27 11:53:09.300   507   507 W Binder:507_B: type=1400 audit(0.0:738): avc: denied { getopt } for scontext=u:r:system_server:s0 tcontext=u:r:shell:s0 tclass=unix_stream_socket permissive=0
+11-27 11:53:09.323   507   507 I Telecom : DefaultDialerCache: Refreshing default dialer for user 0: now com.android.dialer: DDC.oR@AKA
+11-27 11:53:09.342   507   548 I libprocessgroup: Successfully killed process cgroup uid 10130 pid 6114 in 54ms
+11-27 11:53:09.385   507   599 I InputReader: Reconfiguring input devices, changes=KEYBOARD_LAYOUTS | 
+11-27 11:53:09.426  1034  1034 D CarrierSvcBindHelper: No carrier app for: 0
+11-27 11:53:09.432   507   546 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10130; state: DISABLED
+11-27 11:53:09.436   507   547 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10130; state: ENABLED
+11-27 11:53:09.436   507   507 W Looper  : Slow dispatch took 103ms main h=com.android.providers.settings.SettingsProvider$SettingsRegistry$MyHandler c=null m=1
+11-27 11:53:09.430  1034  1034 D CarrierSvcBindHelper: No carrier app for: 0
+11-27 11:53:09.449  2348  2348 I ResolverListAdapter: Add DisplayResolveInfo component: ComponentInfo{com.sva.launcher/com.sva.launcher.MainActivity}, intent component: ComponentInfo{com.sva.launcher/com.sva.launcher.MainActivity}
+11-27 11:53:09.449  2348  2348 I ResolverListAdapter: Add DisplayResolveInfo component: ComponentInfo{com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}, intent component: ComponentInfo{com.android.launcher3/com.android.launcher3.uioverrides.QuickstepLauncher}
+11-27 11:53:09.455  1034  1034 D CarrierConfigLoader: mHandler: 9 phoneId: 0
+11-27 11:53:09.466  6178  6178 I om.sva.launche: Late-enabling -Xcheck:jni
+11-27 11:53:09.475  6178  6178 I om.sva.launche: Unquickening 12 vdex files!
+11-27 11:53:09.478  6178  6178 W om.sva.launche: Unexpected CPU variant for X86 using defaults: x86_64
+11-27 11:53:09.488   378   391 I adbd    : jdwp connection from 6178
+11-27 11:53:09.444   282   282 D Zygote  : Forked child process 6178
+11-27 11:53:09.495   507   547 W ActivityManager: Slow operation: 63ms so far, now at startProcess: returned from zygote!
+11-27 11:53:09.506   507   785 W ActivityManager: Slow operation: 73ms so far, now at startProcess: done updating battery stats
+11-27 11:53:09.506   507   785 W ActivityManager: Slow operation: 73ms so far, now at startProcess: building log message
+11-27 11:53:09.506   507   785 I ActivityManager: Start proc 6178:com.sva.launcher/u0a130 for broadcast {com.sva.launcher/com.sva.launcher.HomeRepair}
+11-27 11:53:09.506   507   785 W ActivityManager: Slow operation: 73ms so far, now at startProcess: starting to update pids map
+11-27 11:53:09.507   507   785 W ActivityManager: Slow operation: 74ms so far, now at startProcess: done updating pids map
+11-27 11:53:09.535   507   545 W VoiceInteractionManager: no available voice recognition services found for user 0
+11-27 11:53:09.542   734   825 I PermissionControllerServiceImpl: Updating user sensitive for uid 10130
+11-27 11:53:09.641   507   517 I system_server: Background young concurrent copying GC freed 135909(6780KB) AllocSpace objects, 42(2108KB) LOS objects, 46% free, 10107KB/18MB, paused 32us total 124.483ms
+11-27 11:53:09.824  6178  6178 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+11-27 11:53:09.825  6178  6178 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+11-27 11:53:09.840  6178  6178 I SvaHomeRepair: received android.intent.action.MY_PACKAGE_REPLACED
+11-27 11:53:09.842  6178  6178 I SvaHomeRepair: not wanted
+11-27 11:53:10.789     0     0 W healthd : battery none chg=a
+11-27 11:53:12.484   457   457 E netmgr  : qemu_pipe_open_ns:62: Could not connect to the 'pipe:qemud:network' service: Invalid argument
+11-27 11:53:12.484   457   457 E netmgr  : Failed to open QEMU pipe 'qemud:network': Invalid argument
+11-27 11:53:12.644   466   466 E wifi_forwarder: qemu_pipe_open_ns:62: Could not connect to the 'pipe:qemud:wififorward' service: Invalid argument
+11-27 11:53:12.644   466   466 E wifi_forwarder: RemoteConnection failed to initialize: RemoteConnection failed to open pipe
+11-27 11:53:12.833   157   157 I servicemanager: Notifying apexservice they have clients: 0
+11-27 11:53:13.020     0     0 I AidlLazyServiceRegistrar: Process has 0 (of 1 available) client(s) in use after notification android.apex.IApexService has clients: 0
+11-27 11:53:13.024     0     0 I AidlLazyServiceRegistrar: Trying to shut down the service. No clients in use for any service in process.
+11-27 11:53:12.840   157   157 I BpBinder: onLastStrongRef automatically unlinking death recipients: <uncached descriptor>
+11-27 11:53:13.027     0     0 I AidlLazyServiceRegistrar: Unregistered all clients and exiting
+11-27 11:53:13.030     0     0 I init    : Service 'apexd' (pid 6159) exited with status 0 oneshot service took 137.929993 seconds in background
+11-27 11:53:13.033     0     0 I init    : Sending signal 9 to service 'apexd' (pid 6159) process group...
+11-27 11:53:13.035     0     0 I libprocessgroup: Successfully killed process cgroup uid 0 pid 6159 in 0ms
+11-27 11:53:15.826  6178  6202 D ProfileInstaller: Installing profile for com.sva.launcher
+11-27 11:53:17.335  6205  6207 I cmd     : oneway function results will be dropped but finished with status OK and parcel size 4
+11-27 11:53:17.349  6210  6212 I cmd     : oneway function results will be dropped but finished with status OK and parcel size 4
+11-27 11:53:17.358  6178  6178 I SvaHomeRepair: wanted=true
+11-27 11:53:25.429  6224  6226 I cmd     : oneway function results will be dropped but finished with status OK and parcel size 4
+--------- beginning of crash
+11-27 11:53:25.430  6178  6178 E AndroidRuntime: FATAL EXCEPTION: main
+11-27 11:53:25.430  6178  6178 E AndroidRuntime: Process: com.sva.launcher, PID: 6178
+11-27 11:53:25.430  6178  6178 E AndroidRuntime: android.app.RemoteServiceException: shell-induced crash
+11-27 11:53:25.430  6178  6178 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2005)
+11-27 11:53:25.430  6178  6178 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-27 11:53:25.430  6178  6178 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:223)
+11-27 11:53:25.430  6178  6178 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:7656)
+11-27 11:53:25.430  6178  6178 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+11-27 11:53:25.430  6178  6178 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:947)
+11-27 11:53:25.431   507  6227 I DropBoxManagerService: add tag=data_app_crash isTagEnabled=true flags=0x2
+11-27 11:53:25.432  6178  6178 I Process : Sending signal. PID: 6178 SIG: 9
+11-27 11:53:25.436   507   644 I ActivityManager: Process com.sva.launcher (pid 6178) has died: vis BFGS
+11-27 11:53:25.437   507  1911 W InputDispatcher: Attempted to unregister already unregistered input channel 'ef0e073 com.sva.launcher (server)'
+11-27 11:53:25.438   282   282 I Zygote  : Process 6178 exited due to signal 9 (Killed)
+11-27 11:53:25.438   507  1911 W WindowManager: removeWindowToken: Attempted to remove non-existing token: android.os.Binder@d1bccfb
+11-27 11:53:25.438   507   644 W ActivityManager: Scheduling restart of crashed service com.sva.launcher/.LauncherOverrideService in 1000ms for connection
+11-27 11:53:25.438   507  1236 W WindowManager: Failed looking up window session=Session{1cc06c4 6178:u0a10130} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5425 com.android.server.wm.WindowState$DeathRecipient.binderDied:2810 android.os.IBinder$DeathRecipient.binderDied:305 
+11-27 11:53:25.438   507  1236 I WindowManager: WIN DEATH: null
+11-27 11:53:25.438   507   540 W ActivityManager: setHasOverlayUi called on unknown pid: 6178
+11-27 11:53:25.439   507   785 W WindowManager: Cannot find window which accessibility connection is added to
+11-27 11:53:25.480   507   548 I libprocessgroup: Successfully killed process cgroup uid 10130 pid 6178 in 42ms
+11-27 11:53:26.439   507   546 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10130; state: DISABLED
+11-27 11:53:26.440   507   547 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10130; state: ENABLED
+11-27 11:53:26.443   282   282 D Zygote  : Forked child process 6230
+11-27 11:53:26.443   507   547 I ActivityManager: Start proc 6230:com.sva.launcher/u0a130 for service {com.sva.launcher/com.sva.launcher.LauncherOverrideService}
+11-27 11:53:26.445  6230  6230 I om.sva.launche: Late-enabling -Xcheck:jni
+11-27 11:53:26.452  6230  6230 I om.sva.launche: Unquickening 12 vdex files!
+11-27 11:53:26.453  6230  6230 W om.sva.launche: Unexpected CPU variant for X86 using defaults: x86_64
+11-27 11:53:26.455   378   391 I adbd    : jdwp connection from 6230
+11-27 11:53:26.614  6230  6230 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+11-27 11:53:26.614  6230  6230 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+11-27 11:53:26.643  6230  6230 I SvaHomeRepair: wanted=true
+11-27 11:53:31.958  6230  6253 D ProfileInstaller: Installing profile for com.sva.launcher
+11-27 11:53:35.456   507   540 D EventSequenceValidator: Transition from ACTIVITY_FINISHED to INTENT_STARTED
+11-27 11:53:35.456   507  6228 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.sva.launcher/.MainActivity} from uid 2000
+11-27 11:53:35.457   393   393 I perfetto: ing_service_impl.cc:758 Configured tracing session 25, #sources:1, duration:5000 ms, #buffers:1, total buffer size:4096 KB, total sessions:1, uid:1071 session name: ""
+11-27 11:53:35.457   384   384 I perfetto: probes_producer.cc:230  Ftrace setup (target_buf=25)
+11-27 11:53:35.466   507   644 W InputReader: Device virtio_input_multi_touch_10 is associated with display ADISPLAY_ID_NONE.
+11-27 11:53:35.466   507   644 W InputReader: Device virtio_input_multi_touch_7 is associated with display ADISPLAY_ID_NONE.
+11-27 11:53:35.466   507   644 W InputReader: Device virtio_input_multi_touch_4 is associated with display ADISPLAY_ID_NONE.
+11-27 11:53:35.466   507   644 W InputReader: Device virtio_input_multi_touch_5 is associated with display ADISPLAY_ID_NONE.
+11-27 11:53:35.466   507   644 W InputReader: Device virtio_input_multi_touch_2 is associated with display ADISPLAY_ID_NONE.
+11-27 11:53:35.466   507   644 W InputReader: Device virtio_input_multi_touch_6 is associated with display ADISPLAY_ID_NONE.
+11-27 11:53:35.466   507   644 W InputReader: Device virtio_input_multi_touch_3 is associated with display ADISPLAY_ID_NONE.
+11-27 11:53:35.466   507   644 W InputReader: Device virtio_input_multi_touch_8 is associated with display ADISPLAY_ID_NONE.
+11-27 11:53:35.466   507   644 W InputReader: Device virtio_input_multi_touch_9 is associated with display ADISPLAY_ID_NONE.
+11-27 11:53:35.466   507   644 W InputReader: Device virtio_input_multi_touch_11 is associated with display ADISPLAY_ID_NONE.
+11-27 11:53:35.466   507   644 W InputReader: Device virtio_input_multi_touch_10 is associated with display ADISPLAY_ID_NONE.
+11-27 11:53:35.466   507   644 W InputReader: Device virtio_input_multi_touch_7 is associated with display ADISPLAY_ID_NONE.
+11-27 11:53:35.466   507   644 W InputReader: Device virtio_input_multi_touch_4 is associated with display ADISPLAY_ID_NONE.
+11-27 11:53:35.466   507   644 W InputReader: Device virtio_input_multi_touch_5 is associated with display ADISPLAY_ID_NONE.
+11-27 11:53:35.466   507   644 W InputReader: Device virtio_input_multi_touch_2 is associated with display ADISPLAY_ID_NONE.
+11-27 11:53:35.466   507   644 W InputReader: Device virtio_input_multi_touch_6 is associated with display ADISPLAY_ID_NONE.
+11-27 11:53:35.466   507   644 W InputReader: Device virtio_input_multi_touch_3 is associated with display ADISPLAY_ID_NONE.
+11-27 11:53:35.466   507   644 W InputReader: Device virtio_input_multi_touch_8 is associated with display ADISPLAY_ID_NONE.
+11-27 11:53:35.466   507   644 W InputReader: Device virtio_input_multi_touch_9 is associated with display ADISPLAY_ID_NONE.
+11-27 11:53:35.466   507   644 W InputReader: Device virtio_input_multi_touch_11 is associated with display ADISPLAY_ID_NONE.
+11-27 11:53:35.468  6259  6261 I cmd     : oneway function results will be dropped but finished with status OK and parcel size 4
+11-27 11:53:35.472  6230  6267 D libEGL  : loaded /vendor/lib64/egl/libEGL_emulation.so
+11-27 11:53:35.473  6230  6267 D libEGL  : loaded /vendor/lib64/egl/libGLESv1_CM_emulation.so
+11-27 11:53:35.475   507   540 D EventSequenceValidator: Transition from INTENT_STARTED to ACTIVITY_LAUNCHED
+11-27 11:53:35.476  6230  6267 D libEGL  : loaded /vendor/lib64/egl/libGLESv2_emulation.so
+11-27 11:53:35.503   384   384 I perfetto: ftrace_procfs.cc:176    enabled ftrace
+11-27 11:53:35.689     0     0 W perfetto: enabled ftrace
+11-27 11:53:35.512   299   303 D goldfish-address-space: claimShared: Ask to claim region [0x3f9fa7000 0x3fa790000]
+11-27 11:53:35.686   299   303 D goldfish-address-space: claimShared: Ask to claim region [0x3fa790000 0x3faf79000]
+11-27 11:53:36.194   714   728 I ndroid.systemu: NativeAlloc concurrent copying GC freed 10954(654KB) AllocSpace objects, 9(180KB) LOS objects, 49% free, 6528KB/12MB, paused 17us total 263.232ms
+11-27 11:53:36.224  6230  6230 I SvaHomeRepair: list=com.sva.launcher/com.sva.launcher.LauncherOverrideService enabled=1
+11-27 11:53:36.302  6230  6252 D HostConnection: HostConnection::get() New Host Connection established 0x76f362944f10, tid 6252
+11-27 11:53:36.304   299   303 D goldfish-address-space: claimShared: Ask to claim region [0x3faf79000 0x3fb762000]
+11-27 11:53:36.319  6230  6252 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform ANDROID_EMU_hwc_display_power_mode GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+11-27 11:53:36.321   158   158 I hwservicemanager: getTransport: Cannot find entry android.hardware.configstore@1.0::ISurfaceFlingerConfigs/default in either framework or device manifest.
+11-27 11:53:36.331  6230  6252 D EGL_emulation: eglCreateContext: 0x76f352968890: maj 3 min 0 rcv 3
+11-27 11:53:36.349  6230  6252 D EGL_emulation: eglMakeCurrent: 0x76f352968890: ver 3 0 (tinfo 0x76f2f299b4f0) (first time)
+11-27 11:53:36.357   299   303 D goldfish-address-space: claimShared: Ask to claim region [0x3f47e9000 0x3f4fd2000]
+11-27 11:53:36.366   158   158 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@4.0::IMapper/default in either framework or device manifest.
+11-27 11:53:36.366  6230  6252 I Gralloc4: mapper 4.x is not supported
+11-27 11:53:36.367  6230  6252 D HostConnection: createUnique: call
+11-27 11:53:36.367  6230  6252 D HostConnection: HostConnection::get() New Host Connection established 0x76f36296f150, tid 6252
+11-27 11:53:36.367  6230  6252 D goldfish-address-space: allocate: Ask for block of size 0x100
+11-27 11:53:36.367  6230  6252 D goldfish-address-space: allocate: ioctl allocate returned offset 0x3f3ffe000 size 0x2000
+11-27 11:53:36.382  6230  6252 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform ANDROID_EMU_hwc_display_power_mode GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+11-27 11:53:36.383   299   303 D goldfish-address-space: claimShared: Ask to claim region [0x3f4000000 0x3f47e9000]
+11-27 11:53:36.384   299   303 D goldfish-address-space: claimShared: Ask to claim region [0x3f70fd000 0x3f78e6000]
+11-27 11:53:36.586   299   303 D goldfish-address-space: claimShared: Ask to claim region [0x3f4fd2000 0x3f57bb000]
+11-27 11:53:36.662  6230  6241 I om.sva.launche: JIT allocated 76KB for compiled code of void android.view.View.<init>(android.content.Context, android.util.AttributeSet, int, int)
+11-27 11:53:36.727   507  2422 D HostConnection: HostConnection::get() New Host Connection established 0x76f3629443d0, tid 2422
+11-27 11:53:36.730   507  2422 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform ANDROID_EMU_hwc_display_power_mode GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+11-27 11:53:36.740   507  2422 D EGL_emulation: eglCreateContext: 0x76f3529f6ce0: maj 3 min 0 rcv 3
+11-27 11:53:36.741   507  2422 D EGL_emulation: eglMakeCurrent: 0x76f3529f6ce0: ver 3 0 (tinfo 0x76f2f2aae2f0) (first time)
+11-27 11:53:36.863  6230  6274 W SystemServiceRegistry: No service published for: tv_input
+11-27 11:53:38.124  6230  6252 I OpenGLRenderer: Davey! duration=2048ms; Flags=1, IntendedVsync=938534255753, Vsync=938700922413, OldestInputEvent=9223372036854775807, NewestInputEvent=0, HandleInputStart=938704560331, AnimationStart=938704561994, PerformTraversalsStart=938705256339, DrawStart=938842240484, SyncQueued=938845457056, SyncStart=938846071092, IssueDrawCommandsStart=938846171910, SwapBuffers=940517518067, FrameCompleted=940583238540, DequeueBufferDuration=49563, QueueBufferDuration=1389378, GpuCompleted=0, 
+11-27 11:53:38.130   507   540 D EventSequenceValidator: Transition from ACTIVITY_LAUNCHED to ACTIVITY_FINISHED
+11-27 11:53:38.170   507   545 D ArtManagerInternalImpl: /data/misc/iorapd/com.sva.launcher/131/com.sva.launcher.MainActivity/compiled_traces/compiled_trace.pb doesn't exist
+11-27 11:53:38.170   507   545 I ActivityTaskManager: Displayed com.sva.launcher/.MainActivity: +2s671ms
+11-27 11:53:38.198  6230  6230 I Choreographer: Skipped 116 frames!  The application may be doing too much work on its main thread.
+11-27 11:53:38.384  6230  6252 I OpenGLRenderer: Davey! duration=2125ms; Flags=0, IntendedVsync=938717574947, Vsync=940650908203, OldestInputEvent=9223372036854775807, NewestInputEvent=0, HandleInputStart=940657313650, AnimationStart=940657315723, PerformTraversalsStart=940658981261, DrawStart=940659167920, SyncQueued=940659614052, SyncStart=940659677270, IssueDrawCommandsStart=940659753512, SwapBuffers=940830591828, FrameCompleted=940842673639, DequeueBufferDuration=27301, QueueBufferDuration=137486, GpuCompleted=0, 
+11-27 11:53:38.596   299   303 D goldfish-address-space: claimShared: Ask to claim region [0x3f4000000 0x3f47e9000]
+11-27 11:53:39.040   507  1479 E TaskPersister: File error accessing recents directory (directory doesn't exist?).
+11-27 11:53:39.317   299   303 D goldfish-address-space: claimShared: Ask to claim region [0x3f4fd2000 0x3f57bb000]
+11-27 11:53:39.323  6230  6252 I OpenGLRenderer: Davey! duration=1112ms; Flags=1, IntendedVsync=940667667656, Vsync=941017667642, OldestInputEvent=9223372036854775807, NewestInputEvent=0, HandleInputStart=941029539839, AnimationStart=941029541303, PerformTraversalsStart=941032078707, DrawStart=941067184217, SyncQueued=941079288026, SyncStart=941081230189, IssueDrawCommandsStart=941084126734, SwapBuffers=941769899833, FrameCompleted=941782072745, DequeueBufferDuration=5675713, QueueBufferDuration=2928050, GpuCompleted=0, 
+11-27 11:53:39.326  6230  6230 W InputMethodManager: Ignoring onBind: cur seq=207, given seq=206
+11-27 11:53:39.326  6230  6230 I Choreographer: Skipped 45 frames!  The application may be doing too much work on its main thread.
+11-27 11:53:39.652   299   303 D goldfish-address-space: claimShared: Ask to claim region [0x3f47e9000 0x3f4fd2000]
+11-27 11:53:39.658  6230  6252 I OpenGLRenderer: Davey! duration=1080ms; Flags=0, IntendedVsync=941034272717, Vsync=941784272687, OldestInputEvent=9223372036854775807, NewestInputEvent=0, HandleInputStart=941785659606, AnimationStart=941785660999, PerformTraversalsStart=941786751043, DrawStart=941786889652, SyncQueued=941787313141, SyncStart=941789205847, IssueDrawCommandsStart=941789317406, SwapBuffers=942103962445, FrameCompleted=942117008405, DequeueBufferDuration=4794417, QueueBufferDuration=2504120, GpuCompleted=0, 
+11-27 11:53:40.525   384   384 I perfetto: probes_producer.cc:329  Producer stop (id=25)
+11-27 11:53:40.527   384   384 I perfetto: ftrace_procfs.cc:183    disabled ftrace
+11-27 11:53:40.528   393   393 I perfetto: ng_service_impl.cc:1948 Tracing session 25 ended, total sessions:0
+11-27 11:53:40.713     0     0 W perfetto: disabled ftrace
+11-27 11:53:45.467   507   540 W ActivityTaskManager: Launch timeout has expired, giving up wake lock!
+11-27 11:53:46.354  6230  6230 I SvaHomeRepair: check: listed=true enabled=1 connected=true stuck=false
+11-27 11:53:54.195     0     0 D logd    : logdr: UID=2000 GID=2000 PID=6291 n tail=0 logMask=99 pid=0 start=0ns timeout=0ns
+11-27 11:53:55.217     0     0 D logd    : logdr: UID=2000 GID=2000 PID=6299 n tail=0 logMask=99 pid=0 start=0ns timeout=0ns
